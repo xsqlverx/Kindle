@@ -1,0 +1,49 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Outer Glass Ring -->
+    <path
+        android:pathData="M54,26 C38.54,26 26,38.54 26,54 C26,69.46 38.54,82 54,82 C69.46,82 82,69.46 82,54 C82,38.54 69.46,26 54,26 Z"
+        android:strokeWidth="3.5"
+        android:strokeColor="#4D6366F1"
+        android:fillColor="#00000000" />
+
+    <!-- Interlocking Inner Rings with Iris gradient -->
+    <path
+        android:pathData="M54,34 C42.95,34 34,42.95 34,54 C34,65.05 42.95,74 54,74 C65.05,74 74,65.05 74,54 C74,42.95 65.05,34 54,34 Z">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:angle="45"
+                android:endColor="#818CF8"
+                android:startColor="#6366F1"
+                android:type="linear" />
+        </aapt:attr>
+        <aapt:attr name="android:strokeWidth">
+            <string android:value="4.5" />
+        </aapt:attr>
+    </path>
+
+    <!-- Center Core Prism Glass Orb -->
+    <path
+        android:pathData="M54,42 C47.37,42 42,47.37 42,54 C42,60.63 47.37,66 54,66 C60.63,66 66,60.63 66,54 C66,47.37 60.63,42 54,42 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:angle="90"
+                android:endColor="#A5B4FC"
+                android:startColor="#6366F1"
+                android:type="linear" />
+        </aapt:attr>
+    </path>
+
+    <!-- Glass Specular Highlight Arc -->
+    <path
+        android:pathData="M46,46 C48.5,43.5 51.5,42.5 55,42.5"
+        android:strokeWidth="2"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+</vector>
+

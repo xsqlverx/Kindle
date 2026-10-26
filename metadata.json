@@ -1,0 +1,6 @@
+{
+  "name": "Life OS",
+  "description": "A comprehensive personal life operating system managing academics, workouts, tasks, and finances.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
