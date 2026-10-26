@@ -29,14 +29,14 @@ val LocalLifeOsColors = staticCompositionLocalOf {
     LifeOsThemeColors(
         isDark = true,
         background = GraphiteDark,
-        surfaceGlass = Color(0x991D202B),
-        surfaceGlassHighlight = Color(0x33818CF8),
-        borderGlass = Color(0x4D818CF8),
+        surfaceGlass = DayInk.Surface,
+        surfaceGlassHighlight = DayInk.Raised,
+        borderGlass = DayInk.Line,
         primaryAccent = IrisPrimary,
         secondaryAccent = IrisRadiant,
-        textPrimary = Color.White,
-        textSecondary = Color(0xFF94A3B8),
-        textTertiary = Color(0xFF64748B),
+        textPrimary = DayInk.Text,
+        textSecondary = DayInk.Muted,
+        textTertiary = DayInk.Quiet,
         ambientGlow = IrisGlow
     )
 }
@@ -44,8 +44,8 @@ val LocalLifeOsColors = staticCompositionLocalOf {
 private val NightGraphiteScheme = darkColorScheme(
     primary = IrisRadiant,
     onPrimary = InkDeep,
-    primaryContainer = IrisPrimary,
-    onPrimaryContainer = Color.White,
+    primaryContainer = GraphiteSurface,
+    onPrimaryContainer = IrisSoft,
     secondary = IrisSoft,
     onSecondary = InkDeep,
     background = GraphiteDark,
@@ -53,7 +53,7 @@ private val NightGraphiteScheme = darkColorScheme(
     surface = GraphiteCard,
     onSurface = Color.White,
     surfaceVariant = GraphiteSurface,
-    onSurfaceVariant = Color(0xFFCBD5E1),
+    onSurfaceVariant = DayInk.Muted,
     outline = GraphiteBorder
 )
 
@@ -137,14 +137,14 @@ fun resolveActiveTheme(mode: AppThemeMode): Pair<ColorScheme, LifeOsThemeColors>
             NightGraphiteScheme to LifeOsThemeColors(
                 isDark = true,
                 background = GraphiteDark,
-                surfaceGlass = Color(0xA61D202B),
-                surfaceGlassHighlight = Color(0x33818CF8),
-                borderGlass = Color(0x3D818CF8),
+                surfaceGlass = DayInk.Surface,
+                surfaceGlassHighlight = DayInk.Raised,
+                borderGlass = DayInk.Line,
                 primaryAccent = IrisRadiant,
                 secondaryAccent = IrisPrimary,
-                textPrimary = Color.White,
-                textSecondary = Color(0xFF94A3B8),
-                textTertiary = Color(0xFF64748B),
+                textPrimary = DayInk.Text,
+                textSecondary = DayInk.Muted,
+                textTertiary = DayInk.Quiet,
                 ambientGlow = IrisGlow
             )
         }
@@ -152,14 +152,14 @@ fun resolveActiveTheme(mode: AppThemeMode): Pair<ColorScheme, LifeOsThemeColors>
             NightGraphiteScheme to LifeOsThemeColors(
                 isDark = true,
                 background = GraphiteDark,
-                surfaceGlass = Color(0xA61D202B),
-                surfaceGlassHighlight = Color(0x33818CF8),
-                borderGlass = Color(0x3D818CF8),
+                surfaceGlass = DayInk.Surface,
+                surfaceGlassHighlight = DayInk.Raised,
+                borderGlass = DayInk.Line,
                 primaryAccent = IrisRadiant,
                 secondaryAccent = IrisPrimary,
-                textPrimary = Color.White,
-                textSecondary = Color(0xFF94A3B8),
-                textTertiary = Color(0xFF64748B),
+                textPrimary = DayInk.Text,
+                textSecondary = DayInk.Muted,
+                textTertiary = DayInk.Quiet,
                 ambientGlow = IrisGlow
             )
         }

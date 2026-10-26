@@ -56,6 +56,7 @@ import com.example.data.model.FocusPhase
 import com.example.data.model.FocusSession
 import com.example.data.model.TaskStatus
 import com.example.ui.components.LifeOsTab
+import com.example.ui.theme.DayInk
 import com.example.viewmodel.LifeOsViewModel
 import com.example.viewmodel.TodayPrototypeViewModel
 import kotlinx.coroutines.delay
@@ -63,19 +64,6 @@ import kotlinx.coroutines.isActive
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-internal object DayInk {
-    val Background = Color(0xFF111216)
-    val Surface = Color(0xFF1C1D24)
-    val Raised = Color(0xFF262630)
-    val Lavender = Color(0xFFC8BCE8)
-    val Text = Color(0xFFF3F0F7)
-    val Muted = Color(0xFFB0ACBA)
-    val Quiet = Color(0xFF96909F)
-    val Line = Color(0xFF35343E)
-    val Mint = Color(0xFFB4CDBF)
-    val Amber = Color(0xFFE5C4A0)
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,6 +75,7 @@ fun TodayScreen(
 ) {
     val focusModel: TodayPrototypeViewModel = composeViewModel()
     val session by focusModel.session.collectAsStateWithLifecycle()
+    val openSessionPanel by focusModel.openSessionPanel.collectAsStateWithLifecycle()
     val tasks by viewModel.allTasks.collectAsStateWithLifecycle()
     val habits by viewModel.allHabits.collectAsStateWithLifecycle()
     val water by viewModel.totalWaterTodayMl.collectAsStateWithLifecycle()
@@ -111,6 +100,13 @@ fun TodayScreen(
     // Lecture details are drawn by the activity; dismiss this dialog so they remain reachable.
     LaunchedEffect(selectedLecture?.id) {
         if (selectedLecture != null) showAllTools = false
+    }
+
+    LaunchedEffect(openSessionPanel) {
+        if (openSessionPanel) {
+            showSession = true
+            focusModel.consumeSessionPanelRequest()
+        }
     }
 
     // Re-read the persisted deadline on resume. There is no timer job while the UI is stopped.

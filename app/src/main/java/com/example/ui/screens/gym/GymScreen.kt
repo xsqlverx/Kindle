@@ -1,6 +1,8 @@
 package com.example.ui.screens.gym
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -48,6 +50,7 @@ fun GymScreen(
     val waterTodayMl by viewModel.totalWaterTodayMl.collectAsStateWithLifecycle()
     val macros by viewModel.macros.collectAsStateWithLifecycle()
     val restTimer by viewModel.restTimerSeconds.collectAsStateWithLifecycle()
+    val goalWeight by viewModel.bodyWeightGoal.collectAsStateWithLifecycle()
 
     var showAddSetDialog by remember { mutableStateOf(false) }
     var showWeightDialog by remember { mutableStateOf(false) }
@@ -55,89 +58,167 @@ fun GymScreen(
 
     val splits = listOf("Push", "Pull", "Legs", "Upper", "Lower", "Cardio")
 
-    val latestWeight = weightLogs.firstOrNull()?.weightKg ?: 69.5f
-    val earliestWeight = weightLogs.lastOrNull()?.weightKg ?: 70.4f
-    val startingWeight = 70.0f
-    val goalWeight = 66.5f
-    val weightDelta = latestWeight - startingWeight
+    val latestWeight = weightLogs.firstOrNull()?.weightKg
+    val startingWeight = weightLogs.lastOrNull()?.weightKg
+    val weightDelta = if (latestWeight != null && startingWeight != null) latestWeight - startingWeight else null
 
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 100.dp)
+        contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)
     ) {
-        // Floating Rest Timer (if running)
+        item {
+            WorkspaceIntro("YOUR SAVED ROUTINE", "$selectedSplit.\nOne set at a time.",
+                if (sets.isEmpty()) "Build your routine below, then keep your attention on the next set." else
+                    "${sets.count { it.isCompleted }} of ${sets.size} saved sets checked off.")
+            if (sets.isNotEmpty()) {
+                Spacer(Modifier.height(15.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    sets.take(16).forEach { set ->
+                        Box(Modifier.weight(1f).height(20.dp).clip(RoundedCornerShape(4.dp))
+                            .background(if (set.isCompleted) lifeColors.primaryAccent else lifeColors.surfaceGlassHighlight))
+                    }
+                }
+                val next = sets.firstOrNull { !it.isCompleted }
+                Spacer(Modifier.height(13.dp))
+                Text(next?.let { "Next up · ${it.exerciseName}" } ?: "Your saved sets are checked off.",
+                    color = lifeColors.textSecondary, fontSize = 12.sp)
+            }
+        }
+
         if (restTimer > 0) {
             item {
-                LiquidGlassCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    tint = RingGymRose.copy(alpha = 0.22f),
-                    borderAlpha = 0.8f
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 18.dp, vertical = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Timer,
-                                contentDescription = "Rest Timer",
-                                tint = RingGymRose,
-                                modifier = Modifier.size(22.dp)
-                            )
-                            Column {
-                                Text(
-                                    text = "REST INTERVAL",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.sp,
-                                    color = RingGymRose
-                                )
-                                Text(
-                                    text = "${restTimer / 60}:${String.format("%02d", restTimer % 60)} remaining",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = lifeColors.textPrimary
-                                )
-                            }
-                        }
-
+                LiquidGlassCard(Modifier.fillMaxWidth().testTag("gym_rest_timer")) {
+                    Column(Modifier.fillMaxWidth().padding(20.dp)) {
+                        WorkspaceLabel("BETWEEN SETS")
+                        Spacer(Modifier.height(8.dp))
+                        Text(String.format(Locale.getDefault(), "%02d:%02d", restTimer / 60, restTimer % 60),
+                            fontSize = 35.sp, fontWeight = FontWeight.Light, color = lifeColors.primaryAccent)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            FilledTonalButton(
-                                onClick = {
-                                    playAppleHaptic(context)
-                                    viewModel.startRestTimer(restTimer + 30)
-                                },
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Text("+30s", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            }
-
-                            IconButton(
-                                onClick = {
-                                    playAppleHaptic(context)
-                                    viewModel.stopRestTimer()
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Cancel",
-                                    tint = lifeColors.textSecondary
-                                )
-                            }
+                            TextButton(onClick = { viewModel.startRestTimer(restTimer + 30) }) { Text("Add 30 seconds") }
+                            TextButton(onClick = { viewModel.stopRestTimer() }) { Text("End rest", color = lifeColors.textSecondary) }
                         }
                     }
                 }
             }
+        }
+
+        // 4. Workout Splits Selector
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Your routine",
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = lifeColors.textPrimary
+                )
+                TextButton(onClick = { showAddSetDialog = true }) {
+                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Add Set", fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+
+        item {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 2.dp)
+            ) {
+                items(splits) { split ->
+                    val isSelected = (split == selectedSplit)
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                if (isSelected) lifeColors.primaryAccent
+                                else lifeColors.surfaceGlass
+                            )
+                            .border(
+                                1.dp,
+                                if (isSelected) lifeColors.primaryAccent else lifeColors.borderGlass,
+                                RoundedCornerShape(16.dp)
+                            )
+                            .clickable {
+                                playAppleHaptic(context)
+                                viewModel.setSelectedSplit(split)
+                            }
+                            .padding(horizontal = 18.dp, vertical = 10.dp)
+                    ) {
+                        Text(
+                            text = split,
+                            fontSize = 13.sp,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else lifeColors.textPrimary
+                        )
+                    }
+                }
+            }
+        }
+
+        // 5. Exercise Sets Grouped by Exercise
+        if (sets.isEmpty()) {
+            item {
+                LiquidGlassCard(modifier = Modifier.fillMaxWidth()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = Icons.Default.FitnessCenter,
+                                contentDescription = null,
+                                tint = lifeColors.textTertiary,
+                                modifier = Modifier.size(36.dp)
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = "No exercises logged yet for $selectedSplit split",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = lifeColors.textPrimary
+                            )
+                            Text(
+                                text = "Tap 'Add Set' above to build your session",
+                                fontSize = 12.sp,
+                                color = lifeColors.textSecondary
+                            )
+                        }
+                    }
+                }
+            }
+        } else {
+            val groupedByExercise = sets.groupBy { it.exerciseName }
+            items(groupedByExercise.entries.toList()) { (exerciseName, exerciseSets) ->
+                ExerciseGlassBlock(
+                    exerciseName = exerciseName,
+                    sets = exerciseSets,
+                    onToggleSet = { set ->
+                        playAppleHaptic(context)
+                        viewModel.toggleSetCompleted(set)
+                        if (!set.isCompleted) {
+                            // Start Apple-style 90s rest timer automatically when set checked off!
+                            viewModel.startRestTimer(90)
+                        }
+                    }
+                )
+            }
+        }
+        item {
+            Spacer(Modifier.height(10.dp))
+            Text("Support the work.", fontSize = 23.sp, color = lifeColors.textPrimary, fontWeight = FontWeight.Medium)
+            Spacer(Modifier.height(6.dp))
+            Text("Nutrition, hydration and your weigh-ins.", fontSize = 12.sp, color = lifeColors.textSecondary)
         }
 
         // 1. Calorie & Macro Target Glass Card
@@ -157,7 +238,7 @@ fun GymScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "NUTRITION & MACROS",
                                 fontSize = 10.sp,
@@ -380,212 +461,48 @@ fun GymScreen(
                         ) {
                             Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(15.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("500 ml", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text("500 ml", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = InkDeep)
                         }
                     }
-                }
-            }
-        }
-
-        // 3. Body Weight Glass Tracker Card
-        item {
-            LiquidGlassCard(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { showWeightDialog = true }
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 8.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(
-                                text = "LEAN RECOMPOSITION",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp,
-                                color = lifeColors.primaryAccent
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(RingHabitEmerald.copy(alpha = 0.2f))
-                                    .padding(horizontal = 5.dp, vertical = 1.dp)
-                            ) {
-                                Text(
-                                    text = "Goal: 66–67 kg",
-                                    fontSize = 9.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = RingHabitEmerald
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Row(
-                            verticalAlignment = Alignment.Bottom,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(
-                                text = "$latestWeight kg",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = lifeColors.textPrimary
-                            )
-                            Text(
-                                text = if (weightDelta <= 0) "${String.format("%.1f", weightDelta)} kg" else "+${String.format("%.1f", weightDelta)} kg",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (weightDelta <= 0) RingHabitEmerald else RingGymRose
-                            )
-                        }
-                        Text(
-                            text = "Started: 70.0 kg • -3.5 kg taper",
-                            fontSize = 11.sp,
-                            color = lifeColors.textSecondary
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(lifeColors.surfaceGlassHighlight)
-                            .padding(horizontal = 12.dp, vertical = 8.dp)
-                    ) {
-                        Text(
-                            text = "+ Weigh-in",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = lifeColors.primaryAccent
-                        )
-                    }
-                }
-            }
-        }
-
-        // 4. Workout Splits Selector
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Workout Routine Hub",
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = lifeColors.textPrimary
-                )
-                TextButton(onClick = { showAddSetDialog = true }) {
-                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Add Set", fontWeight = FontWeight.Bold)
                 }
             }
         }
 
         item {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(horizontal = 2.dp)
-            ) {
-                items(splits) { split ->
-                    val isSelected = (split == selectedSplit)
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                if (isSelected) lifeColors.primaryAccent
-                                else lifeColors.surfaceGlass
-                            )
-                            .border(
-                                1.dp,
-                                if (isSelected) lifeColors.primaryAccent else lifeColors.borderGlass,
-                                RoundedCornerShape(16.dp)
-                            )
-                            .clickable {
-                                playAppleHaptic(context)
-                                viewModel.setSelectedSplit(split)
-                            }
-                            .padding(horizontal = 18.dp, vertical = 10.dp)
-                    ) {
-                        Text(
-                            text = split,
-                            fontSize = 13.sp,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSelected) Color.White else lifeColors.textPrimary
-                        )
+            LiquidGlassCard(Modifier.fillMaxWidth(), onClick = { showWeightDialog = true }) {
+                Column(Modifier.fillMaxWidth().padding(20.dp)) {
+                    WorkspaceLabel("YOUR WEIGH-INS")
+                    Spacer(Modifier.height(16.dp))
+                    Row(Modifier.fillMaxWidth()) {
+                        Column(Modifier.weight(1f)) {
+                            Text(latestWeight?.let { "$it kg" } ?: "—", fontSize = 27.sp, fontWeight = FontWeight.Light, color = lifeColors.textPrimary)
+                            Text(if (latestWeight == null) "No weigh-in yet" else "Latest saved weight", fontSize = 11.sp, color = lifeColors.textTertiary)
+                        }
+                        Column(Modifier.weight(1f)) {
+                            Text("$goalWeight kg", fontSize = 27.sp, fontWeight = FontWeight.Light, color = lifeColors.primaryAccent)
+                            Text("Current target · tap to edit", fontSize = 11.sp, color = lifeColors.textTertiary)
+                        }
                     }
+                    Spacer(Modifier.height(14.dp))
+                    Text(if (weightDelta == null) "Log a weigh-in to begin your history." else
+                        String.format(Locale.getDefault(), "%+.1f kg since your first saved weigh-in", weightDelta),
+                        color = lifeColors.textSecondary, fontSize = 12.sp)
+                    Spacer(Modifier.height(8.dp))
+                    TextButton(onClick = { showWeightDialog = true }) { Text("Log weigh-in / edit target", fontSize = 12.sp) }
                 }
             }
         }
 
-        // 5. Exercise Sets Grouped by Exercise
-        if (sets.isEmpty()) {
-            item {
-                LiquidGlassCard(modifier = Modifier.fillMaxWidth()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(32.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                imageVector = Icons.Default.FitnessCenter,
-                                contentDescription = null,
-                                tint = lifeColors.textTertiary,
-                                modifier = Modifier.size(36.dp)
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text(
-                                text = "No exercises logged yet for $selectedSplit split",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = lifeColors.textPrimary
-                            )
-                            Text(
-                                text = "Tap 'Add Set' above to build your session",
-                                fontSize = 12.sp,
-                                color = lifeColors.textSecondary
-                            )
-                        }
-                    }
-                }
-            }
-        } else {
-            val groupedByExercise = sets.groupBy { it.exerciseName }
-            items(groupedByExercise.entries.toList()) { (exerciseName, exerciseSets) ->
-                ExerciseGlassBlock(
-                    exerciseName = exerciseName,
-                    sets = exerciseSets,
-                    onToggleSet = { set ->
-                        playAppleHaptic(context)
-                        viewModel.toggleSetCompleted(set)
-                        if (!set.isCompleted) {
-                            // Start Apple-style 90s rest timer automatically when set checked off!
-                            viewModel.startRestTimer(90)
-                        }
-                    }
-                )
-            }
-        }
     }
 
     // Modal: Log Weigh-in
     if (showWeightDialog) {
-        var weightInput by remember { mutableStateOf("$latestWeight") }
+        var weightInput by remember { mutableStateOf(latestWeight?.toString().orEmpty()) }
+        var goalInput by remember { mutableStateOf(goalWeight.toString()) }
+        val parsedWeight = weightInput.toFloatOrNull()
+        val parsedGoal = goalInput.toFloatOrNull()
+        val validWeight = parsedWeight != null && parsedWeight.isFinite() && parsedWeight > 0f
+        val validGoal = parsedGoal != null && parsedGoal.isFinite() && parsedGoal > 0f
         var noteInput by remember { mutableStateOf("") }
 
         AlertDialog(
@@ -597,8 +514,16 @@ fun GymScreen(
                         value = weightInput,
                         onValueChange = { weightInput = it },
                         label = { Text("Weight (kg)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        isError = weightInput.isNotBlank() && !validWeight,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp)
+                    )
+                    OutlinedTextField(
+                        value = goalInput, onValueChange = { goalInput = it },
+                        label = { Text("Target weight (kg)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)
                     )
                     OutlinedTextField(
                         value = noteInput,
@@ -611,10 +536,13 @@ fun GymScreen(
             },
             confirmButton = {
                 Button(
+                    enabled = validWeight && validGoal,
                     onClick = {
-                        val weight = weightInput.toFloatOrNull() ?: latestWeight
-                        viewModel.logBodyWeight(weight, noteInput)
-                        showWeightDialog = false
+                        if (validWeight && validGoal) {
+                            viewModel.logBodyWeight(requireNotNull(parsedWeight), noteInput)
+                            viewModel.setBodyWeightGoal(requireNotNull(parsedGoal))
+                            showWeightDialog = false
+                        }
                     }
                 ) {
                     Text("Save Weigh-in")
@@ -838,96 +766,29 @@ private fun MacroProgressRow(
 }
 
 @Composable
-private fun ExerciseGlassBlock(
-    exerciseName: String,
-    sets: List<ExerciseSetLog>,
-    onToggleSet: (ExerciseSetLog) -> Unit
-) {
-    val lifeColors = LocalLifeOsColors.current
-
-    LiquidGlassCard(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = exerciseName,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = lifeColors.textPrimary
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Sets Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = "SET", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = lifeColors.textTertiary, modifier = Modifier.weight(1f))
-                Text(text = "WEIGHT", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = lifeColors.textTertiary, modifier = Modifier.weight(1.5f))
-                Text(text = "REPS", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = lifeColors.textTertiary, modifier = Modifier.weight(1.5f))
-                Text(text = "DONE", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = lifeColors.textTertiary, modifier = Modifier.weight(1f))
+private fun ExerciseGlassBlock(exerciseName: String, sets: List<ExerciseSetLog>, onToggleSet: (ExerciseSetLog) -> Unit) {
+    val colors = LocalLifeOsColors.current
+    LiquidGlassCard(Modifier.fillMaxWidth()) {
+        Column(Modifier.fillMaxWidth().padding(18.dp)) {
+            Text(exerciseName, color = colors.textPrimary, fontSize = 18.sp, lineHeight = 25.sp, fontWeight = FontWeight.Medium)
+            Spacer(Modifier.height(5.dp))
+            Text("${sets.count { it.isCompleted }} of ${sets.size} sets complete", color = colors.textTertiary, fontSize = 11.sp)
+            Spacer(Modifier.height(18.dp))
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                WorkspaceLabel("SET", Modifier.width(38.dp))
+                WorkspaceLabel("WEIGHT", Modifier.weight(1f))
+                WorkspaceLabel("REPS", Modifier.weight(1f))
+                Spacer(Modifier.width(48.dp))
             }
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            sets.forEach { set ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "#${set.setNumber}",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = lifeColors.primaryAccent,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        text = "${set.weightKg} kg",
-                        fontSize = 13.sp,
-                        color = lifeColors.textPrimary,
-                        modifier = Modifier.weight(1.5f)
-                    )
-                    Text(
-                        text = "${set.reps}",
-                        fontSize = 13.sp,
-                        color = lifeColors.textPrimary,
-                        modifier = Modifier.weight(1.5f)
-                    )
-
-                    Box(
-                        modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (set.isCompleted) RingGymRose else Color.Transparent
-                                )
-                                .border(
-                                    1.2.dp,
-                                    if (set.isCompleted) RingGymRose else lifeColors.textTertiary,
-                                    CircleShape
-                                )
-                                .clickable { onToggleSet(set) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (set.isCompleted) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "Completed set",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(15.dp)
-                                )
-                            }
-                        }
-                    }
+            Spacer(Modifier.height(8.dp))
+            sets.sortedBy { it.setNumber }.forEach { set ->
+                HorizontalDivider(color = colors.borderGlass.copy(alpha = 0.6f))
+                Row(Modifier.fillMaxWidth().heightIn(min = 56.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(set.setNumber.toString(), color = colors.textTertiary, fontSize = 12.sp, modifier = Modifier.width(38.dp))
+                    Text("${set.weightKg} kg", color = colors.textPrimary, fontSize = 14.sp, modifier = Modifier.weight(1f))
+                    Text(set.reps.toString(), color = colors.textPrimary, fontSize = 14.sp, modifier = Modifier.weight(1f))
+                    Checkbox(set.isCompleted, { onToggleSet(set) }, modifier = Modifier.size(48.dp).testTag("exercise_set_${set.id}"),
+                        colors = CheckboxDefaults.colors(checkedColor = colors.primaryAccent, checkmarkColor = MaterialTheme.colorScheme.onPrimary))
                 }
             }
         }

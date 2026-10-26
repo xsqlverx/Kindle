@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -30,17 +31,18 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
 import androidx.core.view.WindowCompat
 import com.example.data.model.AppThemeMode
 import com.example.ui.components.LectureDetailSheet
 import com.example.ui.components.LifeOsTab
-import com.example.ui.components.LiquidGlassBottomBar
-import com.example.ui.components.TopAppBarGlass
 import com.example.ui.components.TodayPrototypeDock
+import com.example.ui.components.WorkspaceTopBar
 import com.example.ui.screens.academics.AcademicsScreen
 import com.example.ui.screens.gym.GymScreen
 import com.example.ui.screens.reset.DailyResetScreen
@@ -49,18 +51,24 @@ import com.example.ui.screens.today.TodayScreen
 import com.example.ui.theme.LifeOsTheme
 import com.example.ui.theme.LocalLifeOsColors
 import com.example.viewmodel.LifeOsViewModel
+import com.example.viewmodel.TodayPrototypeViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val viewModel: LifeOsViewModel = viewModel()
+            val viewModel: LifeOsViewModel = composeViewModel()
+            val focusModel: TodayPrototypeViewModel = composeViewModel()
             val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
             val currentTab by viewModel.currentTab.collectAsStateWithLifecycle()
 
             LifeOsTheme(mode = if (currentTab == LifeOsTab.TODAY) AppThemeMode.NIGHT_GRAPHITE else themeMode) {
                 val lifeColors = LocalLifeOsColors.current
+                val density = LocalDensity.current
+                val statusInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                var headerHeight by remember { mutableStateOf(76.dp) }
+                val screenState = rememberSaveableStateHolder()
                 SideEffect {
                     val insetsController = WindowCompat.getInsetsController(window, window.decorView)
                     insetsController.isAppearanceLightStatusBars = !lifeColors.isDark
@@ -77,7 +85,7 @@ class MainActivity : ComponentActivity() {
                             drawCircle(
                                 brush = Brush.radialGradient(
                                     colors = listOf(
-                                        lifeColors.primaryAccent.copy(alpha = if (lifeColors.isDark) 0.14f else 0.08f),
+                                        lifeColors.primaryAccent.copy(alpha = if (lifeColors.isDark) 0.045f else 0.08f),
                                         Color.Transparent
                                     ),
                                     center = Offset(size.width * 0.8f, size.height * 0.12f),
@@ -88,7 +96,7 @@ class MainActivity : ComponentActivity() {
                             drawCircle(
                                 brush = Brush.radialGradient(
                                     colors = listOf(
-                                        lifeColors.secondaryAccent.copy(alpha = if (lifeColors.isDark) 0.10f else 0.05f),
+                                        lifeColors.secondaryAccent.copy(alpha = if (lifeColors.isDark) 0.025f else 0.05f),
                                         Color.Transparent
                                     ),
                                     center = Offset(size.width * 0.2f, size.height * 0.85f),
@@ -134,22 +142,14 @@ class MainActivity : ComponentActivity() {
                                 alpha = (1f - navBarHideProgress * 1.5f).coerceIn(0f, 1f)
                                 translationY = navBarHideProgress * 64.dp.toPx()
                             }
-                            if (currentTab == LifeOsTab.TODAY) {
-                                TodayPrototypeDock(currentTab, { viewModel.setTab(it) }, dockModifier)
-                            } else {
-                                LiquidGlassBottomBar(
-                                    modifier = dockModifier,
-                                    currentTab = currentTab,
-                                    onTabSelected = { viewModel.setTab(it) }
-                                )
-                            }
+                            TodayPrototypeDock(currentTab, { viewModel.setTab(it) }, dockModifier)
                         }
                     ) { innerPadding ->
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .statusBarsPadding()
-                                .padding(top = if (currentTab == LifeOsTab.TODAY) 0.dp else 58.dp)
+                                .padding(top = if (currentTab == LifeOsTab.TODAY) 0.dp else headerHeight)
                                 .padding(bottom = innerPadding.calculateBottomPadding())
                                 .clipToBounds()
                         ) {
@@ -184,25 +184,32 @@ class MainActivity : ComponentActivity() {
                                     .fillMaxSize()
                                     .clipToBounds()
                             ) { tab ->
-                                when (tab) {
-                                    LifeOsTab.TODAY -> TodayScreen(
-                                        viewModel = viewModel,
-                                        onNavigateToTab = { viewModel.setTab(it) },
-                                        onOpenSettings = { showSettings = true }
-                                    )
-                                    LifeOsTab.GYM -> GymScreen(
-                                        viewModel = viewModel
-                                    )
-                                    LifeOsTab.ACADEMICS -> AcademicsScreen(
-                                        viewModel = viewModel
-                                    )
-                                    LifeOsTab.TASKS -> TasksMatrixScreen(
-                                        viewModel = viewModel
-                                    )
-                                    LifeOsTab.RESET -> DailyResetScreen(
-                                        viewModel = viewModel,
-                                        onFinishReset = { viewModel.setTab(LifeOsTab.TODAY) }
-                                    )
+                                screenState.SaveableStateProvider(tab.name) {
+                                    when (tab) {
+                                        LifeOsTab.TODAY -> TodayScreen(
+                                            viewModel = viewModel,
+                                            onNavigateToTab = { viewModel.setTab(it) },
+                                            onOpenSettings = { showSettings = true }
+                                        )
+                                        LifeOsTab.GYM -> GymScreen(
+                                            viewModel = viewModel
+                                        )
+                                        LifeOsTab.ACADEMICS -> AcademicsScreen(
+                                            viewModel = viewModel
+                                        )
+                                        LifeOsTab.TASKS -> TasksMatrixScreen(
+                                            viewModel = viewModel,
+                                            onStartFocus = { task ->
+                                                focusModel.start(task.title)
+                                                focusModel.requestSessionPanel()
+                                                viewModel.setTab(LifeOsTab.TODAY)
+                                            }
+                                        )
+                                        LifeOsTab.RESET -> DailyResetScreen(
+                                            viewModel = viewModel,
+                                            onFinishReset = { viewModel.setTab(LifeOsTab.TODAY) }
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -268,12 +275,15 @@ class MainActivity : ComponentActivity() {
                     }
 
                     // Top App Bar Glass anchored on top
-                    if (currentTab != LifeOsTab.TODAY || showSettings) TopAppBarGlass(
+                    if (currentTab != LifeOsTab.TODAY || showSettings) WorkspaceTopBar(
+                        modifier = Modifier.onSizeChanged { size ->
+                            headerHeight = (with(density) { size.height.toDp() } - statusInset).coerceAtLeast(76.dp)
+                        },
                         title = when (currentTab) {
                             LifeOsTab.TODAY -> "Life OS"
-                            LifeOsTab.GYM -> "Gym & Fitness"
-                            LifeOsTab.ACADEMICS -> "College Hub"
-                            LifeOsTab.TASKS -> "Eisenhower Matrix"
+                            LifeOsTab.GYM -> "Fitness"
+                            LifeOsTab.ACADEMICS -> "College"
+                            LifeOsTab.TASKS -> "Tasks"
                             LifeOsTab.RESET -> "Daily Reset"
                         },
                         subtitle = when (currentTab) {

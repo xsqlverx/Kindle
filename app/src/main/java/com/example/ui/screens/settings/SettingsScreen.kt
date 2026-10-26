@@ -24,6 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.BuildConfig
+import com.example.ui.components.WorkspaceLabel
 import com.example.ui.components.LiquidGlassCard
 import com.example.ui.components.playAppleHaptic
 import com.example.ui.theme.LocalLifeOsColors
@@ -63,7 +65,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(top = 12.dp, bottom = 90.dp)
         ) {
@@ -228,46 +230,14 @@ fun SettingsScreen(
             }
 
             item {
-                LiquidGlassCard(modifier = Modifier.fillMaxWidth()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(18.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(text = "App Build", fontSize = 13.sp, color = lifeColors.textSecondary)
-                            Text(text = "LifeOS v2.4 (Winter Arc Production)", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = lifeColors.textPrimary)
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(text = "Database", fontSize = 13.sp, color = lifeColors.textSecondary)
-                            Text(text = "Room SQLite (Local Offline First)", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = lifeColors.textPrimary)
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(text = "Target Attendance", fontSize = 13.sp, color = lifeColors.textSecondary)
-                            Text(text = "80% Minimum Threshold", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = lifeColors.primaryAccent)
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(text = "Target Exam", fontSize = 13.sp, color = lifeColors.textSecondary)
-                            Text(
-                                text = if (targetExam.dateMillis > 0L) "${targetExam.title.ifBlank { "Exam" }} (${targetExam.getFormattedDate()})" else "Not configured",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (targetExam.dateMillis > 0L) RingHabitEmerald else lifeColors.textSecondary
-                            )
-                        }
+                LiquidGlassCard(Modifier.fillMaxWidth()) {
+                    Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        WorkspaceLabel("ABOUT YOUR WORKSPACE")
+                        SettingsInfo("App version", BuildConfig.VERSION_NAME)
+                        SettingsInfo("Storage", "Saved on this device")
+                        SettingsInfo("Attendance", "Targets are editable per course in College")
+                        SettingsInfo("Next milestone", if (targetExam.dateMillis > 0L)
+                            "${targetExam.title.ifBlank { "Exam" }} · ${targetExam.getFormattedDate()}" else "No exam date set")
                     }
                 }
             }
@@ -799,5 +769,15 @@ private fun SettingsActionCard(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun SettingsInfo(label: String, value: String) {
+    val colors = LocalLifeOsColors.current
+    Column(Modifier.fillMaxWidth()) {
+        Text(label, color = colors.textTertiary, fontSize = 11.sp)
+        Spacer(Modifier.height(4.dp))
+        Text(value, color = colors.textPrimary, fontSize = 14.sp, lineHeight = 21.sp)
     }
 }

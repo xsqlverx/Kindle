@@ -3,6 +3,9 @@ package com.example.ui.screens.academics
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,6 +20,8 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -30,10 +35,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.data.model.AttendanceProjection
 import com.example.data.model.AssignmentItem
 import com.example.data.model.AttendanceRecord
 import com.example.data.model.ExamTarget
 import com.example.data.model.TimetableEntry
+import com.example.ui.components.WorkspaceIntro
+import com.example.ui.components.WorkspaceLabel
 import com.example.ui.components.LectureDetailSheet
 import com.example.ui.components.LiquidGlassCard
 import com.example.ui.components.playAppleHaptic
@@ -83,9 +91,9 @@ fun AcademicsScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 100.dp)
+        contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)
     ) {
         // 1. Academic Target & First Exam Banner (Redesigned per Req 3)
         item {
@@ -185,7 +193,7 @@ fun AcademicsScreen(
                             text = dayLabel,
                             fontSize = 13.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSelected) Color.White else lifeColors.textPrimary
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else lifeColors.textPrimary
                         )
                     }
                 }
@@ -253,7 +261,7 @@ fun AcademicsScreen(
                         color = lifeColors.textPrimary
                     )
                     Text(
-                        text = "80% threshold requirement",
+                        text = "Based on your saved class counts",
                         fontSize = 12.sp,
                         color = lifeColors.textSecondary
                     )
@@ -267,7 +275,7 @@ fun AcademicsScreen(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "Target: 80%",
+                        text = "Your targets",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = lifeColors.primaryAccent
@@ -282,7 +290,8 @@ fun AcademicsScreen(
                 onLogAttendance = { attended ->
                     playAppleHaptic(context)
                     viewModel.recordAttendance(record.courseCode, attended)
-                }
+                },
+                onUpdate = { attended, total, target -> viewModel.correctAttendance(record.courseCode, attended, total, target) }
             )
         }
 
@@ -741,703 +750,205 @@ private fun AcademicTargetBanner(
     onConfigureExam: () -> Unit,
     testTag: String
 ) {
-    val lifeColors = LocalLifeOsColors.current
-    val daysLeft = targetExam.getDaysLeft()
-
-    val totalAttended = attendanceRecords.sumOf { it.attendedClasses }
-    val totalClasses = attendanceRecords.sumOf { it.totalClasses }
-    val currentAttendancePct = if (totalClasses > 0) (totalAttended * 100 / totalClasses) else 0
-
-    LiquidGlassCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onConfigureExam() }
-            .testTag(testTag),
-        tint = lifeColors.primaryAccent.copy(alpha = 0.12f),
-        borderAlpha = 0.8f
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            // Row 1: Academic Icon, Exam Title & Countdown Counter
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(
-                    modifier = Modifier.weight(1f),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(46.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(lifeColors.primaryAccent.copy(alpha = 0.2f))
-                            .border(1.dp, lifeColors.primaryAccent.copy(alpha = 0.4f), RoundedCornerShape(14.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.School,
-                            contentDescription = "Academic Target",
-                            tint = lifeColors.primaryAccent,
-                            modifier = Modifier.size(24.dp)
-                        )
+    val colors = LocalLifeOsColors.current
+    val days = targetExam.getDaysLeft()
+    Column(Modifier.fillMaxWidth().testTag(testTag)) {
+        WorkspaceIntro("ON YOUR HORIZON", "Stay a step ahead.", "Classes, deadlines and a little more clarity.")
+        Spacer(Modifier.height(16.dp))
+        LiquidGlassCard(Modifier.fillMaxWidth(), onClick = onConfigureExam) {
+            Column(Modifier.fillMaxWidth().padding(20.dp)) {
+                WorkspaceLabel(if (days == null) "YOUR NEXT MILESTONE" else "EXAM COUNTDOWN")
+                Spacer(Modifier.height(12.dp))
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(if (days == null) "Give yourself a date." else targetExam.title.ifBlank { "Upcoming exam" },
+                            color = colors.textPrimary, fontSize = 19.sp, lineHeight = 25.sp, fontWeight = FontWeight.Medium)
+                        Spacer(Modifier.height(6.dp))
+                        Text(if (days == null) "Tap to set an exam or milestone" else targetExam.getFormattedDate(),
+                            color = colors.textSecondary, fontSize = 12.sp)
                     }
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = if (targetExam.dateMillis > 0L) targetExam.title.ifBlank { "Upcoming Exam" } else "No Exam Date Configured",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = lifeColors.textPrimary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = if (targetExam.dateMillis > 0L) targetExam.getFormattedDate() else "Tap here or visit Settings to set date",
-                            fontSize = 12.sp,
-                            color = lifeColors.textSecondary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-
-                // Days Countdown Pill
-                if (targetExam.dateMillis > 0L && daysLeft != null) {
-                    Column(
-                        horizontalAlignment = Alignment.End,
-                        modifier = Modifier.padding(start = 8.dp)
-                    ) {
-                        Text(
-                            text = if (daysLeft >= 0) "$daysLeft" else "0",
-                            fontSize = 26.sp,
-                            fontWeight = FontWeight.Black,
-                            color = lifeColors.primaryAccent
-                        )
-                        Text(
-                            text = if (daysLeft == 1) "DAY LEFT" else if (daysLeft < 0) "PASSED" else "DAYS LEFT",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.8.sp,
-                            color = lifeColors.textSecondary
-                        )
-                    }
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(lifeColors.surfaceGlass)
-                            .border(1.dp, lifeColors.borderGlass, RoundedCornerShape(10.dp))
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = "Set Date",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = lifeColors.primaryAccent
-                        )
-                    }
-                }
-            }
-
-            // Divider separating exam info from the attendance threshold bar
-            HorizontalDivider(
-                color = lifeColors.borderGlass.copy(alpha = 0.5f),
-                thickness = 0.8.dp
-            )
-
-            // Row 2: Fixed 80% Attendance Target Badge (Properly Aligned and Never Truncated)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(RingHabitEmerald.copy(alpha = 0.18f))
-                            .border(1.dp, RingHabitEmerald.copy(alpha = 0.35f), RoundedCornerShape(6.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "80% Attendance Target",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = RingHabitEmerald,
-                            maxLines = 1,
-                            softWrap = false
-                        )
-                    }
-
-                    Text(
-                        text = "College Policy",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = lifeColors.textSecondary
-                    )
-                }
-
-                Text(
-                    text = if (totalClasses > 0) "Current: $currentAttendancePct% ($totalAttended/$totalClasses)" else "0 / 0 Lectures Logged",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (totalClasses > 0 && currentAttendancePct >= 80) RingHabitEmerald else if (totalClasses > 0) RingGymRose else lifeColors.textSecondary
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ActiveLectureCard(
-    lectureStatus: com.example.viewmodel.CurrentLectureStatus,
-    onClick: () -> Unit
-) {
-    val lifeColors = LocalLifeOsColors.current
-
-    LiquidGlassCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .testTag("active_lecture_tile"),
-        tint = if (lectureStatus.isOngoing) RingWaterCyan.copy(alpha = 0.12f) else lifeColors.surfaceGlass
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                // Guaranteed non-wrapping Status Pill
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(
-                            if (lectureStatus.isOngoing) RingHabitEmerald.copy(alpha = 0.18f)
-                            else lifeColors.primaryAccent.copy(alpha = 0.18f)
-                        )
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(7.dp)
-                            .clip(CircleShape)
-                            .background(if (lectureStatus.isOngoing) RingHabitEmerald else lifeColors.primaryAccent)
-                    )
-                    Text(
-                        text = if (lectureStatus.isOngoing) "ONGOING LECTURE" else "UPCOMING LECTURE",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 0.8.sp,
-                        color = if (lectureStatus.isOngoing) RingHabitEmerald else lifeColors.primaryAccent,
-                        maxLines = 1,
-                        softWrap = false
-                    )
-                }
-
-                // Subtitle / Time details (e.g. "Starts in 25 min", "No further classes")
-                Text(
-                    text = lectureStatus.timeRemainingOrUntil,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = lifeColors.textSecondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(start = 10.dp)
-                )
-            }
-
-            // Main lecture name or summary
-            Text(
-                text = lectureStatus.entry?.courseName ?: lectureStatus.message.ifBlank { "No immediate class" },
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = lifeColors.textPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
-
-@Composable
-private fun TimetableGlassCard(
-    entry: TimetableEntry,
-    onClick: () -> Unit,
-    onDelete: () -> Unit
-) {
-    val lifeColors = LocalLifeOsColors.current
-    val timeFormatted = "${String.format("%02d:%02d", entry.startHour, entry.startMinute)} - ${String.format("%02d:%02d", entry.endHour, entry.endMinute)}"
-
-    LiquidGlassCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .testTag("timetable_card_${entry.id}")
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Time Pillar
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(lifeColors.surfaceGlassHighlight)
-                        .padding(horizontal = 10.dp, vertical = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = timeFormatted,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = lifeColors.primaryAccent
-                    )
-                }
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = entry.courseCode,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = lifeColors.textPrimary
-                        )
-                        Text(
-                            text = "• ${entry.room}",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = lifeColors.primaryAccent
-                        )
-                    }
-                    Text(
-                        text = entry.courseName,
-                        fontSize = 12.sp,
-                        color = lifeColors.textSecondary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    if (entry.professor.isNotEmpty()) {
-                        Text(
-                            text = entry.professor,
-                            fontSize = 11.sp,
-                            color = lifeColors.textTertiary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-            }
-
-            IconButton(
-                onClick = onDelete,
-                modifier = Modifier.size(32.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Delete,
-                    contentDescription = "Delete Class",
-                    tint = lifeColors.textTertiary,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun AttendanceGlassRow(
-    record: AttendanceRecord,
-    onLogAttendance: (Boolean) -> Unit
-) {
-    val lifeColors = LocalLifeOsColors.current
-    val total = record.totalClasses
-    val attended = record.attendedClasses
-
-    val percentage = if (total > 0) {
-        (attended.toFloat() / total.toFloat() * 100f)
-    } else 0f
-
-    val isSafe = if (total == 0) true else percentage >= record.targetPercentage
-
-    // Calculate buffer
-    val bufferStatusText = remember(attended, total, record.targetPercentage) {
-        if (total == 0) {
-            "No classes logged yet"
-        } else if (isSafe) {
-            // Can miss how many?
-            // (attended) / (total + x) >= 0.8 => total + x <= attended / 0.8 => x <= attended/0.8 - total
-            val canMiss = floor((attended / 0.80f) - total).toInt()
-            if (canMiss > 0) "Safe: Can miss $canMiss class${if (canMiss > 1) "es" else ""}"
-            else "At threshold: Cannot miss next class"
-        } else {
-            // Need consecutive attendances
-            // (attended + x) / (total + x) >= 0.8 => attended + x >= 0.8 total + 0.8 x => 0.2 x >= 0.8 total - attended
-            // x >= (4 * total - 5 * attended)
-            val needed = ceil(4.0 * total - 5.0 * attended).toInt().coerceAtLeast(1)
-            "Warning: Need $needed class${if (needed > 1) "es" else ""} for 80%"
-        }
-    }
-
-    val animatedProgress by animateFloatAsState(
-        targetValue = if (total == 0) 0f else (percentage / 100f).coerceIn(0f, 1f),
-        animationSpec = tween(durationMillis = 400),
-        label = "attendanceProgress"
-    )
-
-    val progressColor by animateColorAsState(
-        targetValue = if (total == 0) lifeColors.textSecondary.copy(alpha = 0.3f) else if (isSafe) RingHabitEmerald else RingGymRose,
-        label = "attendanceColor"
-    )
-
-    LiquidGlassCard(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = record.courseCode,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = lifeColors.textPrimary
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(
-                                    if (total == 0) lifeColors.borderGlass.copy(alpha = 0.4f)
-                                    else if (isSafe) RingHabitEmerald.copy(alpha = 0.15f)
-                                    else RingGymRose.copy(alpha = 0.15f)
-                                )
-                                .border(
-                                    1.dp,
-                                    if (total == 0) lifeColors.borderGlass
-                                    else if (isSafe) RingHabitEmerald.copy(alpha = 0.3f)
-                                    else RingGymRose.copy(alpha = 0.3f),
-                                    RoundedCornerShape(6.dp)
-                                )
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = if (total == 0) "0%" else "${percentage.toInt()}%",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (total == 0) lifeColors.textSecondary else if (isSafe) RingHabitEmerald else RingGymRose
-                            )
+                    if (days != null) {
+                        Column(Modifier.padding(start = 16.dp), horizontalAlignment = Alignment.End) {
+                            Text(days.coerceAtLeast(0).toString(), color = colors.primaryAccent,
+                                fontSize = 42.sp, fontWeight = FontWeight.Light, letterSpacing = (-2).sp)
+                            WorkspaceLabel(if (days < 0) "PASSED" else if (days == 1) "DAY LEFT" else "DAYS LEFT")
                         }
-                    }
-
-                    Spacer(modifier = Modifier.height(2.dp))
-
-                    Text(
-                        text = if (total == 0) "0 of 0 lectures attended • No classes logged yet" else "$attended of $total lectures attended • $bufferStatusText",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = if (total == 0) lifeColors.textSecondary else if (isSafe) lifeColors.textSecondary else RingGymRose,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    } else Icon(Icons.Outlined.Add, "Set exam date", tint = colors.primaryAccent)
                 }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    FilledTonalButton(
-                        onClick = { onLogAttendance(true) },
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = RingHabitEmerald.copy(alpha = 0.2f),
-                            contentColor = RingHabitEmerald
-                        )
-                    ) {
-                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(14.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Present", fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-                    }
-
-                    OutlinedButton(
-                        onClick = { onLogAttendance(false) },
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                        shape = RoundedCornerShape(10.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, RingGymRose.copy(alpha = 0.5f))
-                    ) {
-                        Icon(Icons.Default.Close, contentDescription = null, tint = RingGymRose, modifier = Modifier.size(14.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Absent", fontSize = 11.sp, color = RingGymRose, fontWeight = FontWeight.Bold, maxLines = 1)
-                    }
+                if (attendanceRecords.isNotEmpty()) {
+                    Spacer(Modifier.height(14.dp))
+                    val attended = attendanceRecords.sumOf { it.attendedClasses.toLong() }
+                    val total = attendanceRecords.sumOf { it.totalClasses.toLong() }
+                    Text(if (total > 0L) "${attended * 100L / total}% overall · $attended/$total saved classes"
+                        else "${attendanceRecords.size} courses · no classes logged yet", color = colors.textTertiary, fontSize = 11.sp)
                 }
-            }
-
-            // Animated Linear Progress Bar
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(lifeColors.surfaceGlassHighlight)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(animatedProgress)
-                        .fillMaxHeight()
-                        .clip(RoundedCornerShape(3.dp))
-                        .background(progressColor)
-                )
             }
         }
     }
 }
 
 @Composable
-private fun AssignmentGlassCard(
-    assignment: AssignmentItem,
-    onToggle: () -> Unit,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit
-) {
-    val lifeColors = LocalLifeOsColors.current
-    val diffMillis = assignment.dueDateMillis - System.currentTimeMillis()
-    val daysRemaining = (diffMillis / (24 * 3600 * 1000L)).toInt()
+private fun ActiveLectureCard(lectureStatus: com.example.viewmodel.CurrentLectureStatus, onClick: () -> Unit) {
+    val colors = LocalLifeOsColors.current
+    LiquidGlassCard(Modifier.fillMaxWidth().testTag("active_lecture_tile"), onClick = onClick) {
+        Column(Modifier.fillMaxWidth().padding(20.dp)) {
+            Text(when {
+                lectureStatus.isOngoing -> "IN CLASS NOW"
+                lectureStatus.entry != null -> "UP NEXT"
+                else -> "TIMETABLE"
+            }, color = if (lectureStatus.isOngoing) RingHabitEmerald else colors.primaryAccent,
+                fontSize = 10.sp, letterSpacing = 1.2.sp, fontWeight = FontWeight.Medium)
+            Spacer(Modifier.height(10.dp))
+            Text(lectureStatus.entry?.courseName ?: lectureStatus.message,
+                color = colors.textPrimary, fontSize = 18.sp, lineHeight = 25.sp, fontWeight = FontWeight.Medium)
+            Spacer(Modifier.height(8.dp))
+            Text(lectureStatus.timeRemainingOrUntil, color = colors.textSecondary, fontSize = 12.sp, lineHeight = 18.sp)
+        }
+    }
+}
 
-    val isOverdue = daysRemaining < 0 && !assignment.isSubmitted
-
-    LiquidGlassCard(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            // Top Row: Category, Course Code, Dedicated Grade Weight Badge, and Due Badge
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(
-                    modifier = Modifier.weight(1f, fill = false),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    // Category Chip
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(lifeColors.primaryAccent.copy(alpha = 0.15f))
-                            .padding(horizontal = 7.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = assignment.category.uppercase(),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = lifeColors.primaryAccent,
-                            maxLines = 1
-                        )
-                    }
-
-                    // Course Code Chip
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(lifeColors.surfaceGlassHighlight)
-                            .padding(horizontal = 7.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = assignment.courseCode,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = lifeColors.textSecondary,
-                            maxLines = 1
-                        )
-                    }
-
-                    // Grade Weight Chip - High Contrast & Dedicated Pill
-                    if (assignment.weightPercentage > 0) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(Color(0xFFF59E0B).copy(alpha = 0.18f))
-                                .border(1.dp, Color(0xFFF59E0B).copy(alpha = 0.35f), RoundedCornerShape(6.dp))
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = "${assignment.weightPercentage}% Grade",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = Color(0xFFF59E0B),
-                                maxLines = 1
-                            )
-                        }
-                    }
+@Composable
+private fun TimetableGlassCard(entry: TimetableEntry, onClick: () -> Unit, onDelete: () -> Unit) {
+    val colors = LocalLifeOsColors.current
+    LiquidGlassCard(Modifier.fillMaxWidth().testTag("timetable_card_${entry.id}"), onClick = onClick) {
+        Column(Modifier.fillMaxWidth().padding(start = 18.dp, end = 8.dp, top = 16.dp, bottom = 16.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+                Column(Modifier.width(56.dp).padding(top = 2.dp)) {
+                    Text(String.format(Locale.getDefault(), "%02d:%02d", entry.startHour, entry.startMinute),
+                        color = colors.primaryAccent, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                    Spacer(Modifier.height(7.dp))
+                    Text(String.format(Locale.getDefault(), "%02d:%02d", entry.endHour, entry.endMinute),
+                        color = colors.textTertiary, fontSize = 11.sp)
                 }
-
-                Spacer(modifier = Modifier.width(6.dp))
-
-                // Due Badge
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(
-                            when {
-                                assignment.isSubmitted -> RingHabitEmerald.copy(alpha = 0.15f)
-                                isOverdue -> RingGymRose.copy(alpha = 0.2f)
-                                daysRemaining <= 2 -> RingGymRose.copy(alpha = 0.15f)
-                                else -> lifeColors.surfaceGlassHighlight
-                            }
-                        )
-                        .padding(horizontal = 8.dp, vertical = 3.dp)
-                ) {
-                    Text(
-                        text = when {
-                            assignment.isSubmitted -> "Turned in"
-                            isOverdue -> "Overdue"
-                            daysRemaining == 0 -> "Due today"
-                            daysRemaining == 1 -> "Due tomorrow"
-                            else -> "Due in $daysRemaining d"
-                        },
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = when {
-                            assignment.isSubmitted -> RingHabitEmerald
-                            isOverdue || daysRemaining <= 2 -> RingGymRose
-                            else -> lifeColors.primaryAccent
-                        },
-                        maxLines = 1
-                    )
+                Column(Modifier.weight(1f).padding(horizontal = 10.dp)) {
+                    WorkspaceLabel(entry.courseCode)
+                    Spacer(Modifier.height(5.dp))
+                    Text(entry.courseName, color = colors.textPrimary, fontSize = 15.sp, lineHeight = 22.sp,
+                        fontWeight = FontWeight.Medium)
+                    Spacer(Modifier.height(7.dp))
+                    Text(listOf(entry.room, entry.professor).filter { it.isNotBlank() }.joinToString(" · "),
+                        color = colors.textSecondary, fontSize = 11.sp, lineHeight = 17.sp)
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Outlined.Delete, "Delete ${entry.courseCode} class", tint = colors.textTertiary, modifier = Modifier.size(18.dp))
                 }
             }
+        }
+    }
+}
 
-            // Main Content Row: Checkbox, Title & Description, and Action Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                // Checkbox
-                Box(
-                    modifier = Modifier
-                        .size(26.dp)
-                        .clip(CircleShape)
-                        .background(if (assignment.isSubmitted) RingHabitEmerald else Color.Transparent)
-                        .border(
-                            1.5.dp,
-                            if (assignment.isSubmitted) RingHabitEmerald else lifeColors.textTertiary,
-                            CircleShape
-                        )
-                        .clickable { onToggle() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (assignment.isSubmitted) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Submitted",
-                            tint = Color.White,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
+@Composable
+private fun AttendanceGlassRow(record: AttendanceRecord, onLogAttendance: (Boolean) -> Unit, onUpdate: (Int, Int, Int) -> Unit) {
+    val colors = LocalLifeOsColors.current
+    var adjust by rememberSaveable(record.courseCode) { mutableStateOf(false) }
+    val valid = record.attendedClasses >= 0 && record.totalClasses >= record.attendedClasses && record.targetPercentage in 1..100
+    val projection = if (valid) AttendanceProjection(record.attendedClasses, record.totalClasses, record.targetPercentage) else null
+    val accent = if (projection?.isAtTarget == true) RingHabitEmerald else if (record.totalClasses == 0) colors.primaryAccent else RingGymRose
+    val progress by animateFloatAsState(((projection?.percentage ?: 0) / 100f).coerceIn(0f, 1f), tween(350), label = "attendance_${record.courseCode}")
+    LiquidGlassCard(Modifier.fillMaxWidth()) {
+        Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(record.courseCode, color = colors.textPrimary, fontSize = 19.sp, fontWeight = FontWeight.Medium)
+                    Spacer(Modifier.height(6.dp))
+                    Text("${record.attendedClasses} of ${record.totalClasses} attended", color = colors.textSecondary, fontSize = 12.sp)
                 }
+                Text(projection?.percentage?.let { "$it%" } ?: "—", color = accent, fontSize = 32.sp, fontWeight = FontWeight.Light)
+            }
+            Box(Modifier.fillMaxWidth().height(4.dp).clip(CircleShape).background(colors.surfaceGlassHighlight)) {
+                Box(Modifier.fillMaxWidth(progress).fillMaxHeight().background(accent))
+            }
+            Text(when {
+                projection == null -> "Check your saved totals."
+                projection.percentage == null -> "Add your baseline to start tracking."
+                projection.isAtTarget -> "At ${record.targetPercentage}% target · ${projection.absenceBuffer} class buffer"
+                projection.classesNeeded == null -> "A 100% target cannot be recovered after a recorded absence."
+                else -> "Attend the next ${projection.classesNeeded} classes to reach ${record.targetPercentage}%."
+            }, color = colors.textSecondary, fontSize = 12.sp, lineHeight = 19.sp)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                FilledTonalButton(onClick = { onLogAttendance(true) }, modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                    shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(horizontal = 8.dp),
+                    colors = ButtonDefaults.filledTonalButtonColors(containerColor = RingHabitEmerald.copy(alpha = 0.12f), contentColor = RingHabitEmerald)) {
+                    Text("Present", fontSize = 12.sp)
+                }
+                OutlinedButton(onClick = { onLogAttendance(false) }, modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                    shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(horizontal = 8.dp)) {
+                    Text("Absent", color = colors.textSecondary, fontSize = 12.sp)
+                }
+                IconButton(onClick = { adjust = true }) { Icon(Icons.Outlined.Edit, "Correct attendance totals", tint = colors.primaryAccent, modifier = Modifier.size(19.dp)) }
+            }
+        }
+    }
+    if (adjust) AttendanceBaselineDialog(record, onDismiss = { adjust = false }, onSave = { attended, total, target ->
+        onUpdate(attended, total, target)
+        adjust = false
+    })
+}
 
-                // Title and Description
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = assignment.title,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = if (assignment.isSubmitted) lifeColors.textTertiary else lifeColors.textPrimary,
-                        textDecoration = if (assignment.isSubmitted) TextDecoration.LineThrough else TextDecoration.None,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
+@Composable
+private fun AttendanceBaselineDialog(record: AttendanceRecord, onDismiss: () -> Unit, onSave: (Int, Int, Int) -> Unit) {
+    var attended by remember { mutableStateOf(record.attendedClasses.toString()) }
+    var total by remember { mutableStateOf(record.totalClasses.toString()) }
+    var target by remember { mutableStateOf(record.targetPercentage.toString()) }
+    val a = attended.toIntOrNull()
+    val t = total.toIntOrNull()
+    val goal = target.toIntOrNull()
+    val valid = a != null && t != null && goal != null && a >= 0 && t >= a && goal in 1..100
+    AlertDialog(onDismissRequest = onDismiss,
+        title = { Text("${record.courseCode} · correct totals", fontWeight = FontWeight.Medium) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("Copy the counts from your college portal. This changes only this course's saved attendance.", fontSize = 13.sp, lineHeight = 20.sp)
+                OutlinedTextField(attended, { attended = it }, label = { Text("Classes attended") }, singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(total, { total = it }, label = { Text("Total classes held") }, singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(target, { target = it }, label = { Text("Your target (%)") }, singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth())
+                if (!valid) Text("Attended must be between 0 and total. Target must be 1–100%.", fontSize = 12.sp)
+            }
+        },
+        confirmButton = { TextButton(enabled = valid, onClick = {
+            if (valid) onSave(requireNotNull(a), requireNotNull(t), requireNotNull(goal))
+        }) { Text("Save totals") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+    )
+}
 
+@Composable
+private fun AssignmentGlassCard(assignment: AssignmentItem, onToggle: () -> Unit, onEdit: () -> Unit, onDelete: () -> Unit) {
+    val colors = LocalLifeOsColors.current
+    val today = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+    }.timeInMillis
+    val overdue = !assignment.isSubmitted && assignment.dueDateMillis < today
+    val date = SimpleDateFormat("EEE, d MMM", Locale.getDefault()).format(Date(assignment.dueDateMillis))
+    LiquidGlassCard(Modifier.fillMaxWidth()) {
+        Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            WorkspaceLabel("${assignment.courseCode}  /  ${assignment.category.uppercase(Locale.getDefault())}")
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+                Checkbox(assignment.isSubmitted, { onToggle() }, modifier = Modifier.testTag("assignment_check_${assignment.id}"))
+                Column(Modifier.weight(1f).padding(start = 8.dp, top = 8.dp)) {
+                    Text(assignment.title, color = if (assignment.isSubmitted) colors.textTertiary else colors.textPrimary,
+                        fontSize = 16.sp, lineHeight = 23.sp, fontWeight = FontWeight.Medium,
+                        textDecoration = if (assignment.isSubmitted) TextDecoration.LineThrough else TextDecoration.None)
                     if (assignment.description.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = assignment.description,
-                            fontSize = 11.sp,
-                            color = lifeColors.textTertiary,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        Spacer(Modifier.height(7.dp))
+                        Text(assignment.description, color = colors.textSecondary, fontSize = 12.sp, lineHeight = 19.sp)
                     }
                 }
-
-                // Action Buttons
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    IconButton(
-                        onClick = onEdit,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Edit,
-                            contentDescription = "Edit",
-                            tint = lifeColors.textTertiary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-
-                    IconButton(
-                        onClick = onDelete,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Delete,
-                            contentDescription = "Delete",
-                            tint = lifeColors.textTertiary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
+            }
+            if (assignment.weightPercentage > 0) Text("${assignment.weightPercentage}% of course grade", color = colors.textTertiary, fontSize = 11.sp)
+            HorizontalDivider(color = colors.borderGlass)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(when {
+                    assignment.isSubmitted -> "Submitted · $date"
+                    overdue -> "Overdue · $date"
+                    else -> "Due $date"
+                }, color = if (overdue) RingGymRose else if (assignment.isSubmitted) RingHabitEmerald else colors.primaryAccent,
+                    fontSize = 12.sp, modifier = Modifier.weight(1f))
+                IconButton(onClick = onEdit) { Icon(Icons.Outlined.Edit, "Edit deadline", tint = colors.textSecondary, modifier = Modifier.size(18.dp)) }
+                IconButton(onClick = onDelete) { Icon(Icons.Outlined.Delete, "Delete deadline", tint = colors.textTertiary, modifier = Modifier.size(18.dp)) }
             }
         }
     }

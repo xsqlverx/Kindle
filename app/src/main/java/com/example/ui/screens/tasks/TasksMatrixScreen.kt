@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,17 +50,19 @@ enum class TaskFilterOption(val label: String) {
 @Composable
 fun TasksMatrixScreen(
     viewModel: LifeOsViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onStartFocus: ((TaskItem) -> Unit)? = null
 ) {
     val lifeColors = LocalLifeOsColors.current
     val context = LocalContext.current
 
     val allTasks by viewModel.allTasks.collectAsStateWithLifecycle()
-    var selectedFilter by remember { mutableStateOf(TaskFilterOption.ALL) }
-    var selectedQuadrantFilter by remember { mutableStateOf<Quadrant?>(null) }
+    var selectedFilter by rememberSaveable { mutableStateOf(TaskFilterOption.ALL) }
+    var selectedQuadrantFilter by rememberSaveable { mutableStateOf<Quadrant?>(null) }
     var showAddTaskDialog by remember { mutableStateOf(false) }
-    var quickTaskTitle by remember { mutableStateOf("") }
-    var showCompletedSection by remember { mutableStateOf(true) }
+    var quickTaskTitle by rememberSaveable { mutableStateOf("") }
+    var showPriorityMatrix by rememberSaveable { mutableStateOf(false) }
+    var showCompletedSection by rememberSaveable { mutableStateOf(true) }
 
     val pendingTasks = remember(allTasks) { allTasks.filter { it.status == TaskStatus.PENDING } }
     val completedTasks = remember(allTasks) { allTasks.filter { it.status == TaskStatus.COMPLETED } }
@@ -80,7 +83,7 @@ fun TasksMatrixScreen(
         }
     }
 
-    val totalCount = allTasks.size
+    val totalCount = pendingTasks.size + completedTasks.size
     val completedCount = completedTasks.size
     val completionPercentage = if (totalCount > 0) (completedCount.toFloat() / totalCount.toFloat()) else 0f
     val animatedProgress by animateFloatAsState(
@@ -92,173 +95,99 @@ fun TasksMatrixScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 24.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 100.dp)
+        contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)
     ) {
-        // 1. Daily Progress & Eisenhower Matrix Header Card
         item {
-            LiquidGlassCard(modifier = Modifier.fillMaxWidth().testTag("tasks_matrix_hero")) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(18.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = "DAILY TASKS & MATRIX",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.2.sp,
-                                color = lifeColors.primaryAccent
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = "To-Do Management",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = lifeColors.textPrimary
-                            )
-                        }
-
-                        Button(
-                            onClick = {
-                                playAppleHaptic(context)
-                                showAddTaskDialog = true
-                            },
-                            shape = RoundedCornerShape(14.dp),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                            modifier = Modifier.testTag("new_task_modal_button")
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("New Task", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        }
+            Column(Modifier.fillMaxWidth().testTag("tasks_matrix_hero")) {
+                WorkspaceIntro("CHOOSE YOUR NEXT MOVE", "Make room for\nwhat matters.", "A few clear priorities. A place for everything else.")
+                Spacer(Modifier.height(16.dp))
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text("${pendingTasks.size}", fontSize = 42.sp, fontWeight = FontWeight.Light, color = lifeColors.textPrimary)
+                        Text("open · ${completedTasks.size} completed", fontSize = 12.sp, color = lifeColors.textSecondary)
                     }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // Completion progress bar
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = if (totalCount == 0) "No tasks logged yet" else "$completedCount of $totalCount Completed",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = lifeColors.textSecondary
-                        )
-                        Text(
-                            text = "${(completionPercentage * 100).toInt()}%",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = lifeColors.primaryAccent
-                        )
+                    FilledTonalButton(onClick = { showAddTaskDialog = true }, shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("new_task_modal_button")) {
+                        Icon(Icons.Default.Add, null, modifier = Modifier.size(17.dp))
+                        Spacer(Modifier.width(7.dp))
+                        Text("New task", fontSize = 12.sp)
                     }
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    LinearProgressIndicator(
-                        progress = { animatedProgress },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(7.dp)
-                            .clip(RoundedCornerShape(4.dp)),
-                        color = if (completionPercentage >= 1.0f && totalCount > 0) RingHabitEmerald else lifeColors.primaryAccent,
-                        trackColor = lifeColors.borderGlass.copy(alpha = 0.4f),
-                    )
-
-                    if (completionPercentage >= 1.0f && totalCount > 0) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.CheckCircle,
-                                contentDescription = null,
-                                tint = RingHabitEmerald,
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Text(
-                                text = "All daily tasks completed! Great job!",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = RingHabitEmerald
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // 2x2 Matrix Overview Cards
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        MatrixTile(
-                            title = "Q1: Do First",
-                            subtitle = "Urgent & Imp",
-                            count = q1Tasks.size,
-                            accentColor = Q1DoColor,
-                            isSelected = selectedQuadrantFilter == Quadrant.Q1_DO,
-                            modifier = Modifier.weight(1f),
-                            onClick = {
-                                selectedQuadrantFilter = if (selectedQuadrantFilter == Quadrant.Q1_DO) null else Quadrant.Q1_DO
-                                selectedFilter = if (selectedQuadrantFilter == Quadrant.Q1_DO) TaskFilterOption.Q1_DO else TaskFilterOption.ALL
+                }
+                Spacer(Modifier.height(18.dp))
+                LinearProgressIndicator(progress = { animatedProgress }, color = lifeColors.primaryAccent,
+                    trackColor = lifeColors.borderGlass, modifier = Modifier.fillMaxWidth().height(3.dp).clip(CircleShape))
+                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { showPriorityMatrix = !showPriorityMatrix }
+                    .heightIn(min = 56.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("Your priority map", color = lifeColors.textSecondary, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                    Icon(if (showPriorityMatrix) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        "Toggle priority matrix", tint = lifeColors.primaryAccent)
+                }
+                AnimatedVisibility(showPriorityMatrix) {
+                    Column {
+                            // 2x2 Matrix Overview Cards
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                MatrixTile(
+                                    title = "Q1: Do First",
+                                    subtitle = "Urgent & Imp",
+                                    count = q1Tasks.size,
+                                    accentColor = Q1DoColor,
+                                    isSelected = selectedQuadrantFilter == Quadrant.Q1_DO,
+                                    modifier = Modifier.weight(1f),
+                                    onClick = {
+                                        selectedQuadrantFilter = if (selectedQuadrantFilter == Quadrant.Q1_DO) null else Quadrant.Q1_DO
+                                        selectedFilter = if (selectedQuadrantFilter == Quadrant.Q1_DO) TaskFilterOption.Q1_DO else TaskFilterOption.ALL
+                                    }
+                                )
+                                MatrixTile(
+                                    title = "Q2: Schedule",
+                                    subtitle = "Important",
+                                    count = q2Tasks.size,
+                                    accentColor = Q2ScheduleColor,
+                                    isSelected = selectedQuadrantFilter == Quadrant.Q2_SCHEDULE,
+                                    modifier = Modifier.weight(1f),
+                                    onClick = {
+                                        selectedQuadrantFilter = if (selectedQuadrantFilter == Quadrant.Q2_SCHEDULE) null else Quadrant.Q2_SCHEDULE
+                                        selectedFilter = if (selectedQuadrantFilter == Quadrant.Q2_SCHEDULE) TaskFilterOption.Q2_SCHEDULE else TaskFilterOption.ALL
+                                    }
+                                )
                             }
-                        )
-                        MatrixTile(
-                            title = "Q2: Schedule",
-                            subtitle = "Important",
-                            count = q2Tasks.size,
-                            accentColor = Q2ScheduleColor,
-                            isSelected = selectedQuadrantFilter == Quadrant.Q2_SCHEDULE,
-                            modifier = Modifier.weight(1f),
-                            onClick = {
-                                selectedQuadrantFilter = if (selectedQuadrantFilter == Quadrant.Q2_SCHEDULE) null else Quadrant.Q2_SCHEDULE
-                                selectedFilter = if (selectedQuadrantFilter == Quadrant.Q2_SCHEDULE) TaskFilterOption.Q2_SCHEDULE else TaskFilterOption.ALL
-                            }
-                        )
-                    }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        MatrixTile(
-                            title = "Q3: Delegate",
-                            subtitle = "Urgent",
-                            count = q3Tasks.size,
-                            accentColor = Q3DelegateColor,
-                            isSelected = selectedQuadrantFilter == Quadrant.Q3_DELEGATE,
-                            modifier = Modifier.weight(1f),
-                            onClick = {
-                                selectedQuadrantFilter = if (selectedQuadrantFilter == Quadrant.Q3_DELEGATE) null else Quadrant.Q3_DELEGATE
-                                selectedFilter = if (selectedQuadrantFilter == Quadrant.Q3_DELEGATE) TaskFilterOption.Q3_DELEGATE else TaskFilterOption.ALL
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                MatrixTile(
+                                    title = "Q3: Delegate",
+                                    subtitle = "Urgent",
+                                    count = q3Tasks.size,
+                                    accentColor = Q3DelegateColor,
+                                    isSelected = selectedQuadrantFilter == Quadrant.Q3_DELEGATE,
+                                    modifier = Modifier.weight(1f),
+                                    onClick = {
+                                        selectedQuadrantFilter = if (selectedQuadrantFilter == Quadrant.Q3_DELEGATE) null else Quadrant.Q3_DELEGATE
+                                        selectedFilter = if (selectedQuadrantFilter == Quadrant.Q3_DELEGATE) TaskFilterOption.Q3_DELEGATE else TaskFilterOption.ALL
+                                    }
+                                )
+                                MatrixTile(
+                                    title = "Q4: Drop",
+                                    subtitle = "Low Priority",
+                                    count = q4Tasks.size,
+                                    accentColor = Q4DropColor,
+                                    isSelected = selectedQuadrantFilter == Quadrant.Q4_ELIMINATE,
+                                    modifier = Modifier.weight(1f),
+                                    onClick = {
+                                        selectedQuadrantFilter = if (selectedQuadrantFilter == Quadrant.Q4_ELIMINATE) null else Quadrant.Q4_ELIMINATE
+                                        selectedFilter = if (selectedQuadrantFilter == Quadrant.Q4_ELIMINATE) TaskFilterOption.Q4_ELIMINATE else TaskFilterOption.ALL
+                                    }
+                                )
                             }
-                        )
-                        MatrixTile(
-                            title = "Q4: Drop",
-                            subtitle = "Low Priority",
-                            count = q4Tasks.size,
-                            accentColor = Q4DropColor,
-                            isSelected = selectedQuadrantFilter == Quadrant.Q4_ELIMINATE,
-                            modifier = Modifier.weight(1f),
-                            onClick = {
-                                selectedQuadrantFilter = if (selectedQuadrantFilter == Quadrant.Q4_ELIMINATE) null else Quadrant.Q4_ELIMINATE
-                                selectedFilter = if (selectedQuadrantFilter == Quadrant.Q4_ELIMINATE) TaskFilterOption.Q4_ELIMINATE else TaskFilterOption.ALL
-                            }
-                        )
                     }
                 }
             }
@@ -446,7 +375,8 @@ fun TasksMatrixScreen(
                     onDelete = {
                         playAppleHaptic(context, strong = true)
                         viewModel.deleteTask(task)
-                    }
+                    },
+                    onFocus = if (task.status == TaskStatus.PENDING) onStartFocus?.let { start -> { start(task) } } else null
                 )
             }
         }
@@ -748,7 +678,7 @@ private fun FilterChip(
             text = label,
             fontSize = 12.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            color = if (isSelected) Color.White else lifeColors.textPrimary
+            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else lifeColors.textPrimary
         )
     }
 }

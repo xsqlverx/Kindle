@@ -26,6 +26,7 @@ import com.example.data.model.MoodType
 import com.example.data.model.Quadrant
 import com.example.data.model.TaskItem
 import com.example.data.model.TimetableEntry
+import com.example.ui.components.WorkspaceIntro
 import com.example.ui.components.LiquidGlassCard
 import com.example.ui.components.playAppleHaptic
 import com.example.ui.theme.*
@@ -52,87 +53,12 @@ fun DailyResetReportView(
         modifier = modifier
             .fillMaxSize()
             .testTag("daily_reset_report_view"),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 48.dp),
+        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 20.dp, bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Status Locked Banner
         item {
-            LiquidGlassCard(
-                modifier = Modifier.fillMaxWidth(),
-                tint = RingHabitEmerald.copy(alpha = 0.16f)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(42.dp)
-                                    .clip(CircleShape)
-                                    .background(RingHabitEmerald.copy(alpha = 0.2f))
-                                    .border(1.5.dp, RingHabitEmerald, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Verified,
-                                    contentDescription = null,
-                                    tint = RingHabitEmerald,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                            Column {
-                                Text(
-                                    text = "DAY RESET COMPLETED & LOCKED",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.2.sp,
-                                    color = RingHabitEmerald
-                                )
-                                Text(
-                                    text = "Tomorrow Readiness Report",
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = lifeColors.textPrimary
-                                )
-                            }
-                        }
-
-                        // Locked Pill
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(RingHabitEmerald)
-                                .padding(horizontal = 10.dp, vertical = 5.dp)
-                        ) {
-                            Text(
-                                text = "Locked",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Text(
-                        text = "Completed at $formattedCompletionTime • Today's daily reset is officially saved. No duplicate entries are permitted today so you can disconnect peacefully.",
-                        fontSize = 12.sp,
-                        color = lifeColors.textSecondary,
-                        lineHeight = 17.sp
-                    )
-                }
-            }
+            WorkspaceIntro("YOUR RESET IS SAVED", "A little room for tomorrow.",
+                "Saved at $formattedCompletionTime. You can revisit or revise your reset below.")
         }
 
         // Section 1: Tomorrow's Schedule & First Lecture
@@ -261,7 +187,7 @@ fun DailyResetReportView(
                         )
                     } else {
                         Text(
-                            text = "Mind was completely clear — no unresolved thoughts logged.",
+                            text = "No note saved for this reset.",
                             fontSize = 13.sp,
                             fontStyle = FontStyle.Italic,
                             color = lifeColors.textSecondary
@@ -300,7 +226,7 @@ fun DailyResetReportView(
                                 modifier = Modifier.size(18.dp)
                             )
                             Text(
-                                text = "All tasks resolved — completely clear slate for tomorrow morning!",
+                                text = "No pending tasks in this view.",
                                 fontSize = 13.sp,
                                 color = lifeColors.textPrimary,
                                 fontWeight = FontWeight.SemiBold
@@ -373,9 +299,9 @@ fun DailyResetReportView(
         // Section 4: Backpack & Essentials Check
         item {
             ReportCardHeader(
-                title = "Backpack & Gear Verified",
-                icon = Icons.Default.CheckCircle,
-                accentColor = RingHabitEmerald
+                title = if (record.gearPacked) "Your bag is ready" else "Packing still to check",
+                icon = if (record.gearPacked) Icons.Default.CheckCircle else Icons.Default.Info,
+                accentColor = if (record.gearPacked) RingHabitEmerald else lifeColors.textSecondary
             )
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -396,7 +322,7 @@ fun DailyResetReportView(
                         "3,000ml Water Bottle"
                     )
 
-                    for (gear in gearItems) {
+                    for (gear in if (record.gearPacked) gearItems else emptyList()) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -417,7 +343,7 @@ fun DailyResetReportView(
 
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "All 6 essentials verified & placed by the door for a friction-free morning departure.",
+                        text = if (record.gearPacked) "You confirmed all six packing items in this reset." else "Packing was not fully confirmed. Revisit your reset if you want to finish the checklist.",
                         fontSize = 11.sp,
                         color = lifeColors.textSecondary
                     )
@@ -512,7 +438,7 @@ fun DailyResetReportView(
             ) {
                 Icon(Icons.Default.Home, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Back to Home Dashboard", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Text("Back to my day", fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
 
             Spacer(modifier = Modifier.height(10.dp))

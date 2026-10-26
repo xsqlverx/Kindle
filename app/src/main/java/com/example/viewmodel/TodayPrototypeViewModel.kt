@@ -14,6 +14,11 @@ class TodayPrototypeViewModel(application: Application) : AndroidViewModel(appli
     private val preferences = application.getSharedPreferences("today_focus_session", Context.MODE_PRIVATE)
     private val _session = MutableStateFlow(readSession())
     val session = _session.asStateFlow()
+    private val _openSessionPanel = MutableStateFlow(false)
+    val openSessionPanel = _openSessionPanel.asStateFlow()
+
+    fun requestSessionPanel() { _openSessionPanel.value = true }
+    fun consumeSessionPanelRequest() { _openSessionPanel.value = false }
 
     init {
         refresh()

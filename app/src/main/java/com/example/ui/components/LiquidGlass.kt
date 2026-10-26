@@ -55,7 +55,7 @@ fun Modifier.liquidGlass(
     shape: Shape = RoundedCornerShape(24.dp),
     tint: Color? = null,
     borderAlpha: Float = 0.4f,
-    elevation: Dp = 8.dp,
+    elevation: Dp = 0.dp,
     hasSpecularSheen: Boolean = true
 ): Modifier {
     val lifeColors = LocalLifeOsColors.current
@@ -63,10 +63,10 @@ fun Modifier.liquidGlass(
 
     val borderBrush = Brush.linearGradient(
         colors = listOf(
-            lifeColors.borderGlass.copy(alpha = (borderAlpha * 1.3f).coerceAtMost(0.9f)),
-            lifeColors.borderGlass.copy(alpha = borderAlpha),
-            Color.Transparent,
-            lifeColors.borderGlass.copy(alpha = (borderAlpha * 0.5f))
+            lifeColors.textTertiary.copy(alpha = (borderAlpha * 0.55f).coerceAtMost(0.4f)),
+            lifeColors.borderGlass.copy(alpha = 0.55f),
+            lifeColors.borderGlass.copy(alpha = 0.25f),
+            lifeColors.borderGlass.copy(alpha = 0.5f)
         ),
         start = Offset(0f, 0f),
         end = Offset(400f, 800f)
@@ -74,9 +74,9 @@ fun Modifier.liquidGlass(
 
     val specularBrush = Brush.linearGradient(
         colors = listOf(
-            Color.White.copy(alpha = if (lifeColors.isDark) 0.12f else 0.45f),
+            Color.White.copy(alpha = if (lifeColors.isDark) 0.035f else 0.45f),
             Color.Transparent,
-            Color.White.copy(alpha = if (lifeColors.isDark) 0.04f else 0.15f)
+            Color.White.copy(alpha = if (lifeColors.isDark) 0.012f else 0.15f)
         ),
         start = Offset(0f, 0f),
         end = Offset(300f, 400f)
@@ -98,7 +98,7 @@ fun Modifier.liquidGlass(
             }
         }
         .border(
-            width = 1.2.dp,
+            width = 0.8.dp,
             brush = borderBrush,
             shape = shape
         )
@@ -110,7 +110,7 @@ fun LiquidGlassCard(
     shape: Shape = RoundedCornerShape(24.dp),
     tint: Color? = null,
     borderAlpha: Float = 0.4f,
-    elevation: Dp = 6.dp,
+    elevation: Dp = 0.dp,
     onClick: (() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit
 ) {

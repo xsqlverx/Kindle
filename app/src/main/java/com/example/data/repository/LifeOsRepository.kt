@@ -9,6 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -29,6 +31,30 @@ class LifeOsRepository(context: Context) {
     private val dailyResetDao = db.dailyResetDao()
 
     private val prefs = context.getSharedPreferences("life_os_prefs", Context.MODE_PRIVATE)
+    private val attendanceWrites = Mutex()
+
+    fun getThemeMode(): AppThemeMode = AppThemeMode.entries.firstOrNull {
+        it.name == prefs.getString("appearance_mode", "")
+    } ?: AppThemeMode.NIGHT_GRAPHITE
+
+    fun saveThemeMode(mode: AppThemeMode) {
+        prefs.edit().putString("appearance_mode", mode.name).apply()
+    }
+
+    fun getBodyWeightGoal(): Float = prefs.getFloat("body_weight_goal", 66.5f)
+
+    fun saveBodyWeightGoal(weight: Float) {
+        require(weight.isFinite() && weight > 0f)
+        prefs.edit().putFloat("body_weight_goal", weight).apply()
+    }
+
+    suspend fun correctAttendance(courseCode: String, attended: Int, total: Int, target: Int) {
+        require(attended >= 0 && total >= attended && target in 1..100)
+        attendanceWrites.withLock {
+            val record = academicDao.getAllAttendance().first().find { it.courseCode == courseCode } ?: return@withLock
+            academicDao.updateAttendance(record.copy(attendedClasses = attended, totalClasses = total, targetPercentage = target))
+        }
+    }
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
@@ -80,21 +106,22 @@ class LifeOsRepository(context: Context) {
 
     val allAttendance: Flow<List<AttendanceRecord>> = academicDao.getAllAttendance()
     suspend fun logAttendance(courseCode: String, attended: Boolean) {
-        val records = academicDao.getAllAttendance().first()
-        val record = records.find { it.courseCode == courseCode }
-        if (record != null) {
-            val newAttended = if (attended) record.attendedClasses + 1 else record.attendedClasses
-            val newTotal = record.totalClasses + 1
-            academicDao.updateAttendance(record.copy(attendedClasses = newAttended, totalClasses = newTotal))
-        } else {
-            academicDao.insertAttendance(
-                AttendanceRecord(
-                    courseCode = courseCode,
-                    attendedClasses = if (attended) 1 else 0,
-                    totalClasses = 1,
-                    targetPercentage = 80
+        attendanceWrites.withLock {
+            val records = academicDao.getAllAttendance().first()
+            val record = records.find { it.courseCode == courseCode }
+            if (record != null) {
+                val newAttended = if (attended) record.attendedClasses + 1 else record.attendedClasses
+                academicDao.updateAttendance(record.copy(attendedClasses = newAttended, totalClasses = record.totalClasses + 1))
+            } else {
+                academicDao.insertAttendance(
+                    AttendanceRecord(
+                        courseCode = courseCode,
+                        attendedClasses = if (attended) 1 else 0,
+                        totalClasses = 1,
+                        targetPercentage = 80
+                    )
                 )
-            )
+            }
         }
     }
 

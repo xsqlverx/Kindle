@@ -22,20 +22,22 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.screens.today.DayInk
+import com.example.ui.theme.LocalLifeOsColors
 
 /** All five destinations remain visible; additional tools unfold within Today. */
 @Composable
 fun TodayPrototypeDock(currentTab: LifeOsTab, onTabSelected: (LifeOsTab) -> Unit, modifier: Modifier = Modifier) {
-    Box(modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(Color.Transparent, DayInk.Background)))
+    val colors = LocalLifeOsColors.current
+    Box(modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(Color.Transparent, colors.background)))
         .navigationBarsPadding().padding(horizontal = 16.dp, vertical = 10.dp)) {
         Row(Modifier.fillMaxWidth().selectableGroup().clip(RoundedCornerShape(25.dp))
-            .background(Brush.verticalGradient(listOf(Color(0xFF292831), Color(0xFF1B1B22))))
-            .border(1.dp, Brush.verticalGradient(listOf(Color(0xFF514B5B), Color(0xFF2C2A34))), RoundedCornerShape(25.dp))
+            .background(Brush.verticalGradient(if (colors.isDark) listOf(Color(0xFF292831), Color(0xFF1B1B22))
+                else listOf(Color.White, colors.background)))
+            .border(1.dp, colors.borderGlass, RoundedCornerShape(25.dp))
             .padding(horizontal = 5.dp, vertical = 5.dp)) {
             LifeOsTab.entries.forEach { tab ->
                 val selected = tab == currentTab
-                val tint by animateColorAsState(if (selected) DayInk.Lavender else DayInk.Quiet, label = "dock_${tab.name}")
+                val tint by animateColorAsState(if (selected) colors.primaryAccent else colors.textTertiary, label = "dock_${tab.name}")
                 Column(
                     Modifier.weight(1f).clip(RoundedCornerShape(19.dp))
                         .selectable(selected, role = Role.Tab, onClick = { onTabSelected(tab) })
@@ -47,7 +49,7 @@ fun TodayPrototypeDock(currentTab: LifeOsTab, onTabSelected: (LifeOsTab) -> Unit
                     Text(if (tab == LifeOsTab.RESET) "Reset" else tab.title, color = tint, fontSize = 10.sp,
                         fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal)
                     Spacer(Modifier.height(4.dp))
-                    Box(Modifier.size(3.dp).clip(CircleShape).background(if (selected) DayInk.Lavender else Color.Transparent))
+                    Box(Modifier.size(3.dp).clip(CircleShape).background(if (selected) colors.primaryAccent else Color.Transparent))
                 }
             }
         }

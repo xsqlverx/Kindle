@@ -1,6 +1,6 @@
 # App revamp: working direction
 
-Status: working direction based on the user's answers and supplied references. The first Today prototype is now implemented; see TODAY_PROTOTYPE.md for scope and validation. Naming and logo work come last. The remaining app-wide design is still open to refinement.
+Status: the user enthusiastically accepted the first Today prototype and requested continuation. Its visual language now extends through the workspace; see STATUS.md for implementation and verification, and PROJECT_CONTEXT.md for the durable requirement record. Naming and logo work come last.
 
 ## Purpose
 
@@ -79,7 +79,7 @@ Show the same proposed Today screen in three situations: an ordinary college day
 
 - Actual timetable and accurate attendance screenshot.
 - Actual workout routine if changes to guidance are wanted.
-- Reaction to the first concrete visual study.
+- Device feedback on the workspace continuation. The first Today study was already enthusiastically accepted.
 - Final navigation and side-panel structure, to discuss after the feature relationships are clear.
 
 The user has already completed the five discovery questions. Future discussion should use concrete examples and prototypes rather than repeat the intake questionnaire.

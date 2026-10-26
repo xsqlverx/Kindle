@@ -481,136 +481,44 @@ private fun LegendRow(label: String, value: String, color: Color) {
 fun TaskGlassRow(
     task: TaskItem,
     onToggle: () -> Unit,
-    onDelete: (() -> Unit)? = null
+    onDelete: (() -> Unit)? = null,
+    onFocus: (() -> Unit)? = null
 ) {
-    val lifeColors = LocalLifeOsColors.current
-    val isDone = (task.status == TaskStatus.COMPLETED)
-
-    val quadColor = when (task.quadrant) {
+    val colors = LocalLifeOsColors.current
+    val done = task.status == TaskStatus.COMPLETED
+    val accent = when (task.quadrant) {
         Quadrant.Q1_DO -> Q1DoColor
         Quadrant.Q2_SCHEDULE -> Q2ScheduleColor
         Quadrant.Q3_DELEGATE -> Q3DelegateColor
         Quadrant.Q4_ELIMINATE -> Q4DropColor
     }
-
-    LiquidGlassCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .testTag("task_item_${task.id}"),
-        onClick = onToggle
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Apple-style circular checkbox with testTag
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .background(
-                            if (isDone) lifeColors.primaryAccent
-                            else Color.Transparent
-                        )
-                        .border(
-                            width = 1.5.dp,
-                            color = if (isDone) lifeColors.primaryAccent else lifeColors.textTertiary,
-                            shape = CircleShape
-                        )
-                        .testTag("task_checkbox_${task.id}"),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (isDone) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Completed",
-                            tint = Color.White,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
+    LiquidGlassCard(Modifier.fillMaxWidth().testTag("task_item_${task.id}"), onClick = onToggle) {
+        Column(Modifier.fillMaxWidth().padding(14.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+                Checkbox(done, { onToggle() }, modifier = Modifier.testTag("task_checkbox_${task.id}"),
+                    colors = CheckboxDefaults.colors(checkedColor = colors.primaryAccent, checkmarkColor = MaterialTheme.colorScheme.onPrimary))
+                Column(Modifier.weight(1f).padding(start = 6.dp, top = 10.dp)) {
+                    Text(task.title, color = if (done) colors.textTertiary else colors.textPrimary,
+                        fontSize = 15.sp, lineHeight = 22.sp, fontWeight = FontWeight.Medium,
+                        textDecoration = if (done) TextDecoration.LineThrough else TextDecoration.None)
+                    Spacer(Modifier.height(7.dp))
+                    Text(listOf(task.category, task.dueTime).filter { it.isNotBlank() }.joinToString(" · "),
+                        color = colors.textTertiary, fontSize = 11.sp, lineHeight = 17.sp)
                 }
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = task.title,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = if (isDone) lifeColors.textTertiary else lifeColors.textPrimary,
-                        textDecoration = if (isDone) TextDecoration.LineThrough else TextDecoration.None,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = task.category,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = lifeColors.primaryAccent
-                        )
-                        if (task.dueTime.isNotEmpty()) {
-                            Text(
-                                text = "•",
-                                fontSize = 11.sp,
-                                color = lifeColors.textTertiary
-                            )
-                            Text(
-                                text = task.dueTime,
-                                fontSize = 11.sp,
-                                color = lifeColors.textSecondary
-                            )
-                        }
-                    }
+                if (onDelete != null) IconButton(onClick = onDelete, modifier = Modifier.testTag("delete_task_${task.id}")) {
+                    Icon(Icons.Outlined.DeleteOutline, "Delete task", tint = colors.textTertiary, modifier = Modifier.size(18.dp))
                 }
             }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                // Quadrant badge
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(quadColor.copy(alpha = 0.15f))
-                        .border(1.dp, quadColor.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 7.dp, vertical = 3.dp)
-                ) {
-                    Text(
-                        text = task.quadrant.label,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = quadColor
-                    )
+            Row(Modifier.fillMaxWidth().padding(start = 8.dp, top = 9.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.size(5.dp).clip(CircleShape).background(accent))
+                    Spacer(Modifier.width(7.dp))
+                    Text(task.quadrant.label, color = accent, fontSize = 11.sp)
                 }
-
-                if (onDelete != null) {
-                    IconButton(
-                        onClick = onDelete,
-                        modifier = Modifier
-                            .size(32.dp)
-                            .testTag("delete_task_${task.id}")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.DeleteOutline,
-                            contentDescription = "Delete task",
-                            tint = lifeColors.textTertiary,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
+                if (onFocus != null && !done) TextButton(onClick = onFocus, modifier = Modifier.testTag("focus_task_${task.id}")) {
+                    Icon(Icons.Outlined.PlayArrow, null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("Focus", fontSize = 12.sp)
                 }
             }
         }
@@ -662,7 +570,7 @@ fun HabitPillItem(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(13.dp)
                     )
                 }

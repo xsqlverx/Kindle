@@ -143,7 +143,7 @@ fun FullscreenResetCelebration(
                         modifier = Modifier.size(13.dp)
                     )
                     Text(
-                        text = "DAY CLOSED • 1 OF 1 ENTRY RECORDED",
+                        text = "YOUR RESET IS SAVED",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.2.sp,
@@ -155,7 +155,7 @@ fun FullscreenResetCelebration(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "DAY RESET COMPLETE",
+                text = "Let the day be done.",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = 1.2.sp,
@@ -165,7 +165,7 @@ fun FullscreenResetCelebration(
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = "Mind Cleared • Tomorrow Locked In",
+                text = "One less thing to carry.",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = RingHabitEmerald
@@ -174,7 +174,7 @@ fun FullscreenResetCelebration(
             Spacer(modifier = Modifier.height(14.dp))
 
             Text(
-                text = "Your open loops are handled, backpack is verified, and schedule is queued. Multiple entries are disabled to keep your bedtime disconnect sacred.",
+                text = "Your reset is saved. Take the evening from here. You can revisit your note and tomorrow's outline when you need.",
                 fontSize = 13.sp,
                 color = Color.White.copy(alpha = 0.75f),
                 textAlign = TextAlign.Center,

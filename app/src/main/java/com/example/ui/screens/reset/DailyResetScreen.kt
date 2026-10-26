@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,15 +56,15 @@ fun DailyResetScreen(
         allTasks.filter { it.status == TaskStatus.PENDING }
     }
 
-    var currentStep by remember { mutableStateOf(1) } // 1: Triage, 2: Brain Dump, 3: Tomorrow Preview, 4: Mood
-    var brainDumpText by remember { mutableStateOf("") }
-    var selectedMood by remember { mutableStateOf(MoodType.GOOD) }
-    var isRevising by remember { mutableStateOf(false) }
+    var currentStep by rememberSaveable { mutableStateOf(1) } // 1: Triage, 2: Brain Dump, 3: Tomorrow Preview, 4: Mood
+    var brainDumpText by rememberSaveable { mutableStateOf("") }
+    var selectedMood by rememberSaveable { mutableStateOf(MoodType.GOOD) }
+    var isRevising by rememberSaveable { mutableStateOf(false) }
     var showCelebrationOverlay by remember { mutableStateOf(false) }
 
     // Pre-fill state if today's reset already exists
     LaunchedEffect(todayResetRecord) {
-        todayResetRecord?.let { record ->
+        todayResetRecord?.takeUnless { isRevising }?.let { record ->
             brainDumpText = record.brainDump
             selectedMood = record.mood
         }
@@ -86,12 +87,23 @@ fun DailyResetScreen(
     }
 
     // Interactive Gear Checklist state
-    var earpodsPacked by remember { mutableStateOf(true) }
-    var phonePacked by remember { mutableStateOf(true) }
-    var geometryBoxPacked by remember { mutableStateOf(true) }
-    var calculatorPacked by remember { mutableStateOf(true) }
-    var booksPacked by remember { mutableStateOf(true) }
-    var waterBottlePacked by remember { mutableStateOf(true) }
+    var earpodsPacked by rememberSaveable { mutableStateOf(false) }
+    var phonePacked by rememberSaveable { mutableStateOf(false) }
+    var geometryBoxPacked by rememberSaveable { mutableStateOf(false) }
+    var calculatorPacked by rememberSaveable { mutableStateOf(false) }
+    var booksPacked by rememberSaveable { mutableStateOf(false) }
+    var waterBottlePacked by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(todayResetRecord?.id) {
+        todayResetRecord?.takeUnless { isRevising }?.let { saved ->
+            earpodsPacked = saved.gearPacked
+            phonePacked = saved.gearPacked
+            geometryBoxPacked = saved.gearPacked
+            calculatorPacked = saved.gearPacked
+            booksPacked = saved.gearPacked
+            waterBottlePacked = saved.gearPacked
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         val completedRecord = todayResetRecord
@@ -114,270 +126,67 @@ fun DailyResetScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(top = 12.dp, bottom = 100.dp)
+                contentPadding = PaddingValues(top = 12.dp, bottom = 32.dp)
             ) {
-                // Hero Header Card
                 item {
-                    LiquidGlassCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("daily_reset_hero"),
-                        tint = if (lifeColors.isDark) Color(0x334F46E5) else Color(0x226366F1)
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(20.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(38.dp)
-                                            .clip(CircleShape)
-                                            .background(lifeColors.primaryAccent.copy(alpha = 0.2f)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Bedtime,
-                                            contentDescription = null,
-                                            tint = lifeColors.primaryAccent,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                    }
-                                    Column {
-                                        Text(
-                                            text = "60-SECOND DAILY RESET",
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            letterSpacing = 1.2.sp,
-                                            color = lifeColors.primaryAccent
-                                        )
-                                        Text(
-                                            text = "Close Today • Prep Tomorrow",
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            color = lifeColors.textPrimary
-                                        )
-                                    }
-                                }
-
-                                // Step Pill
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(lifeColors.primaryAccent)
-                                        .padding(horizontal = 10.dp, vertical = 5.dp)
-                                ) {
-                                    Text(
-                                        text = "Step $currentStep of 4",
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text(
-                                text = "No streaks. No guilt. Offload mental clutter so you can disconnect peacefully tonight.",
-                                fontSize = 12.sp,
-                                color = lifeColors.textSecondary
-                            )
-
-                            Spacer(modifier = Modifier.height(14.dp))
-
-                            // Step Indicator Progress Bar
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                for (i in 1..4) {
-                                    val isActive = i <= currentStep
-                                    Box(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .height(4.dp)
-                                            .clip(CircleShape)
-                                            .background(if (isActive) lifeColors.primaryAccent else lifeColors.surfaceGlassHighlight)
-                                    )
-                                }
+                    val titles = listOf("Leave loose ends here.", "Clear a little headspace.", "Give tomorrow a head start.", "How did today feel?")
+                    val descriptions = listOf(
+                        "Decide what deserves tomorrow and what can wait.",
+                        "A place for the thoughts you don't want to carry to bed.",
+                        "Check the first class and the things you want by the door.",
+                        "A quick check-in, then let the day be done."
+                    )
+                    WorkspaceIntro("CLOSE THE DAY  /  0$currentStep OF 04", titles[currentStep - 1], descriptions[currentStep - 1],
+                        modifier = Modifier.testTag("daily_reset_hero"))
+                    Spacer(Modifier.height(19.dp))
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("Triage", "Unload", "Prepare", "Check in").forEachIndexed { index, label ->
+                            Column(Modifier.weight(1f)) {
+                                Box(Modifier.fillMaxWidth().height(3.dp).clip(CircleShape)
+                                    .background(if (index < currentStep) lifeColors.primaryAccent else lifeColors.borderGlass))
+                                Spacer(Modifier.height(8.dp))
+                                Text(label, color = if (index + 1 == currentStep) lifeColors.primaryAccent else lifeColors.textTertiary,
+                                    fontSize = 10.sp)
                             }
                         }
                     }
                 }
-
-                // Interactive 60-Second Reset Timer Sprint Card
                 item {
-                    LiquidGlassCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("reset_timer_card"),
-                        tint = when (resetTimerState) {
-                            ResetTimerState.RUNNING -> lifeColors.primaryAccent.copy(alpha = 0.18f)
-                            ResetTimerState.COMPLETED -> RingHabitEmerald.copy(alpha = 0.18f)
-                            ResetTimerState.PAUSED -> SunsetAmber.copy(alpha = 0.18f)
-                            else -> lifeColors.surfaceGlass
-                        }
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(14.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(44.dp)
-                                        .clip(CircleShape)
-                                        .background(
-                                            when (resetTimerState) {
-                                                ResetTimerState.RUNNING -> lifeColors.primaryAccent.copy(alpha = 0.25f)
-                                                ResetTimerState.COMPLETED -> RingHabitEmerald.copy(alpha = 0.25f)
-                                                ResetTimerState.PAUSED -> SunsetAmber.copy(alpha = 0.25f)
-                                                else -> lifeColors.primaryAccent.copy(alpha = 0.15f)
-                                            }
-                                        )
-                                        .border(
-                                            1.2.dp,
-                                            when (resetTimerState) {
-                                                ResetTimerState.RUNNING -> lifeColors.primaryAccent
-                                                ResetTimerState.COMPLETED -> RingHabitEmerald
-                                                ResetTimerState.PAUSED -> SunsetAmber
-                                                else -> lifeColors.borderGlass
-                                            },
-                                            CircleShape
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = when (resetTimerState) {
-                                            ResetTimerState.RUNNING -> Icons.Default.Timer
-                                            ResetTimerState.COMPLETED -> Icons.Default.CheckCircle
-                                            ResetTimerState.PAUSED -> Icons.Default.Pause
-                                            else -> Icons.Default.HourglassEmpty
-                                        },
-                                        contentDescription = "Timer status",
-                                        tint = when (resetTimerState) {
-                                            ResetTimerState.RUNNING -> lifeColors.primaryAccent
-                                            ResetTimerState.COMPLETED -> RingHabitEmerald
-                                            ResetTimerState.PAUSED -> SunsetAmber
-                                            else -> lifeColors.primaryAccent
-                                        },
-                                        modifier = Modifier.size(22.dp)
-                                    )
+                    LiquidGlassCard(Modifier.fillMaxWidth().testTag("reset_timer_card")) {
+                        Column(Modifier.fillMaxWidth().padding(20.dp)) {
+                            WorkspaceLabel(when (resetTimerState) {
+                                ResetTimerState.RUNNING -> "A MINUTE FOR YOURSELF"
+                                ResetTimerState.PAUSED -> "TAKE YOUR TIME"
+                                ResetTimerState.COMPLETED -> "A MINUTE, GIVEN"
+                                else -> "YOUR ONE-MINUTE RESET"
+                            })
+                            Spacer(Modifier.height(10.dp))
+                            Text(String.format(java.util.Locale.getDefault(), "00:%02d", resetTimerSeconds),
+                                color = lifeColors.textPrimary, fontSize = 38.sp, fontWeight = FontWeight.Light, letterSpacing = (-1).sp)
+                            Spacer(Modifier.height(6.dp))
+                            Text("Use the timer if it helps. Move through the steps at your own pace.",
+                                color = lifeColors.textSecondary, fontSize = 12.sp, lineHeight = 19.sp)
+                            Spacer(Modifier.height(14.dp))
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Button(onClick = {
+                                    playAppleHaptic(context)
+                                    when (resetTimerState) {
+                                        ResetTimerState.READY, ResetTimerState.RESET -> viewModel.start60sTimer()
+                                        ResetTimerState.RUNNING -> viewModel.pause60sTimer()
+                                        ResetTimerState.PAUSED -> viewModel.resume60sTimer()
+                                        ResetTimerState.COMPLETED -> viewModel.reset60sTimer()
+                                    }
+                                }, modifier = Modifier.weight(1f).heightIn(min = 48.dp), shape = RoundedCornerShape(14.dp)) {
+                                    Text(when (resetTimerState) {
+                                        ResetTimerState.RUNNING -> "Pause"
+                                        ResetTimerState.PAUSED -> "Continue"
+                                        ResetTimerState.COMPLETED -> "Start fresh"
+                                        else -> "Start a minute"
+                                    }, fontSize = 13.sp)
                                 }
-
-                                Column {
-                                    Text(
-                                        text = when (resetTimerState) {
-                                            ResetTimerState.READY, ResetTimerState.RESET -> "60-SECOND FOCUS SPRINT"
-                                            ResetTimerState.RUNNING -> "FOCUS SPRINT ACTIVE"
-                                            ResetTimerState.PAUSED -> "SPRINT PAUSED"
-                                            ResetTimerState.COMPLETED -> "SPRINT COMPLETED"
-                                        },
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        letterSpacing = 1.sp,
-                                        color = when (resetTimerState) {
-                                            ResetTimerState.RUNNING -> lifeColors.primaryAccent
-                                            ResetTimerState.COMPLETED -> RingHabitEmerald
-                                            ResetTimerState.PAUSED -> SunsetAmber
-                                            else -> lifeColors.textSecondary
-                                        }
-                                    )
-                                    Spacer(modifier = Modifier.height(2.dp))
-                                    Text(
-                                        text = "${resetTimerSeconds}s remaining",
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = lifeColors.textPrimary
-                                    )
-                                }
-                            }
-
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                when (resetTimerState) {
-                                    ResetTimerState.READY, ResetTimerState.RESET -> {
-                                        Button(
-                                            onClick = {
-                                                playAppleHaptic(context)
-                                                viewModel.start60sTimer()
-                                            },
-                                            shape = RoundedCornerShape(12.dp),
-                                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
-                                        ) {
-                                            Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text("Start", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-                                    ResetTimerState.RUNNING -> {
-                                        FilledTonalButton(
-                                            onClick = {
-                                                playAppleHaptic(context)
-                                                viewModel.pause60sTimer()
-                                            },
-                                            shape = RoundedCornerShape(12.dp),
-                                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                                        ) {
-                                            Icon(Icons.Default.Pause, contentDescription = null, modifier = Modifier.size(16.dp))
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text("Pause", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-                                    ResetTimerState.PAUSED -> {
-                                        Button(
-                                            onClick = {
-                                                playAppleHaptic(context)
-                                                viewModel.resume60sTimer()
-                                            },
-                                            shape = RoundedCornerShape(12.dp),
-                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
-                                        ) {
-                                            Text("Resume", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                        }
-                                        IconButton(
-                                            onClick = {
-                                                playAppleHaptic(context)
-                                                viewModel.reset60sTimer()
-                                            }
-                                        ) {
-                                            Icon(Icons.Default.Refresh, contentDescription = "Reset", tint = lifeColors.textSecondary)
-                                        }
-                                    }
-                                    ResetTimerState.COMPLETED -> {
-                                        FilledTonalButton(
-                                            onClick = {
-                                                playAppleHaptic(context)
-                                                viewModel.reset60sTimer()
-                                            },
-                                            shape = RoundedCornerShape(12.dp),
-                                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                                        ) {
-                                            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text("Restart", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-                                }
+                                TextButton(onClick = { viewModel.reset60sTimer() }) { Text("Reset", color = lifeColors.textSecondary) }
                             }
                         }
                     }
@@ -761,7 +570,7 @@ private fun StepThreeTomorrowView(
                     )
                 }
 
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "FIRST CLASS TOMORROW",
                         fontSize = 10.sp,
@@ -801,12 +610,21 @@ private fun StepThreeTomorrowView(
                     color = lifeColors.textPrimary
                 )
 
+                TextButton(onClick = {
+                    if (!earpodsPacked) onToggleEarpods()
+                    if (!phonePacked) onTogglePhone()
+                    if (!geometryBoxPacked) onToggleGeometry()
+                    if (!calculatorPacked) onToggleCalculator()
+                    if (!booksPacked) onToggleBooks()
+                    if (!waterBottlePacked) onToggleWaterBottle()
+                }) { Text("I've packed everything", fontSize = 12.sp) }
+
                 GearCheckRow("Wireless EarPods / Headphones", Icons.Default.Headphones, earpodsPacked, onToggleEarpods)
                 GearCheckRow("Phone & Cable", Icons.Default.Smartphone, phonePacked, onTogglePhone)
                 GearCheckRow("Geometry Box", Icons.Default.SquareFoot, geometryBoxPacked, onToggleGeometry)
                 GearCheckRow("Scientific Calculator", Icons.Default.Calculate, calculatorPacked, onToggleCalculator)
                 GearCheckRow("Course Books & Notes", Icons.Default.MenuBook, booksPacked, onToggleBooks)
-                GearCheckRow("3,000ml Water Bottle", Icons.Default.WaterDrop, waterBottlePacked, onToggleWaterBottle)
+                GearCheckRow("Water bottle", Icons.Default.WaterDrop, waterBottlePacked, onToggleWaterBottle)
             }
         }
 
@@ -983,7 +801,7 @@ private fun GearCheckRow(
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = InkDeep,
                     modifier = Modifier.size(14.dp)
                 )
             }

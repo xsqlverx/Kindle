@@ -3,19 +3,19 @@ package com.example.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // Core Palette: Graphite, Ink, Iris
-val GraphiteDark = Color(0xFF13151C)
-val GraphiteCard = Color(0xFF1D202B)
-val GraphiteSurface = Color(0xFF242836)
-val GraphiteBorder = Color(0x33818CF8)
+val GraphiteDark = Color(0xFF111216)
+val GraphiteCard = Color(0xFF1C1D24)
+val GraphiteSurface = Color(0xFF262630)
+val GraphiteBorder = Color(0xFF35343E)
 
 val InkDeep = Color(0xFF090A0E)
 val InkMedium = Color(0xFF0F1016)
 val InkElevated = Color(0xFF161822)
 
-val IrisPrimary = Color(0xFF6366F1)
-val IrisRadiant = Color(0xFF818CF8)
-val IrisSoft = Color(0xFFA5B4FC)
-val IrisGlow = Color(0x336366F1)
+val IrisPrimary = Color(0xFF9C89B9)
+val IrisRadiant = Color(0xFFC8BCE8)
+val IrisSoft = Color(0xFFDFD5EE)
+val IrisGlow = Color(0x159C89B9)
 
 // Afternoon Sunset / Warm Golden Palette
 val SunsetBackground = Color(0xFF181310)
@@ -34,13 +34,13 @@ val DayIris = Color(0xFF4F46E5)
 val DayBorder = Color(0x224F46E5)
 
 // Status / Ring Accents
-val RingHabitEmerald = Color(0xFF10B981)
-val RingWaterCyan = Color(0xFF06B6D4)
-val RingGymRose = Color(0xFFF43F5E)
-val RingIris = Color(0xFF818CF8)
+val RingHabitEmerald = Color(0xFF8DBDA7)
+val RingWaterCyan = Color(0xFF8AB8C8)
+val RingGymRose = Color(0xFFD99CAC)
+val RingIris = Color(0xFFC8BCE8)
 
 // Matrix Quadrant Colors
-val Q1DoColor = Color(0xFFEF4444)
-val Q2ScheduleColor = Color(0xFF3B82F6)
-val Q3DelegateColor = Color(0xFFF59E0B)
-val Q4DropColor = Color(0xFF6B7280)
+val Q1DoColor = Color(0xFFD99CAC)
+val Q2ScheduleColor = Color(0xFFC8BCE8)
+val Q3DelegateColor = Color(0xFFD7B98F)
+val Q4DropColor = Color(0xFFAAA5B2)

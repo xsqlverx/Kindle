@@ -33,11 +33,12 @@ class LifeOsViewModel(application: Application) : AndroidViewModel(application) 
     private val repository = LifeOsRepository(application)
 
     // Appearance
-    private val _themeMode = MutableStateFlow(AppThemeMode.AUTO_TIME)
+    private val _themeMode = MutableStateFlow(repository.getThemeMode())
     val themeMode: StateFlow<AppThemeMode> = _themeMode.asStateFlow()
 
     fun setThemeMode(mode: AppThemeMode) {
         _themeMode.value = mode
+        repository.saveThemeMode(mode)
     }
 
     // Navigation
@@ -152,8 +153,14 @@ class LifeOsViewModel(application: Application) : AndroidViewModel(application) 
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // Live Class Detection
-    val currentLectureStatus: StateFlow<CurrentLectureStatus> = allTimetable.map { list ->
-        val cal = Calendar.getInstance()
+    private val lectureClock = flow {
+        while (true) {
+            emit(System.currentTimeMillis())
+            delay(30_000L)
+        }
+    }
+    val currentLectureStatus: StateFlow<CurrentLectureStatus> = combine(allTimetable, lectureClock) { list, now ->
+        val cal = Calendar.getInstance().apply { timeInMillis = now }
         val currentDay = cal.get(Calendar.DAY_OF_WEEK)
         val currentMinutes = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)
 
@@ -198,7 +205,7 @@ class LifeOsViewModel(application: Application) : AndroidViewModel(application) 
                 )
             }
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CurrentLectureStatus(false, null, "College Hub", "Schedule sync active"))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CurrentLectureStatus(false, null, "College", "Checking your saved timetable"))
 
     // Assignments / Deadlines CRUD
     val assignments: StateFlow<List<AssignmentItem>> = repository.allAssignments
@@ -266,6 +273,11 @@ class LifeOsViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    fun correctAttendance(courseCode: String, attended: Int, total: Int, target: Int) {
+        if (attended < 0 || total < attended || target !in 1..100) return
+        viewModelScope.launch { repository.correctAttendance(courseCode, attended, total, target) }
+    }
+
     // Fitness: Splits, Exercises, Sets
     private val _selectedSplit = MutableStateFlow("Push")
     val selectedSplit: StateFlow<String> = _selectedSplit.asStateFlow()
@@ -322,6 +334,15 @@ class LifeOsViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     // Body Weight & Water
+    private val _bodyWeightGoal = MutableStateFlow(repository.getBodyWeightGoal())
+    val bodyWeightGoal = _bodyWeightGoal.asStateFlow()
+
+    fun setBodyWeightGoal(weight: Float) {
+        if (!weight.isFinite() || weight <= 0f) return
+        _bodyWeightGoal.value = weight
+        repository.saveBodyWeightGoal(weight)
+    }
+
     val weightLogs: StateFlow<List<BodyWeightLog>> = repository.weightLogs
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
