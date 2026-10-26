@@ -43,7 +43,7 @@ import com.example.viewmodel.CurrentLectureStatus
 import com.example.viewmodel.LifeOsViewModel
 
 @Composable
-fun TodayScreen(
+fun TodayToolsScreen(
     viewModel: LifeOsViewModel,
     onNavigateToTab: (LifeOsTab) -> Unit,
     modifier: Modifier = Modifier

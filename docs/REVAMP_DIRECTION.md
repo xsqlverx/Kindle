@@ -1,0 +1,85 @@
+# App revamp: working direction
+
+Status: working direction based on the user's answers and supplied references. The first Today prototype is now implemented; see TODAY_PROTOTYPE.md for scope and validation. Naming and logo work come last. The remaining app-wide design is still open to refinement.
+
+## Purpose
+
+Opening the app should answer: what is supposed to be happening now, what is the next useful action, and how can the day recover when something was missed?
+
+The main difficulty described by the user is losing structure after returning home. Attendance and workout guidance already have practical value. Study currently gets deferred beyond the user's evening commitments.
+
+## Existing scope to preserve
+
+Keep every current capability across Today, Fitness, College, Tasks, Daily Reset, and Settings. The user uses all five main areas and wants greater depth. Any later navigation changes must keep these areas easy to reach. The final navigation structure and side panel remain open for discussion.
+
+## User's weekday: approximate, not a fixed schedule
+
+| Window | Reported activity |
+| --- | --- |
+| 6:30-7:00 AM | Alarm, dozing, getting up; a short morning workout is a wish, not an established routine |
+| 7:00-7:40 AM | Bath, breakfast, preparation, bus departure |
+| 8:00 AM-1:30 PM | College; exact periods and breaks require the timetable |
+| Around 1:45-1:50 PM | Leave college |
+| Around 2:30-2:50 PM | Arrive home; afternoon structure breaks down |
+| Afternoon | Food, scrolling, sometimes a nap with no reliable end time |
+| Around 8:00-9:00 PM | Gym; actual start sometimes closer to 8:30 |
+| Around 9:30-10:30 PM | Bath and family prayer; precise boundaries need confirmation |
+| Around 10:30-11:45 PM | Call with girlfriend; preserve as a meaningful commitment |
+| Later | Records and coding; study often remains undone |
+
+Do not turn uncertain times into strict alarms. Do not infer that arriving home is detectable without an explicit check-in or an agreed mechanism. Family, relationship, and coding time should be represented honestly alongside coursework.
+
+## Reference observations
+
+### Supplied JPG: dark sleep-app interface
+
+Observed: charcoal background, muted lavender, softly lit curved surfaces, pale text, a dominant central visual, compact week history, and a lower section with supporting actions. Depth comes from controlled lighting and variation in surface tone. Some small labels are faint; readability needs independent attention.
+
+Interpretation: the desired quality includes atmosphere, tactile materials, deliberate hierarchy, and visual richness. These qualities can inform a new composition built around this app's purpose. The sleep sphere, sleep score, task arrangement, branding, and exact layout are reference-specific.
+
+### Supplied MP4: expanding action control
+
+Inspected using local FFprobe metadata and sequential frames across the approximately 5.5-second clip. The central purple action button rises from a recessed white dock, changes from a circle into a horizontal pill, reveals several tools, and reverses the sequence.
+
+Interpretation: compact controls can reveal additional capability through connected, deliberate motion. A final navigation decision is still pending; the reference demonstrates an interaction principle rather than a ready-made navigation scheme for five existing areas.
+
+## Proposed visual direction
+
+- Deep charcoal with smoke-violet surfaces and pale, readable text.
+- Soft edge lighting and restrained dimensional accents at important interaction points.
+- A clear typographic hierarchy and varied compositions suited to each activity.
+- A distinctive Today composition based on the day's sequence and current action. A day timeline with a travelling highlight is one candidate for exploration, not a finalized signature element.
+- Motion should explain a change: an action becoming an active session, a tool unfolding from its trigger, or a missed block moving into a revised plan.
+- Distinct layouts for attendance, study, workout logging, and reflection within one shared visual system.
+
+## Proposed depth: practical additions to evaluate
+
+1. **Arrival and recovery flow.** A quick home check-in, space for food or a bounded rest, one manageable study action, and a revised plan after a missed start. Suggested blocks stay distinct from confirmed commitments.
+2. **Study execution.** Connect courses and deadlines to an actual session: chosen topic or task, relevant material, first step, a timer when useful, and a record of where to resume. The app needs user-supplied study content before it can offer subject-specific instructions.
+3. **Attendance reliability.** Reconcile a dated baseline from the user's screenshot; then support present, absent, cancelled, and unmarked classes, corrections, and protection against duplicate marking. Calculations must reflect the known class counts and configured target. The attendance screenshot has not yet been supplied.
+4. **Workout continuity.** Make today's routine actionable, surface previous set data and the next exercise, and preserve workout, rest, hydration, weight, and meal capabilities. Routine changes require the user's actual program.
+5. **Planning and follow-through.** Give reminders useful actions such as start, delay, or revise the plan. Respect protected commitments and avoid repeatedly interrupting an active session. Keep all work, including coding and records, visible when allocating time.
+
+These are candidates grounded in the reported day, not a requirement to add five more tabs. Additional modules should earn space through a recurring use case. No final side-panel design has been selected.
+
+## Current source evidence and implementation gaps
+
+- Native Android app using Kotlin and Jetpack Compose, with Room-backed data.
+- The manifest currently declares vibration permission. No application notification/alarm scheduler, alarm receiver, or notification permission declaration was found in the checked main source.
+- A timetable-derived current/next lecture display exists. A dependable whole-day plan and recovery system would require additional behavior and data.
+- Existing records include tasks, habits, timetable entries, assignments, attendance totals, workout sessions and sets, weight, hydration, and daily reset entries.
+- Current attendance records store aggregate counts by course. Per-class history and duplicate prevention would require a data-model change.
+- Existing screenshots reveal repeated large cards, truncated labels, and severely compressed academic rows. The current runtime has not been launched or tested during this discussion.
+
+## First design study to develop
+
+Show the same proposed Today screen in three situations: an ordinary college day, the transition home, and a missed afternoon start. Demonstrate how the same information hierarchy and actions respond to each situation. Establish an original visual language and useful behavior before extending the direction across the full app.
+
+## Open inputs
+
+- Actual timetable and accurate attendance screenshot.
+- Actual workout routine if changes to guidance are wanted.
+- Reaction to the first concrete visual study.
+- Final navigation and side-panel structure, to discuss after the feature relationships are clear.
+
+The user has already completed the five discovery questions. Future discussion should use concrete examples and prototypes rather than repeat the intake questionnaire.

@@ -34,10 +34,13 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.core.view.WindowCompat
+import com.example.data.model.AppThemeMode
 import com.example.ui.components.LectureDetailSheet
 import com.example.ui.components.LifeOsTab
 import com.example.ui.components.LiquidGlassBottomBar
 import com.example.ui.components.TopAppBarGlass
+import com.example.ui.components.TodayPrototypeDock
 import com.example.ui.screens.academics.AcademicsScreen
 import com.example.ui.screens.gym.GymScreen
 import com.example.ui.screens.reset.DailyResetScreen
@@ -56,8 +59,13 @@ class MainActivity : ComponentActivity() {
             val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
             val currentTab by viewModel.currentTab.collectAsStateWithLifecycle()
 
-            LifeOsTheme(mode = themeMode) {
+            LifeOsTheme(mode = if (currentTab == LifeOsTab.TODAY) AppThemeMode.NIGHT_GRAPHITE else themeMode) {
                 val lifeColors = LocalLifeOsColors.current
+                SideEffect {
+                    val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+                    insetsController.isAppearanceLightStatusBars = !lifeColors.isDark
+                    insetsController.isAppearanceLightNavigationBars = !lifeColors.isDark
+                }
 
                 // Full screen fluid canvas with atmospheric ambient light glows
                 Box(
@@ -122,21 +130,27 @@ class MainActivity : ComponentActivity() {
                         containerColor = Color.Transparent,
                         contentWindowInsets = WindowInsets(0, 0, 0, 0),
                         bottomBar = {
-                            LiquidGlassBottomBar(
-                                modifier = Modifier.graphicsLayer {
-                                    alpha = (1f - navBarHideProgress * 1.5f).coerceIn(0f, 1f)
-                                    translationY = navBarHideProgress * 64.dp.toPx()
-                                },
-                                currentTab = currentTab,
-                                onTabSelected = { viewModel.setTab(it) }
-                            )
+                            val dockModifier = Modifier.graphicsLayer {
+                                alpha = (1f - navBarHideProgress * 1.5f).coerceIn(0f, 1f)
+                                translationY = navBarHideProgress * 64.dp.toPx()
+                            }
+                            if (currentTab == LifeOsTab.TODAY) {
+                                TodayPrototypeDock(currentTab, { viewModel.setTab(it) }, dockModifier)
+                            } else {
+                                LiquidGlassBottomBar(
+                                    modifier = dockModifier,
+                                    currentTab = currentTab,
+                                    onTabSelected = { viewModel.setTab(it) }
+                                )
+                            }
                         }
                     ) { innerPadding ->
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .statusBarsPadding()
-                                .padding(top = 58.dp)
+                                .padding(top = if (currentTab == LifeOsTab.TODAY) 0.dp else 58.dp)
+                                .padding(bottom = innerPadding.calculateBottomPadding())
                                 .clipToBounds()
                         ) {
                             AnimatedContent(
@@ -173,7 +187,8 @@ class MainActivity : ComponentActivity() {
                                 when (tab) {
                                     LifeOsTab.TODAY -> TodayScreen(
                                         viewModel = viewModel,
-                                        onNavigateToTab = { viewModel.setTab(it) }
+                                        onNavigateToTab = { viewModel.setTab(it) },
+                                        onOpenSettings = { showSettings = true }
                                     )
                                     LifeOsTab.GYM -> GymScreen(
                                         viewModel = viewModel
@@ -253,7 +268,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     // Top App Bar Glass anchored on top
-                    TopAppBarGlass(
+                    if (currentTab != LifeOsTab.TODAY || showSettings) TopAppBarGlass(
                         title = when (currentTab) {
                             LifeOsTab.TODAY -> "Life OS"
                             LifeOsTab.GYM -> "Gym & Fitness"
