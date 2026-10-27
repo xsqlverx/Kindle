@@ -1,8 +1,18 @@
 # V2 verification and cloud/device handoff
 
-2026-10-27. No local Android compilation, Gradle, emulator or Android test execution.
+2026-10-28. No local Android compilation, Gradle, emulator or Android test execution.
 
 ## First path to try after the external build
+
+Latest control polish: **Today → Whole day/Less**, then College/Fitness/Capture in the shared
+shelf, **Everyday tools → Back**, Review and Daily Reset. All existing actions must still be
+reachable. Inspect aligned surfaces, label wrapping, focus borders, pressed/disabled states
+and consistent primary/secondary/quiet roles in every live destination and confirmation dialog.
+Repeat at narrow widths and 200% font scaling, every appearance, TalkBack/keyboard and Reduce
+motion. The day disclosure should reverse smoothly; custom press/chevron/size travel should
+snap with Reduce motion. No saved data should change from simply opening/closing a control.
+Source/static checks and pinned API inspection are documented in CONTROL_DESIGN.md; no
+native screenshot, touch quality, cloud build or visual acceptance is claimed.
 
 Latest attendance fix: open **College → Attendance → choose class/date → Present or Absent**.
 Repeatedly tap and reopen the same class through lecture details: totals must increase at
@@ -141,7 +151,7 @@ and [graphics modifiers](https://developer.android.com/develop/ui/compose/graphi
   committed together in Room. Timer archive is deduplicated if interrupted before prefs clear.
 - New-topic/attempt editing and project archive are implemented; richer bulk management,
   source deep links from every history entry and longitudinal per-set training history remain.
-- The latest source pass parses 58 Kotlin files. Its 36 supplied V2-related test methods have
+- The latest source pass parses 59 Kotlin files. Its 36 supplied V2-related test methods have
   not been executed here. No source check establishes a successful cloud build or reduced
   cognitive load. Primary research and applied decisions are in EXPERIENCE_RESEARCH.md.
 

@@ -1,5 +1,8 @@
 package com.example.ui.screens.workspace
 
+import com.example.ui.components.WorkspaceButton
+import com.example.ui.components.WorkspaceTextButton
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,8 +33,8 @@ fun ProjectsScreen(model: WorkspaceViewModel, focus: TodayPrototypeViewModel) {
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
         item { SpaceHeading("Projects", "Ship the next piece.", "Keep the goal, milestones and blocker together. Focus on one unfinished step.") }
         item { Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = { addProject = true }) { Text("New project") }
-            TextButton(onClick = { showArchive = !showArchive }) { Text(if (showArchive) "Active" else "Archive") }
+            WorkspaceButton(onClick = { addProject = true }) { Text("New project") }
+            WorkspaceTextButton(onClick = { showArchive = !showArchive }) { Text(if (showArchive) "Active" else "Archive") }
         } }
         if (projects.none { it.archived == showArchive }) item { WorkCard("A goal needs a next step", "Add a coding project, college deliverable or personal build. Milestone checkboxes are your explicit completion record.") }
         items(projects.filter { it.archived == showArchive }, key = { it.id }) { project ->
@@ -48,11 +51,11 @@ fun ProjectsScreen(model: WorkspaceViewModel, focus: TodayPrototypeViewModel) {
                     }
                 }
                 val next = milestones.firstOrNull { !it.done }
-                if (next != null && !project.archived) Button(onClick = { model.offerMove(DayMove(next.title, "PROJECT_STEP", next.id, firstStep = project.blocker, reason = "Next milestone · ${project.title}")) }) { Text("Focus on next milestone") }
+                if (next != null && !project.archived) WorkspaceButton(onClick = { model.offerMove(DayMove(next.title, "PROJECT_STEP", next.id, firstStep = project.blocker, reason = "Next milestone · ${project.title}")) }) { Text("Focus on next milestone") }
                 Row {
-                    TextButton(onClick = { addStepTo = project.id }) { Text("Add milestone") }
-                    TextButton(onClick = { editProjectId = project.id }) { Text("Edit") }
-                    TextButton(onClick = { model.saveProject(project.copy(archived = !project.archived)) }) { Text(if (project.archived) "Restore" else "Archive") }
+                    WorkspaceTextButton(onClick = { addStepTo = project.id }) { Text("Add milestone") }
+                    WorkspaceTextButton(onClick = { editProjectId = project.id }) { Text("Edit") }
+                    WorkspaceTextButton(onClick = { model.saveProject(project.copy(archived = !project.archived)) }) { Text(if (project.archived) "Restore" else "Archive") }
                 }
                 HorizontalDivider(color = colors.borderGlass)
             }
@@ -80,17 +83,17 @@ fun CaptureScreen(model: WorkspaceViewModel) {
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { SpaceHeading("Capture", "Get it out of your head.", "A thought, a useful link, a question for class. Decide what it becomes when you have space.") }
         item { Row {
-            Button(onClick = { add = true }) { Text("Capture a thought") }
-            TextButton(onClick = { processed = !processed }) { Text(if (processed) "Inbox" else "Processed") }
+            WorkspaceButton(onClick = { add = true }) { Text("Capture a thought") }
+            WorkspaceTextButton(onClick = { processed = !processed }) { Text(if (processed) "Inbox" else "Processed") }
         } }
         if (notes.none { it.archived == processed }) item { WorkCard(if (processed) "Nothing processed yet" else "Your inbox is clear", "Notes stay local. Turning one into a task keeps its original record and avoids duplicate tasks on repeated taps.") }
         items(notes.filter { it.archived == processed }, key = { it.id }) { note ->
             WorkCard(note.text, dated(note.createdAt)) {
                 if (note.taskId > 0) Text("Linked task #${note.taskId} · see Tasks", fontSize = 12.sp)
                 Row {
-                    if (note.taskId == 0L) TextButton(onClick = { model.captureToTask(note) }) { Text("Make a task") }
-                    TextButton(onClick = { editId = note.id }) { Text("Edit note") }
-                    TextButton(onClick = { model.saveCapture(note.copy(archived = !note.archived)) }) { Text(if (note.archived) "Restore" else "File away") }
+                    if (note.taskId == 0L) WorkspaceTextButton(onClick = { model.captureToTask(note) }) { Text("Make a task") }
+                    WorkspaceTextButton(onClick = { editId = note.id }) { Text("Edit note") }
+                    WorkspaceTextButton(onClick = { model.saveCapture(note.copy(archived = !note.archived)) }) { Text(if (note.archived) "Restore" else "File away") }
                 }
             }
         }
@@ -110,7 +113,7 @@ fun ExamPrepScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: Toda
     val colors = LocalLifeOsColors.current
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         item { SpaceHeading("Exam preparation", "Know what needs another pass.", if (target.dateMillis > 0) "${target.title} · ${target.getFormattedDate()}" else "Set an exam date in College or Settings. Add your own topics here; no syllabus or mastery is assumed.") }
-        item { Button(onClick = { add = true }) { Text("Add a topic") } }
+        item { WorkspaceButton(onClick = { add = true }) { Text("Add a topic") } }
         if (topics.isEmpty()) item { WorkCard("Build your revision queue", "Add a course and topic from your actual syllabus. Self-rate confidence after practice and set the next revision date.") }
         topics.groupBy { it.course }.forEach { (course, group) ->
             item(key = "course_$course") { Text(course.ifBlank { "Unsorted" }, color = colors.primaryAccent, fontSize = 21.sp, fontWeight = FontWeight.Medium) }
@@ -126,9 +129,9 @@ fun ExamPrepScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: Toda
                         (0..3).forEach { level -> FilterChip(selected = topic.confidence == level,
                             onClick = { model.saveTopic(topic.copy(confidence = level)) }, label = { Text(if (level == 0) "?" else "$level") }) }
                     }
-                    Button(onClick = { model.offerMove(DayMove("${topic.course} · ${topic.title}", "TOPIC", topic.id, topic.material, reason = "From your revision topics")) }) { Text("Study this topic") }
+                    WorkspaceButton(onClick = { model.offerMove(DayMove("${topic.course} · ${topic.title}", "TOPIC", topic.id, topic.material, reason = "From your revision topics")) }) { Text("Study this topic") }
                     RevisionActions(topic.revisionAt, onChange = { model.saveTopic(topic.copy(revisionAt = it)) })
-                    TextButton(onClick = { editId = topic.id }) { Text("Edit topic & material") }
+                    WorkspaceTextButton(onClick = { editId = topic.id }) { Text("Edit topic & material") }
                 }
             }
         }
@@ -145,10 +148,10 @@ fun ExamPrepScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: Toda
 private fun RevisionActions(at: Long, onChange: (Long) -> Unit) {
     Text("Schedule next review", fontSize = 12.sp)
     Row {
-        listOf(1, 3, 7).forEach { days -> TextButton(onClick = {
+        listOf(1, 3, 7).forEach { days -> WorkspaceTextButton(onClick = {
             onChange(Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, days) }.timeInMillis)
         }) { Text("${days}d") } }
-        if (at > 0) TextButton(onClick = { onChange(0L) }) { Text("Clear") }
+        if (at > 0) WorkspaceTextButton(onClick = { onChange(0L) }) { Text("Clear") }
     }
 }
 
@@ -161,8 +164,8 @@ fun PracticeScreen(model: WorkspaceViewModel, focus: TodayPrototypeViewModel, no
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         item { SpaceHeading("Coding practice", "Keep the lesson, not just the count.", "Log a problem and your actual outcome. Save the idea you missed and bring it back into the retry queue.") }
         item { Row {
-            Button(onClick = { add = true }) { Text("Add a problem") }
-            TextButton(onClick = { dueOnly = !dueOnly }) { Text(if (dueOnly) "All problems" else "Due retries") }
+            WorkspaceButton(onClick = { add = true }) { Text("Add a problem") }
+            WorkspaceTextButton(onClick = { dueOnly = !dueOnly }) { Text(if (dueOnly) "All problems" else "Due retries") }
         } }
         val visible = attempts.filter { !dueOnly || it.retryAt in 1L..now }
         if (visible.isEmpty()) item { WorkCard(if (dueOnly) "No retries due" else "Start with a real problem", "Add a DSA exercise, debugging question or contest problem. Unattempted stays unattempted until you report the result.") }
@@ -170,7 +173,7 @@ fun PracticeScreen(model: WorkspaceViewModel, focus: TodayPrototypeViewModel, no
             WorkCard(attempt.problem, "${attempt.difficulty} · ${attempt.outcome}" + if (attempt.retryAt > 0) "\nRetry · ${dated(attempt.retryAt)}" else "") {
                 if (attempt.link.isNotBlank()) MaterialReference(attempt.link)
                 if (attempt.notes.isNotBlank()) Text("Lesson · ${attempt.notes}", fontSize = 14.sp)
-                Button(onClick = { model.offerMove(DayMove(attempt.problem, "PRACTICE", attempt.id, attempt.link, attempt.notes, "From your coding practice")) }) { Text("Work on this problem") }
+                WorkspaceButton(onClick = { model.offerMove(DayMove(attempt.problem, "PRACTICE", attempt.id, attempt.link, attempt.notes, "From your coding practice")) }) { Text("Work on this problem") }
                 Column {
                     listOf("Unattempted", "Stuck", "With help", "Solved").chunked(2).forEach { pair ->
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { pair.forEach { outcome ->
@@ -179,7 +182,7 @@ fun PracticeScreen(model: WorkspaceViewModel, focus: TodayPrototypeViewModel, no
                     }
                 }
                 RevisionActions(attempt.retryAt) { model.saveAttempt(attempt.copy(retryAt = it)) }
-                TextButton(onClick = { editId = attempt.id }) { Text("Edit problem / save lesson") }
+                WorkspaceTextButton(onClick = { editId = attempt.id }) { Text("Edit problem / save lesson") }
             }
         }
     }
@@ -215,7 +218,7 @@ fun ReviewScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: TodayP
         }
         item { WorkCard("Other saved evidence", "${tasks.count { it.status == TaskStatus.COMPLETED }} completed tasks in storage\n${sets.count { it.isCompleted }}/${sets.size} sets checked in the selected split\n${attempts.count { it.outcome == "Solved" }} problems marked solved\n${resets.size} Daily Reset records") {
             Text("Task totals are all-time stored counts; set checks reflect the selected routine, not a dated workout history.", fontSize = 11.sp)
-            TextButton(onClick = { model.navigate(Destination.RESET) }) { Text("Reflect in Daily Reset") }
+            WorkspaceTextButton(onClick = { model.navigate(Destination.RESET) }) { Text("Reflect in Daily Reset") }
         } }
         if (history.isEmpty()) item { WorkCard("Your trail starts with real work", "Save a session with a resume note. A timer that elapsed still needs your review before appearing here.") }
         items(history, key = { it.id }) { record ->
@@ -224,7 +227,7 @@ fun ReviewScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: TodayP
                 Text(record.title, color = colors.textPrimary, fontSize = 21.sp)
                 Text("${record.elapsedSeconds / 60} min ${record.elapsedSeconds % 60}s · ${record.outcome} · ${record.sourceType.lowercase().replace('_', ' ')}", color = colors.textSecondary, fontSize = 12.sp)
                 if (record.resumeNote.isNotBlank()) Text(record.resumeNote, color = colors.textPrimary, fontSize = 14.sp)
-                TextButton(onClick = {
+                WorkspaceTextButton(onClick = {
                     when (record.sourceType) {
                         "FITNESS" -> model.navigate(Destination.FITNESS)
                         "REST" -> model.navigate(Destination.PLAN)

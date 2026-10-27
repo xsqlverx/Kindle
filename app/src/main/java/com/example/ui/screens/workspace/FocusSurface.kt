@@ -91,7 +91,7 @@ fun FocusSurface(expanded: Boolean, origin: Rect?, focus: TodayPrototypeViewMode
                     Text(session.firstStep, color = colors.textSecondary, fontSize = 14.sp, lineHeight = 21.sp)
                 }
                 if (session.material.isNotBlank()) {
-                    TextButton(onClick = { material = !material }) { Text(if (material) "Hide material" else "My material / page") }
+                    WorkspaceTextButton(onClick = { material = !material }) { Text(if (material) "Hide material" else "My material / page") }
                     if (material) MaterialReference(session.material)
                 }
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp) }
@@ -107,13 +107,13 @@ fun FocusSurface(expanded: Boolean, origin: Rect?, focus: TodayPrototypeViewMode
                                 placeholder = { Text("Page 12, example 3. I stopped at…") }, modifier = Modifier.fillMaxWidth().testTag("resume_point"), enabled = !saving, minLines = 2)
                             MoveButton(if (saving) "Keeping your place…" else if (preview) "Finish the preview" else "Save my progress", Modifier.fillMaxWidth().testTag("save_progress"), enabled = !saving) { focus.dismiss() }
                             Text(if (preview) "This ends the tryout. No task, plan block or study history is created." else "This saves the time and your note. It leaves the work open until you decide it's done.", color = colors.textTertiary, fontSize = 11.sp, lineHeight = 17.sp)
-                            if (session.phase == FocusPhase.PAUSED) TextButton(onClick = { reviewing = false; onResume() }, enabled = !saving) { Text("A little more time instead") }
+                            if (session.phase == FocusPhase.PAUSED) WorkspaceTextButton(onClick = { reviewing = false; onResume() }, enabled = !saving) { Text("A little more time instead") }
                         } else {
                             MoveButton(if (saving) "Checking your place…" else if (session.phase == FocusPhase.PAUSED) "Continue gently" else "Pause", Modifier.fillMaxWidth(), enabled = !saving) {
                                 if (session.phase == FocusPhase.RUNNING) focus.pause() else onResume()
                             }
-                            OutlinedButton(onClick = { if (session.phase == FocusPhase.RUNNING) focus.pause(); reviewing = true }, enabled = !saving, modifier = Modifier.fillMaxWidth()) { Text("Save & finish this session") }
-                            TextButton(onClick = onCollapse) { Text("Keep it in the capsule") }
+                            WorkspaceOutlinedButton(onClick = { if (session.phase == FocusPhase.RUNNING) focus.pause(); reviewing = true }, enabled = !saving, modifier = Modifier.fillMaxWidth()) { Text("Save & finish this session") }
+                            WorkspaceTextButton(onClick = onCollapse) { Text("Keep it in the capsule") }
                         }
                     }
                 }

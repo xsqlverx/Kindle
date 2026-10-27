@@ -1,8 +1,32 @@
 # Implementation status
 
-Last updated: 2026-10-27, Asia/Calcutta.
+Last updated: 2026-10-28, Asia/Calcutta.
 
-## Current delivery: attendance reliability
+## Current delivery: coherent controls
+
+Baseline `fbaa1f5`, clean main, fetched and equal to origin/main. The user reports that most
+buttons look unprofessional/out of place, specifically Whole day and Habits/water/everyday
+tools in Today. The plan, implemented control language and evidence are in CONTROL_DESIGN.md.
+
+- Native shared buttons now distinguish primary, tonal, outline and quiet actions, with
+  consistent label typography, spacing/corners, restrained press spring, focus indication and
+  reduced motion. Existing callback bodies, status/destructive colors and disabled state stay.
+- Today has a bounded Whole day disclosure, reversing chevron and resizing agenda; one
+  College/Fitness/Capture shelf with an integrated Everyday tools row; matching icon controls
+  and an explicit Daily Reset row. The tools overlay has a real header and labelled Back.
+- Plan/chooser disclosures and the remaining live screen actions use the same shared controls.
+  The V1 preview's layout/palette and all legacy features remain; shared label typography also
+  applies there. Attendance's pair/save feedback and persistent duplicate protection remain.
+- No data/storage/logic/build configuration changes. Source parsing passes for **59 Kotlin
+  files**, along with the existing route/API/UTF-8/manifest/SQL checks. `git diff --check`
+  passes. Fourteen mechanical migrations preserve all non-import code after normalizing
+  control names; curated callback rewiring was inspected separately. Native signatures were
+  read from the exact pinned Material3 1.3.0 archive. No compilation or Android tests.
+- Cloud build, phone rendering, professional visual fit, touch feel, font scaling, keyboard/
+  TalkBack and frame pacing remain unverified. V2 and overall control polish are not declared
+  finally accepted. User attendance/timetable/workout inputs remain pending.
+
+## Previous delivery: attendance reliability
 
 Baseline `56f8d3a`, clean main, fetched and equal to origin/main before editing. The user
 reported spammable Present/Absent counters, weak press feedback and mismatched styling.

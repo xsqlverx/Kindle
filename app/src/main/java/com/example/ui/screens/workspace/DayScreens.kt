@@ -1,5 +1,10 @@
 package com.example.ui.screens.workspace
 
+import com.example.ui.components.WorkspaceButton
+import com.example.ui.components.WorkspaceTextButton
+import com.example.ui.components.WorkspaceActionRow
+import com.example.ui.components.WorkspaceDisclosure
+
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import androidx.compose.animation.core.animateFloatAsState
@@ -13,6 +18,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material.icons.outlined.Bedtime
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -96,19 +104,21 @@ fun PlanScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: TodayPro
         item { SpaceHeading("${dated(now)}", "The day, in order.", "One small move, with room around the things you've committed to.") }
         item {
             MoveButton("Make room for one thing", Modifier.fillMaxWidth()) { model.offerMove(DayGuide.choices(input).firstOrNull() ?: DayMove("")) }
-            TextButton(onClick = { add = true }) { Text("Add a fixed time or open the detailed editor") }
+            Spacer(Modifier.height(12.dp))
+            WorkspaceActionRow("Add to your day", "Work blocks or fixed commitments", Icons.Outlined.AddCircleOutline) { add = true }
         }
         item { DayAgenda(input, model, onAddCommitment = { add = true }) }
         item {
-            TextButton(onClick = { eveningDraft = true }) { Text("Review my evening · approximate draft") }
-            TextButton(onClick = { model.recover(now, WorkspaceViewModel.dayEnd(now), session.blockId) }) { Text("Recover missed starts") }
-            if (undo) TextButton(onClick = { model.undoRecovery() }) { Text("Undo last recovery") }
-            TextButton(onClick = { editing = !editing }) { Text(if (editing) "Hide block controls" else "Edit blocks & see later days") }
+            WorkspaceActionRow("Evening commitments", "Review the approximate draft before saving", Icons.Outlined.Bedtime) { eveningDraft = true }
+            WorkspaceTextButton(onClick = { model.recover(now, WorkspaceViewModel.dayEnd(now), session.blockId) }) { Text("Recover missed starts") }
+            if (undo) WorkspaceTextButton(onClick = { model.undoRecovery() }) { Text("Undo last recovery") }
+            WorkspaceDisclosure(if (editing) "Hide block controls" else "Block controls & later days", editing,
+                { editing = !editing }, Modifier.fillMaxWidth())
         }
         if (editing && classes.isNotEmpty()) item {
             WorkCard("Saved timetable · today", classes.joinToString("\n") {
                 "%02d:%02d–%02d:%02d · %s".format(it.startHour, it.startMinute, it.endHour, it.endMinute, it.courseName)
-            }) { TextButton(onClick = { model.navigate(Destination.COLLEGE) }) { Text("Edit classes in College") } }
+            }) { WorkspaceTextButton(onClick = { model.navigate(Destination.COLLEGE) }) { Text("Edit classes in College") } }
         }
         if (editing) item { LiveRibbon(blocks.filter { it.startMillis in WorkspaceViewModel.dayStart(now) until WorkspaceViewModel.dayEnd(now) }, now) }
         if (editing) items(blocks.filter { it.endMillis >= WorkspaceViewModel.dayStart(now) }, key = { it.id }) { block ->
@@ -116,12 +126,12 @@ fun PlanScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: TodayPro
                 Modifier.animateItemPlacement(tween(if (reduced) 0 else 460))) {
                 if (block.firstStep.isNotBlank()) Text(block.firstStep)
                 if (!block.fixed && block.state == "PLANNED") {
-                    TextButton(onClick = { model.begin(focus, block.title, block.sourceType, block.sourceId, block.material, block.firstStep, block.id, block.durationMinutes) }) { Text("Start in a free window now") }
+                    WorkspaceTextButton(onClick = { model.begin(focus, block.title, block.sourceType, block.sourceId, block.material, block.firstStep, block.id, block.durationMinutes) }) { Text("Start in a free window now") }
                 }
                 Row {
-                    TextButton(onClick = { resizeId = block.id }) { Text("Duration") }
-                    TextButton(onClick = { model.moveBlockTomorrow(block) }) { Text("Tomorrow") }
-                    TextButton(onClick = { model.deleteBlock(block) }) { Text("Remove from plan") }
+                    WorkspaceTextButton(onClick = { resizeId = block.id }) { Text("Duration") }
+                    WorkspaceTextButton(onClick = { model.moveBlockTomorrow(block) }) { Text("Tomorrow") }
+                    WorkspaceTextButton(onClick = { model.deleteBlock(block) }) { Text("Remove from plan") }
                 }
             }
         }
@@ -169,11 +179,11 @@ private fun EveningDraftDialog(now: Long, onDismiss: () -> Unit, onConfirm: (Lis
             OutlinedTextField(call, { call = it }, label = { Text("Call start · HH:mm") })
             OutlinedTextField(callMinutes, { callMinutes = it }, label = { Text("Call minutes") })
         }
-    }, confirmButton = { Button(enabled = valid, onClick = {
+    }, confirmButton = { WorkspaceButton(enabled = valid, onClick = {
         onConfirm(listOf("Gym", "Family prayer", "Call").mapIndexed { index, title ->
             DayBlock(uid(), title, times[index]!!, durations[index]!!, fixed = true)
         }); onDismiss()
-    }) { Text("Confirm these times for today") } }, dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } })
+    }) { Text("Confirm these times for today") } }, dismissButton = { WorkspaceTextButton(onClick = onDismiss) { Text("Cancel") } })
 }
 
 @Composable
@@ -191,21 +201,21 @@ private fun PlanDialog(choices: List<WorkChoice>, onDismiss: () -> Unit,
     var picker by remember { mutableStateOf(false) }
     AlertDialog(onDismissRequest = onDismiss, title = { Text("Reserve a window") }, text = {
         Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            TextButton(onClick = { picker = !picker }) { Text("Link saved work") }
+            WorkspaceTextButton(onClick = { picker = !picker }) { Text("Link saved work") }
             if (picker) Column(Modifier.heightIn(max = 180.dp).verticalScroll(rememberScrollState())) {
-                choices.forEach { choice -> TextButton(onClick = { title = choice.title; type = choice.type; id = choice.id; material = choice.material; step = choice.step; picker = false }) { Text(choice.title) } }
+                choices.forEach { choice -> WorkspaceTextButton(onClick = { title = choice.title; type = choice.type; id = choice.id; material = choice.material; step = choice.step; picker = false }) { Text(choice.title) } }
             }
             OutlinedTextField(title, { title = it }, label = { Text("Action / commitment") })
-            if (id.isNotBlank()) TextButton(onClick = { type = "CUSTOM"; id = "" }) { Text("Linked ${type.lowercase()} · unlink") }
+            if (id.isNotBlank()) WorkspaceTextButton(onClick = { type = "CUSTOM"; id = "" }) { Text("Linked ${type.lowercase()} · unlink") }
             Row(verticalAlignment = Alignment.CenterVertically) { Checkbox(fixed, { fixed = it }); Text("Fixed commitment") }
             Text(if (fixed) "Only save a time you confirm." else "Find the first free window at or after this time.", fontSize = 12.sp)
-            TextButton(onClick = {
+            WorkspaceTextButton(onClick = {
                 val cal = Calendar.getInstance().apply { timeInMillis = start }
                 DatePickerDialog(context, { _, y, m, d ->
                     start = (cal.clone() as Calendar).apply { set(y, m, d) }.timeInMillis
                 }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
             }) { Text(dated(start)) }
-            TextButton(onClick = {
+            WorkspaceTextButton(onClick = {
                 val cal = Calendar.getInstance().apply { timeInMillis = start }
                 TimePickerDialog(context, { _, h, m -> start = (cal.clone() as Calendar).apply { set(Calendar.HOUR_OF_DAY, h); set(Calendar.MINUTE, m); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }.timeInMillis }, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), false).show()
             }) { Text("Change start time") }
@@ -215,9 +225,9 @@ private fun PlanDialog(choices: List<WorkChoice>, onDismiss: () -> Unit,
                 OutlinedTextField(step, { step = it }, label = { Text("First concrete step") })
             }
         }
-    }, confirmButton = { Button(enabled = title.isNotBlank() && (minutes.toIntOrNull() ?: 0) in 5..180, onClick = {
+    }, confirmButton = { WorkspaceButton(enabled = title.isNotBlank() && (minutes.toIntOrNull() ?: 0) in 5..180, onClick = {
         onSave(title, minutes.toInt(), start, fixed, type, id, material, step); onDismiss()
-    }) { Text("Save to Plan") } }, dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } })
+    }) { Text("Save to Plan") } }, dismissButton = { WorkspaceTextButton(onClick = onDismiss) { Text("Cancel") } })
 }
 
 @Composable
@@ -235,7 +245,7 @@ fun StudyScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: TodayPr
         } }
         items(blocks.filter { !it.fixed && it.state == "PLANNED" }, key = { "plan_${it.id}" }) { block ->
             WorkCard("Planned · ${block.title}", "${dated(block.startMillis)} · ${block.durationMinutes} minutes\n${block.firstStep}") {
-                TextButton(onClick = { model.offerMove(DayGuide.fromBlock(block)) }) { Text("Find this work a window") }
+                WorkspaceTextButton(onClick = { model.offerMove(DayGuide.fromBlock(block)) }) { Text("Find this work a window") }
             }
         }
         if (history.isEmpty() && blocks.none { !it.fixed }) item { WorkCard("Start with something small", "A task, a deadline, a page of notes or a coding step. Sessions appear here only after you save real work.") }

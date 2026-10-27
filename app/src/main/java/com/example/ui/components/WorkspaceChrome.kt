@@ -66,11 +66,12 @@ fun WorkspaceTopBar(
             Text(title, color = colors.textPrimary, fontSize = 22.sp, fontWeight = FontWeight.Medium,
                 maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
-        IconButton(onClick = { showAppearance = true }, enabled = !isSettingsOpen,
+        WorkspaceIconButton(onClick = { showAppearance = true }, enabled = !isSettingsOpen,
             modifier = Modifier.testTag("theme_selector_pill")) {
             Icon(Icons.Outlined.Palette, "Change appearance", tint = colors.textSecondary, modifier = Modifier.size(21.dp))
         }
-        IconButton(onClick = onOpenSettings, modifier = Modifier.testTag("top_app_bar_settings_btn")) {
+        Spacer(Modifier.width(8.dp))
+        WorkspaceIconButton(onClick = onOpenSettings, modifier = Modifier.testTag("top_app_bar_settings_btn")) {
             Icon(if (isSettingsOpen) Icons.Outlined.Close else Icons.Outlined.Tune,
                 if (isSettingsOpen) "Close settings" else "Open settings",
                 tint = colors.primaryAccent, modifier = Modifier.size(21.dp))
@@ -101,7 +102,7 @@ fun WorkspaceTopBar(
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { showAppearance = false }) { Text("Done") } }
+            confirmButton = { WorkspaceTextButton(onClick = { showAppearance = false }) { Text("Done") } }
         )
     }
 }

@@ -1,5 +1,7 @@
 package com.example.ui.screens.reset
 
+import com.example.ui.components.WorkspaceButton
+
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -184,7 +186,7 @@ fun FullscreenResetCelebration(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            Button(
+            WorkspaceButton(
                 onClick = {
                     playAppleHaptic(context)
                     onDismiss()

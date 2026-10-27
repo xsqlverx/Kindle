@@ -53,16 +53,11 @@ fun Modifier.focusSource(): Modifier {
 fun MoveButton(text: String, modifier: Modifier = Modifier, enabled: Boolean = true, onClick: () -> Unit) {
     val context = LocalContext.current
     val colors = LocalLifeOsColors.current
-    val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
-    val reduced = LocalReducedMotion.current
-    val scale by animateFloatAsState(if (pressed) 0.955f else 1f,
-        if (reduced) snap() else spring(dampingRatio = 0.62f, stiffness = 650f), label = "move_press")
-    Button(onClick = { playAppleHaptic(context); onClick() }, enabled = enabled, interactionSource = interaction,
-        shape = RoundedCornerShape(20.dp), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 17.dp),
+    WorkspaceButton(onClick = { playAppleHaptic(context); onClick() }, enabled = enabled,
+        shape = RoundedCornerShape(18.dp), contentPadding = PaddingValues(horizontal = 18.dp, vertical = 16.dp),
         colors = ButtonDefaults.buttonColors(containerColor = colors.primaryAccent, contentColor = colors.background),
-        modifier = modifier.heightIn(min = 56.dp).graphicsLayer { scaleX = scale; scaleY = if (pressed) scale * 1.02f else scale }) {
-        Text(text, Modifier.weight(1f), fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+        modifier = modifier.heightIn(min = 56.dp)) {
+        Text(text, Modifier.weight(1f), style = MaterialTheme.typography.labelLarge)
         Spacer(Modifier.width(10.dp))
         Icon(Icons.AutoMirrored.Outlined.ArrowForward, null, Modifier.size(19.dp))
     }

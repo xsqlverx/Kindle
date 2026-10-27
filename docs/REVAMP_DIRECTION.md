@@ -17,6 +17,12 @@ is still pending; no totals were guessed. See ATTENDANCE_RELIABILITY.md and STAT
 
 ## Purpose
 
+2026-10-28 control feedback: most buttons feel unprofessional/out of place, including Whole
+day and the everyday-tools entry. The native shared controls and recomposed Today tool shelf
+are now implemented in source (CONTROL_DESIGN.md). Keep this consistent action hierarchy,
+geometry, typography, focus/disabled states and restrained press motion across live screens.
+User/device visual approval remains pending; no existing function or data is removed.
+
 Opening the app should answer: what is supposed to be happening now, what is the next useful action, and how can the day recover when something was missed?
 
 The main difficulty described by the user is losing structure after returning home. Attendance and workout guidance already have practical value. Study currently gets deferred beyond the user's evening commitments.

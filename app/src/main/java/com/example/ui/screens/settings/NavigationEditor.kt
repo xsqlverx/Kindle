@@ -57,7 +57,7 @@ fun NavigationEditor(model: WorkspaceViewModel) {
                 Icon(Icons.AutoMirrored.Outlined.ArrowForward, "Move selected slot right")
             }
         }
-        Button(onClick = { picker = true }, modifier = Modifier.fillMaxWidth()) { Text("Choose destination for slot ${slot + 1}") }
+        WorkspaceButton(onClick = { picker = true }, modifier = Modifier.fillMaxWidth()) { Text("Choose destination for slot ${slot + 1}") }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text("Reduce motion", color = colors.textPrimary)
@@ -96,5 +96,5 @@ fun NavigationEditor(model: WorkspaceViewModel) {
                     }
                 }
             }
-        }, confirmButton = { TextButton(onClick = { picker = false }) { Text("Done") } })
+        }, confirmButton = { WorkspaceTextButton(onClick = { picker = false }) { Text("Done") } })
 }

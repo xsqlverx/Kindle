@@ -16,6 +16,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
@@ -257,7 +259,15 @@ class MainActivity : ComponentActivity() {
                         }
                         if (tools || preview) Dialog(onDismissRequest = { tools = false; preview = false }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
                             Column(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().navigationBarsPadding()) {
-                                TextButton(onClick = { tools = false; preview = false }) { Text("Back to your live workspace") }
+                                Row(Modifier.fillMaxWidth().padding(horizontal = 22.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    WorkspaceIconButton(onClick = { tools = false; preview = false }) {
+                                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Back to your live workspace")
+                                    }
+                                    Column(Modifier.weight(1f).padding(start = 14.dp)) {
+                                        Text(if (preview) "V1 design preview" else "Everyday tools", color = colors.textPrimary, fontSize = 20.sp)
+                                        Text(if (preview) "Original design study" else "Habits, water & daily essentials", color = colors.textSecondary, fontSize = 12.sp)
+                                    }
+                                }
                                 Box(Modifier.weight(1f)) {
                                     if (preview) TodayDesignPreview(life, legacyNavigate, onOpenSettings = { preview = false; navigate(Destination.SETTINGS) })
                                     else TodayToolsScreen(life, { tools = false; legacyNavigate(it) })

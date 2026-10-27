@@ -65,20 +65,21 @@ fun NextMoveSheet(life: LifeOsViewModel, model: WorkspaceViewModel, focus: Today
             Text(if (preview) "Choose an action to rehearse. Focus, minimize, then save your place. This preview leaves your real day and study totals unchanged." else "Pick one action and a duration. Its place in the day comes with it.", color = colors.textSecondary, fontSize = 13.sp, lineHeight = 20.sp)
             OutlinedTextField(move.title, { model.updateMove(move.copy(title = it.take(300))) }, label = { Text("What will you move forward?") },
                 placeholder = { Text("A page to revise, a bug to fix…") }, modifier = Modifier.fillMaxWidth().testTag("next_move_title"), enabled = !busy)
-            if (choices.isNotEmpty()) TextButton(onClick = { pick = !pick }, enabled = !busy) { Text(if (pick) "Hide saved work" else "Choose from my saved work") }
+            if (choices.isNotEmpty()) WorkspaceDisclosure(if (pick) "Hide saved work" else "Choose saved work", pick,
+                { pick = !pick }, Modifier.fillMaxWidth(), enabled = !busy)
             AnimatedVisibility(pick, enter = fadeIn(tween(if (reduced) 0 else 160)), exit = fadeOut(tween(if (reduced) 0 else 100))) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     OutlinedTextField(search, { search = it }, label = { Text("Find work") }, modifier = Modifier.fillMaxWidth())
                     LazyColumn(Modifier.heightIn(max = 220.dp)) {
                         items(choices.filter { it.title.contains(search, ignoreCase = true) }, key = { it.key }) { choice ->
-                            TextButton(onClick = { model.updateMove(if (preview) choice.copy(sourceType = "PREVIEW", sourceId = "", blockId = "", minutes = move.minutes) else choice.copy(minutes = move.minutes)); pick = false }) { Text(choice.title) }
+                            WorkspaceTextButton(onClick = { model.updateMove(if (preview) choice.copy(sourceType = "PREVIEW", sourceId = "", blockId = "", minutes = move.minutes) else choice.copy(minutes = move.minutes)); pick = false }) { Text(choice.title) }
                         }
                     }
                 }
             }
             if (!preview && (move.sourceId.isNotBlank() || move.sourceType != "CUSTOM")) {
                 Text(move.reason, color = colors.textSecondary, fontSize = 12.sp)
-                TextButton(onClick = { model.updateMove(move.copy(sourceType = "CUSTOM", sourceId = "", blockId = "", reason = "A small step you choose")) }, enabled = !busy) { Text("Make this a separate action") }
+                WorkspaceTextButton(onClick = { model.updateMove(move.copy(sourceType = "CUSTOM", sourceId = "", blockId = "", reason = "A small step you choose")) }, enabled = !busy) { Text("Make this a separate action") }
             }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 (if (move.minutes == 1) listOf(1, 5, 10, 25) else listOf(5, 10, 25, 45)).forEach { minutes ->
@@ -92,7 +93,8 @@ fun NextMoveSheet(life: LifeOsViewModel, model: WorkspaceViewModel, focus: Today
                     if (move.blockId.isNotBlank()) Text("Updates this existing block; its source and material stay linked.", color = colors.textSecondary, fontSize = 11.sp)
                 }
             }
-            TextButton(onClick = { more = !more; if (!more) customDuration = "" }, enabled = !busy) { Text(if (more) "Keep it simple" else if (move.material.isNotBlank() || move.firstStep.isNotBlank()) "Material & resume point · kept" else "Add a page, link or first step") }
+            WorkspaceDisclosure(if (more) "Less detail" else if (move.material.isNotBlank() || move.firstStep.isNotBlank()) "Material & first step · kept" else "Add material or a first step", more,
+                { more = !more; if (!more) customDuration = "" }, Modifier.fillMaxWidth(), enabled = !busy)
             AnimatedVisibility(more, enter = fadeIn(tween(if (reduced) 0 else 160)), exit = fadeOut(tween(if (reduced) 0 else 100))) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(customDuration, { value ->
@@ -109,8 +111,8 @@ fun NextMoveSheet(life: LifeOsViewModel, model: WorkspaceViewModel, focus: Today
                 Modifier.fillMaxWidth().testTag("next_move_commit"), enabled = !busy && (input.session.phase != FocusPhase.IDLE || (preview || window != null) && move.title.isNotBlank() && (customDuration.isBlank() || (customDuration.toIntOrNull() ?: 0) in 1..180))) {
                 model.placeMove(focus, start = readyNow)
             }
-            if (!preview && readyNow && input.session.phase == FocusPhase.IDLE) TextButton(onClick = { model.placeMove(focus, start = false) }, enabled = !busy && move.title.isNotBlank() && (customDuration.isBlank() || (customDuration.toIntOrNull() ?: 0) in 1..180)) { Text("Just put it in my day") }
-            TextButton(onClick = model::stashMove, enabled = !busy) { Text(if (preview) "Back to my day" else "Keep this draft for later") }
+            if (!preview && readyNow && input.session.phase == FocusPhase.IDLE) WorkspaceTextButton(onClick = { model.placeMove(focus, start = false) }, enabled = !busy && move.title.isNotBlank() && (customDuration.isBlank() || (customDuration.toIntOrNull() ?: 0) in 1..180)) { Text("Just put it in my day") }
+            WorkspaceTextButton(onClick = model::stashMove, enabled = !busy) { Text(if (preview) "Back to my day" else "Keep this draft for later") }
             Text(if (preview) "The tryout is separate from your real records." else "New actions also live in Tasks. Saving time never marks work complete.", color = colors.textTertiary, fontSize = 11.sp, lineHeight = 16.sp)
         }
     }

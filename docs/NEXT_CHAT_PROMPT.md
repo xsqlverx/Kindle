@@ -14,6 +14,13 @@ Inspect Git status and the actual source. Preserve existing local changes. V1 in
 
 WHAT I WANT
 
+Latest feedback, 2026-10-28 after `fbaa1f5`: most buttons feel unprofessional/out of place,
+specifically Whole day and Habits/water/everyday tools. Read CONTROL_DESIGN.md. Shared native
+button roles, geometry/type/press/focus states now cover live actions; Today has a bounded day
+disclosure, integrated quick-access shelf and Everyday tools row. Plan/chooser use the same
+control language. Preserve callbacks, data and attendance deduplication. Source checks pass
+for 59 Kotlin files; cloud compilation and physical-device visual acceptance are unverified.
+
 Latest request after `56f8d3a`: Present/Absent buttons were spammable, had weak feedback and
 did not fit the visual style. Continue from ATTENDANCE_RELIABILITY.md and current STATUS.md.
 The source now uses a version-4 additive Room ledger, dated-class controls shared by College

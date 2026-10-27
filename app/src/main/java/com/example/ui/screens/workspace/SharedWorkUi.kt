@@ -1,5 +1,9 @@
 package com.example.ui.screens.workspace
 
+import com.example.ui.components.WorkspaceButton
+import com.example.ui.components.WorkspaceOutlinedButton
+import com.example.ui.components.WorkspaceTextButton
+
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.snap
@@ -53,7 +57,7 @@ fun MaterialReference(text: String) {
     val handler = LocalUriHandler.current
     var failed by remember { mutableStateOf(false) }
     if (text.startsWith("https://") || text.startsWith("http://")) {
-        TextButton(onClick = { try { handler.openUri(text) } catch (_: Exception) { failed = true } }) { Text(text) }
+        WorkspaceTextButton(onClick = { try { handler.openUri(text) } catch (_: Exception) { failed = true } }) { Text(text) }
         if (failed) Text("No app could open this link. You can edit or copy the reference.", fontSize = 12.sp)
     } else androidx.compose.foundation.text.selection.SelectionContainer { Text(text, fontSize = 13.sp) }
 }
@@ -92,8 +96,8 @@ fun RecordDialog(title: String, labels: List<String>, initial: List<String> = la
                     label = { Text(label) }, modifier = Modifier.fillMaxWidth(), minLines = if (index == labels.lastIndex && labels.size > 1) 2 else 1)
             }
         }
-    }, confirmButton = { Button(enabled = values.firstOrNull()?.isNotBlank() == true, onClick = { onSave(values.map { it.trim() }); onDismiss() }) { Text("Save") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } })
+    }, confirmButton = { WorkspaceButton(enabled = values.firstOrNull()?.isNotBlank() == true, onClick = { onSave(values.map { it.trim() }); onDismiss() }) { Text("Save") } },
+        dismissButton = { WorkspaceTextButton(onClick = onDismiss) { Text("Cancel") } })
 }
 
 @Composable
@@ -108,24 +112,24 @@ fun WorkComposer(choices: List<WorkChoice>, onDismiss: () -> Unit,
     var picker by remember { mutableStateOf(false) }
     AlertDialog(onDismissRequest = onDismiss, title = { Text("Give these minutes a purpose") }, text = {
         Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            TextButton(onClick = { picker = !picker }) { Text("Choose a task, deadline, topic or coding step") }
+            WorkspaceTextButton(onClick = { picker = !picker }) { Text("Choose a task, deadline, topic or coding step") }
             if (picker) Column(Modifier.heightIn(max = 220.dp).verticalScroll(rememberScrollState())) {
-                choices.forEach { choice -> TextButton(onClick = {
+                choices.forEach { choice -> WorkspaceTextButton(onClick = {
                     title = choice.title; material = choice.material; step = choice.step
                     selectedType = choice.type; selectedId = choice.id; picker = false
                 }) { Text("${choice.type.lowercase().replace('_', ' ')} · ${choice.title}") } }
                 if (choices.isEmpty()) Text("No saved work yet. Name a concrete action below.")
             }
             OutlinedTextField(title, { title = it }, label = { Text("Action") })
-            if (selectedId.isNotBlank()) TextButton(onClick = { selectedType = "CUSTOM"; selectedId = "" }) { Text("Linked ${selectedType.lowercase()} · unlink") }
+            if (selectedId.isNotBlank()) WorkspaceTextButton(onClick = { selectedType = "CUSTOM"; selectedId = "" }) { Text("Linked ${selectedType.lowercase()} · unlink") }
             OutlinedTextField(material, { material = it }, label = { Text("Material / URL / page") })
             OutlinedTextField(step, { step = it }, label = { Text("First concrete step") })
             OutlinedTextField(minutes, { minutes = it.filter(Char::isDigit).take(3) }, label = { Text("Minutes (5–180)") })
             Text("Uses a free window now. Planned commitments stay protected. A finished timer does not complete the source record.", fontSize = 12.sp)
         }
-    }, confirmButton = { Button(enabled = title.isNotBlank() && (minutes.toIntOrNull() ?: 0) in 5..180,
+    }, confirmButton = { WorkspaceButton(enabled = title.isNotBlank() && (minutes.toIntOrNull() ?: 0) in 5..180,
         onClick = { onStart(WorkChoice(selectedType, selectedId, title), material, step, minutes.toInt()); onDismiss() }) { Text("Start focus") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } })
+        dismissButton = { WorkspaceTextButton(onClick = onDismiss) { Text("Cancel") } })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -152,11 +156,11 @@ fun SessionPanel(focus: TodayPrototypeViewModel, now: Long, onResume: () -> Unit
             Text("Timer expiry records elapsed time only. Complete a task, milestone or submission explicitly in its own space.", fontSize = 12.sp)
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                if (session.phase == FocusPhase.RUNNING) OutlinedButton(onClick = focus::pause, enabled = !saving) { Text("Pause") }
-                if (session.phase == FocusPhase.PAUSED) OutlinedButton(onClick = onResume, enabled = !saving) { Text("Continue") }
-                Button(onClick = focus::dismiss, enabled = !saving) { Text(if (saving) "Saving…" else "Save & end session") }
+                if (session.phase == FocusPhase.RUNNING) WorkspaceOutlinedButton(onClick = focus::pause, enabled = !saving) { Text("Pause") }
+                if (session.phase == FocusPhase.PAUSED) WorkspaceOutlinedButton(onClick = onResume, enabled = !saving) { Text("Continue") }
+                WorkspaceButton(onClick = focus::dismiss, enabled = !saving) { Text(if (saving) "Saving…" else "Save & end session") }
             }
-            TextButton(onClick = onDismiss) { Text("Keep in capsule") }
+            WorkspaceTextButton(onClick = onDismiss) { Text("Keep in capsule") }
         }
     }
 }

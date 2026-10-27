@@ -1,6 +1,6 @@
 # Project context and requirement record
 
-Last updated: 2026-10-27, Asia/Calcutta.
+Last updated: 2026-10-28, Asia/Calcutta.
 
 ## User intent
 
@@ -36,6 +36,15 @@ The new Today is a guided next-action surface, with a distinct optional 60-secon
 that does not create real tasks, plans or study history. Real activity keeps the existing
 data/session contract. Neither cognitive-load reduction nor visual quality is called verified
 without user/device evidence.
+
+### Control design feedback, 2026-10-28
+
+The user says most buttons look unprofessional/out of place, naming Today's Whole day and
+Habits/water/everyday tools. CONTROL_DESIGN.md records the implemented shared native action
+styles and targeted Today composition. Controls must belong to the charcoal/lavender surface,
+show clear primary/secondary/disclosure roles, and retain tactile response and all behavior.
+This visual refinement is implemented in source; device acceptance/cloud build are unverified.
+No data, brand, navigation contract or feature scope change was requested.
 
 ## Routine and human constraints
 

@@ -1,5 +1,10 @@
 package com.example.ui.screens.academics
 
+import com.example.ui.components.WorkspaceButton
+import com.example.ui.components.WorkspaceOutlinedButton
+import com.example.ui.components.WorkspaceTextButton
+import com.example.ui.components.WorkspaceTonalButton
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -151,7 +156,7 @@ fun AcademicsScreen(
                     )
                 }
 
-                FilledTonalButton(
+                WorkspaceTonalButton(
                     onClick = { showAddClassDialog = true },
                     modifier = Modifier.testTag("add_class_button"),
                     shape = RoundedCornerShape(12.dp),
@@ -328,7 +333,7 @@ fun AcademicsScreen(
                     )
                 }
 
-                FilledTonalButton(
+                WorkspaceTonalButton(
                     onClick = { showAddAssignmentDialog = true },
                     modifier = Modifier.testTag("add_deadline_button"),
                     shape = RoundedCornerShape(12.dp),
@@ -370,7 +375,7 @@ fun AcademicsScreen(
                                 fontWeight = FontWeight.Medium,
                                 color = lifeColors.textSecondary
                             )
-                            Button(
+                            WorkspaceButton(
                                 onClick = { showAddAssignmentDialog = true },
                                 modifier = Modifier.padding(top = 4.dp),
                                 shape = RoundedCornerShape(12.dp)
@@ -460,7 +465,7 @@ fun AcademicsScreen(
                 }
             },
             confirmButton = {
-                Button(
+                WorkspaceButton(
                     onClick = {
                         if (courseCode.isNotBlank()) {
                             val sh = startHour.toIntOrNull() ?: 10
@@ -488,7 +493,7 @@ fun AcademicsScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showAddClassDialog = false }) { Text("Cancel") }
+                WorkspaceTextButton(onClick = { showAddClassDialog = false }) { Text("Cancel") }
             }
         )
     }
@@ -552,7 +557,7 @@ fun AcademicsScreen(
                 Text("Are you sure you want to remove '${itemToDelete.title}' (${itemToDelete.courseCode})? This action cannot be undone.")
             },
             confirmButton = {
-                Button(
+                WorkspaceButton(
                     onClick = {
                         playAppleHaptic(context, strong = true)
                         viewModel.deleteAssignment(itemToDelete)
@@ -564,7 +569,7 @@ fun AcademicsScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { assignmentToDelete = null }) { Text("Cancel") }
+                WorkspaceTextButton(onClick = { assignmentToDelete = null }) { Text("Cancel") }
             }
         )
     }
@@ -578,7 +583,7 @@ fun AcademicsScreen(
                 Text("Remove '${entryToDelete.courseCode} - ${entryToDelete.courseName}' from your schedule?")
             },
             confirmButton = {
-                Button(
+                WorkspaceButton(
                     onClick = {
                         playAppleHaptic(context, strong = true)
                         viewModel.deleteTimetableEntry(entryToDelete)
@@ -590,7 +595,7 @@ fun AcademicsScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { classToDelete = null }) { Text("Cancel") }
+                WorkspaceTextButton(onClick = { classToDelete = null }) { Text("Cancel") }
             }
         )
     }
@@ -658,7 +663,7 @@ fun AcademicsScreen(
                             color = lifeColors.textSecondary
                         )
 
-                        OutlinedButton(
+                        WorkspaceOutlinedButton(
                             onClick = {
                                 val cal = Calendar.getInstance().apply {
                                     timeInMillis = selectedMillis
@@ -717,7 +722,7 @@ fun AcademicsScreen(
                 }
             },
             confirmButton = {
-                Button(
+                WorkspaceButton(
                     onClick = {
                         playAppleHaptic(context)
                         viewModel.setTargetExam(examTitle.trim().ifBlank { "Upcoming Exam" }, selectedMillis)
@@ -732,7 +737,7 @@ fun AcademicsScreen(
             dismissButton = {
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     if (targetExam.dateMillis > 0L) {
-                        TextButton(
+                        WorkspaceTextButton(
                             onClick = {
                                 playAppleHaptic(context)
                                 viewModel.clearTargetExam()
@@ -742,7 +747,7 @@ fun AcademicsScreen(
                             Text("Clear", color = RingGymRose)
                         }
                     }
-                    TextButton(onClick = { showConfigureExamDialog = false }) {
+                    WorkspaceTextButton(onClick = { showConfigureExamDialog = false }) {
                         Text("Cancel", color = lifeColors.textSecondary)
                     }
                 }
@@ -877,7 +882,7 @@ private fun AttendanceGlassRow(record: AttendanceRecord, hasBaseline: Boolean, a
                 else -> "Attend the next ${projection.classesNeeded} classes to reach ${record.targetPercentage}%."
             }, color = colors.textSecondary, fontSize = 12.sp, lineHeight = 19.sp)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                TextButton(enabled = !action.busy, onClick = { adjust = true }) {
+                WorkspaceTextButton(enabled = !action.busy, onClick = { adjust = true }) {
                     Icon(Icons.Outlined.Edit, null, Modifier.size(16.dp))
                     Spacer(Modifier.width(8.dp))
                     Text(if (hasBaseline) "Correct totals" else "Add real totals", fontSize = 12.sp)
@@ -922,10 +927,10 @@ private fun AttendanceBaselineDialog(record: AttendanceRecord, action: Attendanc
                 if (action.busy) Text("Saving totals…", fontSize = 12.sp)
             }
         },
-        confirmButton = { TextButton(enabled = valid && !action.busy, onClick = {
+        confirmButton = { WorkspaceTextButton(enabled = valid && !action.busy, onClick = {
             if (valid) { requested = true; onSave(requireNotNull(a), requireNotNull(t), requireNotNull(goal)) }
         }) { Text("Save totals") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+        dismissButton = { WorkspaceTextButton(onClick = onDismiss) { Text("Cancel") } }
     )
 }
 
@@ -953,7 +958,7 @@ private fun AssignmentGlassCard(assignment: AssignmentItem, onToggle: () -> Unit
                 }
             }
             if (assignment.weightPercentage > 0) Text("${assignment.weightPercentage}% of course grade", color = colors.textTertiary, fontSize = 11.sp)
-            if (onStartWork != null) TextButton(onClick = onStartWork) { Text("Work on this deadline") }
+            if (onStartWork != null) WorkspaceTextButton(onClick = onStartWork) { Text("Work on this deadline") }
             HorizontalDivider(color = colors.borderGlass)
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(when {
@@ -1066,7 +1071,7 @@ private fun DeadlineEditorDialog(
             }
         },
         confirmButton = {
-            Button(
+            WorkspaceButton(
                 onClick = {
                     if (title.isNotBlank()) {
                         onSave(
@@ -1084,7 +1089,7 @@ private fun DeadlineEditorDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            WorkspaceTextButton(onClick = onDismiss) { Text("Cancel") }
         }
     )
 }

@@ -301,7 +301,7 @@ fun TopAppBarGlass(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showThemeDialog = false }) {
+                WorkspaceTextButton(onClick = { showThemeDialog = false }) {
                     Text("Close", color = lifeColors.primaryAccent, fontWeight = FontWeight.Bold)
                 }
             }

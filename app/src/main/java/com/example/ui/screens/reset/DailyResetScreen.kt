@@ -170,7 +170,7 @@ fun DailyResetScreen(
                                 color = lifeColors.textSecondary, fontSize = 12.sp, lineHeight = 19.sp)
                             Spacer(Modifier.height(14.dp))
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Button(onClick = {
+                                WorkspaceButton(onClick = {
                                     playAppleHaptic(context)
                                     when (resetTimerState) {
                                         ResetTimerState.READY, ResetTimerState.RESET -> viewModel.start60sTimer()
@@ -186,7 +186,7 @@ fun DailyResetScreen(
                                         else -> "Start a minute"
                                     }, fontSize = 13.sp)
                                 }
-                                TextButton(onClick = { viewModel.reset60sTimer() }) { Text("Reset", color = lifeColors.textSecondary) }
+                                WorkspaceTextButton(onClick = { viewModel.reset60sTimer() }) { Text("Reset", color = lifeColors.textSecondary) }
                             }
                         }
                     }
@@ -359,7 +359,7 @@ private fun StepOneTriageView(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            FilledTonalButton(
+                            WorkspaceTonalButton(
                                 onClick = {
                                     playAppleHaptic(context)
                                     onSetTriage(task.id, TaskStatus.MOVED_TOMORROW)
@@ -377,7 +377,7 @@ private fun StepOneTriageView(
                                 }
                             }
 
-                            FilledTonalButton(
+                            WorkspaceTonalButton(
                                 onClick = {
                                     playAppleHaptic(context)
                                     onSetTriage(task.id, TaskStatus.MOVED_LATER)
@@ -395,7 +395,7 @@ private fun StepOneTriageView(
                                 }
                             }
 
-                            OutlinedButton(
+                            WorkspaceOutlinedButton(
                                 onClick = {
                                     playAppleHaptic(context)
                                     onSetTriage(task.id, TaskStatus.DROPPED)
@@ -414,7 +414,7 @@ private fun StepOneTriageView(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Button(
+        WorkspaceButton(
             onClick = onNext,
             modifier = Modifier
                 .fillMaxWidth()
@@ -479,7 +479,7 @@ private fun StepTwoBrainDumpView(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            OutlinedButton(
+            WorkspaceOutlinedButton(
                 onClick = onBack,
                 modifier = Modifier
                     .weight(1f)
@@ -489,7 +489,7 @@ private fun StepTwoBrainDumpView(
                 Text("Back")
             }
 
-            Button(
+            WorkspaceButton(
                 onClick = onNext,
                 modifier = Modifier
                     .weight(2f)
@@ -610,7 +610,7 @@ private fun StepThreeTomorrowView(
                     color = lifeColors.textPrimary
                 )
 
-                TextButton(onClick = {
+                WorkspaceTextButton(onClick = {
                     if (!earpodsPacked) onToggleEarpods()
                     if (!phonePacked) onTogglePhone()
                     if (!geometryBoxPacked) onToggleGeometry()
@@ -632,7 +632,7 @@ private fun StepThreeTomorrowView(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            OutlinedButton(
+            WorkspaceOutlinedButton(
                 onClick = onBack,
                 modifier = Modifier
                     .weight(1f)
@@ -642,7 +642,7 @@ private fun StepThreeTomorrowView(
                 Text("Back")
             }
 
-            Button(
+            WorkspaceButton(
                 onClick = onNext,
                 modifier = Modifier
                     .weight(2f)
@@ -726,7 +726,7 @@ private fun StepFourMoodView(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            OutlinedButton(
+            WorkspaceOutlinedButton(
                 onClick = onBack,
                 modifier = Modifier
                     .weight(1f)
@@ -736,7 +736,7 @@ private fun StepFourMoodView(
                 Text("Back")
             }
 
-            Button(
+            WorkspaceButton(
                 onClick = onComplete,
                 modifier = Modifier
                     .weight(2.5f)

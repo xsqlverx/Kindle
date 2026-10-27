@@ -59,8 +59,9 @@ fun GuidedTodayScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: T
                     Text(SimpleDateFormat("EEEE, d MMM", Locale.getDefault()).format(Date(now)), color = colors.textSecondary, fontSize = 12.sp)
                     Text("Today", color = colors.textPrimary, fontSize = 27.sp, fontWeight = FontWeight.Medium)
                 }
-                IconButton(onClick = { model.offerMove() }) { Icon(Icons.Outlined.Add, "Add a next move", tint = colors.primaryAccent) }
-                IconButton(onClick = onSettings) { Icon(Icons.Outlined.Tune, "Settings", tint = colors.textSecondary) }
+                WorkspaceIconButton(onClick = { model.offerMove() }) { Icon(Icons.Outlined.Add, "Add a next move", tint = colors.primaryAccent) }
+                Spacer(Modifier.width(8.dp))
+                WorkspaceIconButton(onClick = onSettings) { Icon(Icons.Outlined.Tune, "Settings", tint = colors.textSecondary) }
             }
         }
         item { WeekTrace(input) }
@@ -92,18 +93,27 @@ fun GuidedTodayScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: T
                     Text("The shape of today", color = colors.textPrimary, fontSize = 21.sp, fontWeight = FontWeight.Medium)
                     Text("${clock(now)} · classes and your saved plan", color = colors.textSecondary, fontSize = 11.sp)
                 }
-                TextButton(onClick = { showWholeDay = !showWholeDay }) { Text(if (showWholeDay) "Less" else "Whole day") }
+                Spacer(Modifier.width(10.dp))
+                WorkspaceDisclosure(if (showWholeDay) "Less" else "Whole day", showWholeDay,
+                    { showWholeDay = !showWholeDay }, Modifier.testTag("today_whole_day"))
             }
             Spacer(Modifier.height(12.dp))
             DayAgenda(input, model, showWholeDay)
         }
         item {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                QuickDoor("College", Icons.Outlined.School, Modifier.weight(1f)) { model.navigate(Destination.COLLEGE) }
-                QuickDoor("Fitness", Icons.Outlined.FitnessCenter, Modifier.weight(1f)) { model.navigate(Destination.FITNESS) }
-                QuickDoor("Capture", Icons.Outlined.EditNote, Modifier.weight(1f)) { capture = true }
+            Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp))
+                .background(colors.surfaceGlass).border(1.dp, colors.borderGlass, RoundedCornerShape(24.dp))) {
+                Row(Modifier.fillMaxWidth().padding(5.dp), verticalAlignment = Alignment.CenterVertically) {
+                    WorkspaceShortcut("College", Icons.Outlined.School, Modifier.weight(1f)) { model.navigate(Destination.COLLEGE) }
+                    VerticalDivider(Modifier.height(28.dp), color = colors.borderGlass)
+                    WorkspaceShortcut("Fitness", Icons.Outlined.FitnessCenter, Modifier.weight(1f)) { model.navigate(Destination.FITNESS) }
+                    VerticalDivider(Modifier.height(28.dp), color = colors.borderGlass)
+                    WorkspaceShortcut("Capture", Icons.Outlined.EditNote, Modifier.weight(1f)) { capture = true }
+                }
+                HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = colors.borderGlass)
+                WorkspaceActionRow("Everyday tools", "Habits, water & daily essentials", Icons.Outlined.Widgets,
+                    Modifier.testTag("today_everyday_tools"), embedded = true, onClick = onTools)
             }
-            TextButton(onClick = onTools) { Text("Habits, water & everyday tools") }
         }
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -111,9 +121,13 @@ fun GuidedTodayScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: T
                     Text(if (todayFocus.isEmpty()) "Your next return can be easier." else "${todayFocus.sumOf { it.elapsedSeconds } / 60} minutes kept today.", color = colors.textPrimary, fontSize = 16.sp)
                     Text(if (todayFocus.isEmpty()) "One saved line is enough to pick up the thread." else "From ${todayFocus.size} saved session(s). The little starts stay visible.", color = colors.textSecondary, fontSize = 12.sp, lineHeight = 18.sp)
                 }
-                IconButton(onClick = { model.navigate(Destination.REVIEW) }) { Icon(Icons.Outlined.History, "Review saved progress", tint = colors.primaryAccent) }
+                Spacer(Modifier.width(12.dp))
+                WorkspaceIconButton(onClick = { model.navigate(Destination.REVIEW) }) { Icon(Icons.Outlined.History, "Review saved progress", tint = colors.primaryAccent) }
             }
-            TextButton(onClick = { model.navigate(Destination.RESET) }) { Text("Close the day with Daily Reset") }
+            Spacer(Modifier.height(14.dp))
+            WorkspaceActionRow("Daily Reset", "Close the day. Keep a place for tomorrow.", Icons.Outlined.Bedtime) {
+                model.navigate(Destination.RESET)
+            }
         }
     }
     if (capture) RecordDialog("Catch the thought", listOf("Note, idea or link"), onDismiss = { capture = false }) {
@@ -219,12 +233,12 @@ private fun NextMoveHero(cue: DayCue, input: DayInputs, model: WorkspaceViewMode
         }
         val hour = Calendar.getInstance().apply { timeInMillis = input.now }.get(Calendar.HOUR_OF_DAY)
         if (cue.stage == DayStage.FIRST_STEP && hour in 13..18 && input.homeAt !in DayGuide.startOfDay(input.now)..input.now) {
-            TextButton(onClick = model::checkIn) { Text("I'm home · mark the transition") }
+            WorkspaceTextButton(onClick = model::checkIn) { Text("I'm home · mark the transition") }
         }
         if (cue.stage == DayStage.ARRIVE || input.homeAt in DayGuide.startOfDay(input.now)..input.now && cue.stage == DayStage.READY) {
-            TextButton(onClick = { markOrigin(bounds); model.begin(focus, "A little breathing room", "REST", minutes = 5, kind = FocusKind.REST) }) { Text("Land gently · take 5 minutes") }
+            WorkspaceTextButton(onClick = { markOrigin(bounds); model.begin(focus, "A little breathing room", "REST", minutes = 5, kind = FocusKind.REST) }) { Text("Land gently · take 5 minutes") }
         } else if (cue.stage == DayStage.READY || cue.stage == DayStage.RECOVER) {
-            TextButton(onClick = { model.offerMove(DayMove("")) }) { Text("Choose something else") }
+            WorkspaceTextButton(onClick = { model.offerMove(DayMove("")) }) { Text("Choose something else") }
         }
         if (cue.stage in listOf(DayStage.FIRST_STEP, DayStage.READY, DayStage.RECOVER, DayStage.FOCUS, DayStage.FINISH)) {
             SculptedLoop(when (cue.stage) { DayStage.FOCUS -> 1; DayStage.FINISH -> 2; else -> 0 })
@@ -287,7 +301,7 @@ private fun SavedProgressCard(record: WorkSessionRecord, input: DayInputs, model
             Text(record.title, color = colors.textPrimary, fontSize = 17.sp)
             Text(record.resumeNote.ifBlank { "Your session is in Review. Leave yourself a place to resume next time." }, color = colors.textSecondary, fontSize = 13.sp, lineHeight = 20.sp)
             MoveButton("Back to my day", Modifier.fillMaxWidth()) { focus.clearSavedFeedback() }
-            if (canComplete) OutlinedButton(onClick = { model.completeSource(record) }, modifier = Modifier.fillMaxWidth()) {
+            if (canComplete) WorkspaceOutlinedButton(onClick = { model.completeSource(record) }, modifier = Modifier.fillMaxWidth()) {
                 Text(when (record.sourceType) { "ASSIGNMENT" -> "Also mark this submitted"; "PROJECT_STEP" -> "Also finish this milestone"; else -> "Also mark this task done" })
             }
             if (completed) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -310,18 +324,8 @@ private fun TrialEndCard(trial: TrialResult, model: WorkspaceViewModel, focus: T
             Text("${trial.title}\n${trial.resumeNote.ifBlank { "In a real session, leave a line to make returning easier." }}", color = colors.textSecondary, fontSize = 14.sp, lineHeight = 21.sp)
             Text("For real work: choose → focus → save your place. Your time and note then appear in Study and Review.", color = colors.textSecondary, fontSize = 13.sp, lineHeight = 20.sp)
             MoveButton("Pick my real next move", Modifier.fillMaxWidth()) { focus.clearSavedFeedback(); model.offerMove() }
-            TextButton(onClick = focus::clearSavedFeedback) { Text("Back to my day") }
+            WorkspaceTextButton(onClick = focus::clearSavedFeedback) { Text("Back to my day") }
         }
-    }
-}
-
-@Composable
-private fun QuickDoor(title: String, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier, onClick: () -> Unit) {
-    val colors = LocalLifeOsColors.current
-    Column(modifier.clip(RoundedCornerShape(20.dp)).background(colors.surfaceGlass).clickable(onClick = onClick)
-        .padding(horizontal = 10.dp, vertical = 16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(7.dp)) {
-        Icon(icon, null, tint = colors.primaryAccent, modifier = Modifier.size(21.dp))
-        Text(title, color = colors.textPrimary, fontSize = 12.sp)
     }
 }
 
@@ -338,11 +342,11 @@ fun DayAgenda(input: DayInputs, model: WorkspaceViewModel, wholeDay: Boolean = t
         Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(colors.surfaceGlass).padding(18.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
             Text("A little room is waiting.", color = colors.textPrimary, fontSize = 16.sp)
             Text("Your next move will appear here. Classes and confirmed plans sit beside it.", color = colors.textSecondary, fontSize = 12.sp, lineHeight = 18.sp)
-            TextButton(onClick = onAddCommitment) { Text("Add a commitment") }
+            WorkspaceTextButton(onClick = onAddCommitment) { Text("Add a commitment") }
         }
     } else if (visible.isEmpty()) {
         Text("The planned part of today has settled. Make a new move, or leave tomorrow a starting point.", color = colors.textSecondary, fontSize = 13.sp)
-    } else Column {
+    } else Column(Modifier.animateContentSize(if (reduced) snap() else tween(240))) {
         visible.forEach { row -> key(row.id) {
             val current = input.now in row.start until row.end && (row.fixed || row.block?.state == "PLANNED")
             val saved = row.block?.state == "REVIEWED"

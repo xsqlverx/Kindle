@@ -1,5 +1,8 @@
 package com.example.ui.screens.reset
 
+import com.example.ui.components.WorkspaceButton
+import com.example.ui.components.WorkspaceOutlinedButton
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -426,7 +429,7 @@ fun DailyResetReportView(
         item {
             Spacer(modifier = Modifier.height(8.dp))
 
-            Button(
+            WorkspaceButton(
                 onClick = {
                     playAppleHaptic(context)
                     onFinish()
@@ -443,7 +446,7 @@ fun DailyResetReportView(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            OutlinedButton(
+            WorkspaceOutlinedButton(
                 onClick = {
                     playAppleHaptic(context)
                     onRevise()

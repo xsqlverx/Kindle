@@ -108,7 +108,7 @@ fun TasksMatrixScreen(
                         Text("${pendingTasks.size}", fontSize = 42.sp, fontWeight = FontWeight.Light, color = lifeColors.textPrimary)
                         Text("open · ${completedTasks.size} completed", fontSize = 12.sp, color = lifeColors.textSecondary)
                     }
-                    FilledTonalButton(onClick = { showAddTaskDialog = true }, shape = RoundedCornerShape(14.dp),
+                    WorkspaceTonalButton(onClick = { showAddTaskDialog = true }, shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.heightIn(min = 48.dp).testTag("new_task_modal_button")) {
                         Icon(Icons.Default.Add, null, modifier = Modifier.size(17.dp))
                         Spacer(Modifier.width(7.dp))
@@ -223,7 +223,7 @@ fun TasksMatrixScreen(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Button(
+                    WorkspaceButton(
                         onClick = {
                             if (quickTaskTitle.isNotBlank()) {
                                 playAppleHaptic(context)
@@ -568,7 +568,7 @@ fun TasksMatrixScreen(
                 }
             },
             confirmButton = {
-                Button(
+                WorkspaceButton(
                     onClick = {
                         if (title.isNotBlank()) {
                             viewModel.addTask(
@@ -587,7 +587,7 @@ fun TasksMatrixScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showAddTaskDialog = false }) { Text("Cancel") }
+                WorkspaceTextButton(onClick = { showAddTaskDialog = false }) { Text("Cancel") }
             }
         )
     }

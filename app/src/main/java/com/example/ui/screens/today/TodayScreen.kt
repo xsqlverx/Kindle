@@ -515,7 +515,7 @@ fun TaskGlassRow(
                     Spacer(Modifier.width(7.dp))
                     Text(task.quadrant.label, color = accent, fontSize = 11.sp)
                 }
-                if (onFocus != null && !done) TextButton(onClick = onFocus, modifier = Modifier.testTag("focus_task_${task.id}")) {
+                if (onFocus != null && !done) WorkspaceTextButton(onClick = onFocus, modifier = Modifier.testTag("focus_task_${task.id}")) {
                     Icon(Icons.Outlined.PlayArrow, null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(4.dp))
                     Text("Focus", fontSize = 12.sp)

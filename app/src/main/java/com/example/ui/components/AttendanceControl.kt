@@ -52,7 +52,7 @@ fun CourseAttendanceControl(entries: List<TimetableEntry>, viewModel: LifeOsView
     val entry = entries.firstOrNull { it.id == selected } ?: ordered.first()
     var picking by remember { mutableStateOf(false) }
     Box {
-        TextButton(onClick = { picking = true }, contentPadding = PaddingValues(horizontal = 0.dp)) {
+        WorkspaceTextButton(onClick = { picking = true }, contentPadding = PaddingValues(horizontal = 0.dp)) {
             Icon(Icons.Outlined.CalendarToday, null, Modifier.size(16.dp))
             Spacer(Modifier.width(8.dp))
             Text("Choose class · ${classTimeLabel(entry)}", fontSize = 12.sp)
@@ -79,7 +79,7 @@ fun AttendanceHistory(courseCode: String, viewModel: LifeOsViewModel) {
     val marks = events.filter { it.courseCode == courseCode }
     var historyOpen by rememberSaveable(courseCode) { mutableStateOf(false) }
     if (marks.isEmpty()) { return }
-    TextButton(onClick = { historyOpen = true }) {
+    WorkspaceTextButton(onClick = { historyOpen = true }) {
         Icon(Icons.Outlined.History, null, Modifier.size(16.dp))
         Spacer(Modifier.width(8.dp))
         Text("Class history · ${marks.size}", fontSize = 12.sp)
@@ -99,7 +99,7 @@ fun AttendanceHistory(courseCode: String, viewModel: LifeOsViewModel) {
                 }
             }
         }
-    }, confirmButton = { TextButton(onClick = { historyOpen = false }) { Text("Done") } })
+    }, confirmButton = { WorkspaceTextButton(onClick = { historyOpen = false }) { Text("Done") } })
 }
 
 /** Both entry points render the same stored mark, never optimistic counter increments. */
@@ -170,7 +170,7 @@ fun AttendanceClassControl(entry: TimetableEntry, viewModel: LifeOsViewModel) {
                 Text("Saved · ${AttendanceChoice.entries.firstOrNull { it.name == mark?.status }?.label ?: mark?.status}",
                     Modifier.weight(1f).padding(horizontal = 10.dp).semantics { liveRegion = LiveRegionMode.Polite },
                     color = colors.textPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                if (!covered) TextButton(enabled = !action.busy, onClick = { changing = true }) { Text("Change", fontSize = 12.sp) }
+                if (!covered) WorkspaceTextButton(enabled = !action.busy, onClick = { changing = true }) { Text("Change", fontSize = 12.sp) }
             }
         } else if (!covered) {
             Row(Modifier.fillMaxWidth().background(colors.surfaceGlassHighlight.copy(alpha = 0.45f), RoundedCornerShape(22.dp))
@@ -183,14 +183,14 @@ fun AttendanceClassControl(entry: TimetableEntry, viewModel: LifeOsViewModel) {
                 }
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                TextButton(enabled = canMark, onClick = { viewModel.markAttendance(occurrence, AttendanceChoice.CANCELLED, mark?.status) }) {
+                WorkspaceTextButton(enabled = canMark, onClick = { viewModel.markAttendance(occurrence, AttendanceChoice.CANCELLED, mark?.status) }) {
                     Text("Class cancelled", fontSize = 12.sp)
                 }
-                if (changing) TextButton(enabled = canMark, onClick = { viewModel.markAttendance(occurrence, AttendanceChoice.UNMARKED, mark?.status) }) {
+                if (changing) WorkspaceTextButton(enabled = canMark, onClick = { viewModel.markAttendance(occurrence, AttendanceChoice.UNMARKED, mark?.status) }) {
                     Text("Remove mark", fontSize = 12.sp)
                 }
             }
-            if (changing) TextButton(onClick = { changing = false }) { Text("Keep saved mark", fontSize = 12.sp) }
+            if (changing) WorkspaceTextButton(onClick = { changing = false }) { Text("Keep saved mark", fontSize = 12.sp) }
         }
         val message = when {
             busyHere -> "Saving this class…"

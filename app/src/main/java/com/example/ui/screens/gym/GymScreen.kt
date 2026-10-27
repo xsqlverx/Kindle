@@ -87,7 +87,7 @@ fun GymScreen(
                 Text(next?.let { "Next up · ${it.exerciseName}" } ?: "Your saved sets are checked off.",
                     color = lifeColors.textSecondary, fontSize = 12.sp)
             }
-            if (onLogTraining != null) TextButton(onClick = { onLogTraining(selectedSplit) }) { Text("Log today's training effort") }
+            if (onLogTraining != null) WorkspaceTextButton(onClick = { onLogTraining(selectedSplit) }) { Text("Log today's training effort") }
         }
 
         if (restTimer > 0) {
@@ -99,8 +99,8 @@ fun GymScreen(
                         Text(String.format(Locale.getDefault(), "%02d:%02d", restTimer / 60, restTimer % 60),
                             fontSize = 35.sp, fontWeight = FontWeight.Light, color = lifeColors.primaryAccent)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            TextButton(onClick = { viewModel.startRestTimer(restTimer + 30) }) { Text("Add 30 seconds") }
-                            TextButton(onClick = { viewModel.stopRestTimer() }) { Text("End rest", color = lifeColors.textSecondary) }
+                            WorkspaceTextButton(onClick = { viewModel.startRestTimer(restTimer + 30) }) { Text("Add 30 seconds") }
+                            WorkspaceTextButton(onClick = { viewModel.stopRestTimer() }) { Text("End rest", color = lifeColors.textSecondary) }
                         }
                     }
                 }
@@ -122,7 +122,7 @@ fun GymScreen(
                     fontWeight = FontWeight.Bold,
                     color = lifeColors.textPrimary
                 )
-                TextButton(onClick = { showAddSetDialog = true }) {
+                WorkspaceTextButton(onClick = { showAddSetDialog = true }) {
                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Add Set", fontWeight = FontWeight.Bold)
@@ -278,7 +278,7 @@ fun GymScreen(
                                 }
                             }
 
-                            FilledTonalButton(
+                            WorkspaceTonalButton(
                                 onClick = {
                                     playAppleHaptic(context)
                                     showMealDialog = true
@@ -429,7 +429,7 @@ fun GymScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        FilledTonalButton(
+                        WorkspaceTonalButton(
                             onClick = {
                                 playAppleHaptic(context)
                                 viewModel.addWaterMl(250)
@@ -449,7 +449,7 @@ fun GymScreen(
                             Text("250 ml", fontSize = 13.sp, fontWeight = FontWeight.Bold)
                         }
 
-                        Button(
+                        WorkspaceButton(
                             onClick = {
                                 playAppleHaptic(context)
                                 viewModel.addWaterMl(500)
@@ -490,7 +490,7 @@ fun GymScreen(
                         String.format(Locale.getDefault(), "%+.1f kg since your first saved weigh-in", weightDelta),
                         color = lifeColors.textSecondary, fontSize = 12.sp)
                     Spacer(Modifier.height(8.dp))
-                    TextButton(onClick = { showWeightDialog = true }) { Text("Log weigh-in / edit target", fontSize = 12.sp) }
+                    WorkspaceTextButton(onClick = { showWeightDialog = true }) { Text("Log weigh-in / edit target", fontSize = 12.sp) }
                 }
             }
         }
@@ -537,7 +537,7 @@ fun GymScreen(
                 }
             },
             confirmButton = {
-                Button(
+                WorkspaceButton(
                     enabled = validWeight && validGoal,
                     onClick = {
                         if (validWeight && validGoal) {
@@ -551,7 +551,7 @@ fun GymScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showWeightDialog = false }) { Text("Cancel") }
+                WorkspaceTextButton(onClick = { showWeightDialog = false }) { Text("Cancel") }
             }
         )
     }
@@ -632,7 +632,7 @@ fun GymScreen(
                 }
             },
             confirmButton = {
-                Button(
+                WorkspaceButton(
                     onClick = {
                         if (exerciseName.isNotBlank()) {
                             viewModel.addExerciseSet(
@@ -648,7 +648,7 @@ fun GymScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showAddSetDialog = false }) { Text("Cancel") }
+                WorkspaceTextButton(onClick = { showAddSetDialog = false }) { Text("Cancel") }
             }
         )
     }
@@ -698,7 +698,7 @@ fun GymScreen(
                 }
             },
             confirmButton = {
-                Button(
+                WorkspaceButton(
                     onClick = {
                         viewModel.logQuickMeal(
                             calories = calInput.toIntOrNull() ?: 0,
@@ -713,7 +713,7 @@ fun GymScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showMealDialog = false }) { Text("Cancel") }
+                WorkspaceTextButton(onClick = { showMealDialog = false }) { Text("Cancel") }
             }
         )
     }

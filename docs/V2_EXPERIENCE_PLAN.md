@@ -18,6 +18,12 @@ pending. This resolves the source-level gap in the historical diagnosis below.
 
 ## Feedback that changes the brief
 
+2026-10-28: the user reports widespread button inconsistency, specifically Whole day and
+Everyday tools. CONTROL_DESIGN.md records the implementation: shared native control roles,
+consistent labels/corners/padding and press response, a bounded day disclosure and integrated
+quick-access surface. All actions/data remain. Professional visual fit requires device feedback;
+source checks are not visual acceptance.
+
 The user tested the app. They called it excellent **for a V1 prototype only**, but report that it feels disconnected and gives them too little reason to open it even for testing. They explicitly want more tabs/spaces, more meaningful capability, a unified experience, richer animations and motion, liquid glass, and a much more compelling visual experience for an app intended to organize their whole life.
 
 The V1 approval establishes a foundation. It must not be interpreted as an instruction to freeze the current quiet surfaces, navigation, feature set, or interaction depth. Preserve the original requirement to derive an original experience rather than copy supplied references.

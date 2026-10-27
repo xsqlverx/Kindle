@@ -1,5 +1,9 @@
 package com.example.ui.screens.settings
 
+import com.example.ui.components.WorkspaceButton
+import com.example.ui.components.WorkspaceOutlinedButton
+import com.example.ui.components.WorkspaceTextButton
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -286,7 +290,7 @@ fun SettingsScreen(
                 )
             },
             confirmButton = {
-                Button(
+                WorkspaceButton(
                     onClick = {
                         playAppleHaptic(context, strong = true)
                         viewModel.resetAllDataToDefault()
@@ -303,7 +307,7 @@ fun SettingsScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showResetConfirmDialog = false }) {
+                WorkspaceTextButton(onClick = { showResetConfirmDialog = false }) {
                     Text("Cancel", color = lifeColors.textSecondary)
                 }
             }
@@ -337,7 +341,7 @@ fun SettingsScreen(
                 )
             },
             confirmButton = {
-                Button(
+                WorkspaceButton(
                     onClick = {
                         playAppleHaptic(context, strong = true)
                         viewModel.resetAttendanceData()
@@ -352,7 +356,7 @@ fun SettingsScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showResetAttendanceDialog = false }) {
+                WorkspaceTextButton(onClick = { showResetAttendanceDialog = false }) {
                     Text("Cancel", color = lifeColors.textSecondary)
                 }
             }
@@ -422,7 +426,7 @@ fun SettingsScreen(
                 }
             },
             confirmButton = {
-                Button(
+                WorkspaceButton(
                     onClick = {
                         val (success, msg) = viewModel.importTimetableJson(jsonText)
                         if (success) {
@@ -440,7 +444,7 @@ fun SettingsScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showTimetableImportDialog = false }) {
+                WorkspaceTextButton(onClick = { showTimetableImportDialog = false }) {
                     Text("Cancel", color = lifeColors.textSecondary)
                 }
             }
@@ -513,7 +517,7 @@ fun SettingsScreen(
                 }
             },
             confirmButton = {
-                Button(
+                WorkspaceButton(
                     onClick = {
                         val (success, msg) = viewModel.importWorkoutJson(jsonText)
                         if (success) {
@@ -531,7 +535,7 @@ fun SettingsScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showWorkoutImportDialog = false }) {
+                WorkspaceTextButton(onClick = { showWorkoutImportDialog = false }) {
                     Text("Cancel", color = lifeColors.textSecondary)
                 }
             }
@@ -601,7 +605,7 @@ fun SettingsScreen(
                             color = lifeColors.textSecondary
                         )
 
-                        OutlinedButton(
+                        WorkspaceOutlinedButton(
                             onClick = {
                                 val cal = Calendar.getInstance().apply {
                                     timeInMillis = selectedMillis
@@ -660,7 +664,7 @@ fun SettingsScreen(
                 }
             },
             confirmButton = {
-                Button(
+                WorkspaceButton(
                     onClick = {
                         playAppleHaptic(context)
                         viewModel.setTargetExam(examTitle.trim().ifBlank { "Upcoming Exam" }, selectedMillis)
@@ -678,7 +682,7 @@ fun SettingsScreen(
             dismissButton = {
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     if (targetExam.dateMillis > 0L) {
-                        TextButton(
+                        WorkspaceTextButton(
                             onClick = {
                                 playAppleHaptic(context)
                                 viewModel.clearTargetExam()
@@ -691,7 +695,7 @@ fun SettingsScreen(
                             Text("Clear", color = RingGymRose)
                         }
                     }
-                    TextButton(onClick = { showExamDateDialog = false }) {
+                    WorkspaceTextButton(onClick = { showExamDateDialog = false }) {
                         Text("Cancel", color = lifeColors.textSecondary)
                     }
                 }

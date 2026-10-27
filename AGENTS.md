@@ -23,6 +23,12 @@ The user authorized pushing this ongoing revamp to `origin/main`. Verify the che
 
 ## Continuity
 
+Latest control feedback (2026-10-28): most buttons feel unprofessional/out of place, naming
+Today's Whole day and Habits/water/everyday tools. Read docs/CONTROL_DESIGN.md. Use the shared
+native controls and deliberate primary/secondary/disclosure hierarchy in live UI; preserve
+callbacks, data, disabled/focus/accessibility behavior and reduced motion. Source-only evidence
+does not confirm native visual quality, cloud compilation or final user approval.
+
 Latest feedback after `4951ae3`: a feature library alone did not make the average day or
 testing path understandable. The user prioritized removing cognitive load and rewarding
 motion, requested internet research, and explicitly asked for implementation/push without

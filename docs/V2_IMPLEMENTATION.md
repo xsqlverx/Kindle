@@ -74,6 +74,15 @@ Current first delivery: stages 1–3 have working source implementations; stage 
 opt-in plan/timer reminders, source checks and ten supplied cloud test methods. Cloud
 compilation, Android test execution, rendering, delivery and device refinement remain open.
 
+## Control design follow-up
+
+Latest presentation stage, 2026-10-28, baseline `fbaa1f5`: CONTROL_DESIGN.md defines the
+code-grounded control plan and evidence. Shared native buttons now cover live screen actions;
+Today, Plan and the chooser use coherent rows/disclosures. No data/schema changes. The exact
+pinned Material3 source signatures were inspected, source checks pass for 59 Kotlin files,
+and callback-preservation was checked. No local Android compilation/test execution or observed
+cloud/device result. Follow the visual/interaction acceptance path in V2_VERIFICATION.md.
+
 ## Attendance reliability follow-up
 
 Baseline `56f8d3a`; refreshed clean main. The user explicitly reports spammable counters,
