@@ -1,6 +1,6 @@
 # App revamp: working direction
 
-Status: the user enthusiastically accepted the first Today prototype and requested continuation. Its visual language now extends through the workspace; see STATUS.md for implementation and verification, and PROJECT_CONTEXT.md for the durable requirement record. Naming and logo work come last.
+Status: the first Today prototype was accepted for V1 only. V2 implementation now includes the connected shell, live day/session foundation and working new modules; see STATUS.md, V2_IMPLEMENTATION.md and V2_VERIFICATION.md. Cloud compilation/device verification remain unobserved. Naming and logo work come last.
 
 ## Purpose
 
@@ -10,7 +10,7 @@ The main difficulty described by the user is losing structure after returning ho
 
 ## Existing scope to preserve
 
-Keep every current capability across Today, Fitness, College, Tasks, Daily Reset, and Settings. The user uses all five main areas and wants greater depth. Any later navigation changes must keep these areas easy to reach. The final navigation structure and side panel remain open for discussion.
+Keep every current capability across Today, Fitness, College, Tasks, Daily Reset, and Settings. The confirmed fixed centre launcher and four fully assignable outer slots now route the 13-space library. The expanded centre geometry is an implemented first design, pending device feedback; no side restrictions or permanent outer assignments apply.
 
 ## User's weekday: approximate, not a fixed schedule
 
@@ -62,7 +62,7 @@ Interpretation: compact controls can reveal additional capability through connec
 
 These are candidates grounded in the reported day, not a requirement to add five more tabs. Additional modules should earn space through a recurring use case. No final side-panel design has been selected.
 
-## Current source evidence and implementation gaps
+## V1 source diagnosis (historical; current V2 status is in STATUS.md)
 
 - Native Android app using Kotlin and Jetpack Compose, with Room-backed data.
 - The manifest currently declares vibration permission. No application notification/alarm scheduler, alarm receiver, or notification permission declaration was found in the checked main source.
@@ -80,6 +80,6 @@ Show the same proposed Today screen in three situations: an ordinary college day
 - Actual timetable and accurate attendance screenshot.
 - Actual workout routine if changes to guidance are wanted.
 - Device feedback on the workspace continuation. The first Today study was already enthusiastically accepted.
-- Final navigation and side-panel structure, to discuss after the feature relationships are clear.
+- Device refinement of the implemented expanding centre launcher; the five-position contract is confirmed.
 
 The user has already completed the five discovery questions. Future discussion should use concrete examples and prototypes rather than repeat the intake questionnaire.

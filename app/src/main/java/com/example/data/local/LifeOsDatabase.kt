@@ -174,12 +174,15 @@ interface DailyResetDao {
         ExerciseSetLog::class,
         BodyWeightLog::class,
         WaterLog::class,
-        DailyResetRecord::class
+        DailyResetRecord::class,
+        DayBlock::class, WorkSessionRecord::class, WorkProject::class, ProjectStep::class,
+        CaptureNote::class, ExamTopic::class, CodingAttempt::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class LifeOsDatabase : RoomDatabase() {
+    abstract fun workspaceDao(): WorkspaceDao
     abstract fun taskDao(): TaskDao
     abstract fun habitDao(): HabitDao
     abstract fun academicDao(): AcademicDao

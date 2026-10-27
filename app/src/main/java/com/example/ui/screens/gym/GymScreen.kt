@@ -39,7 +39,8 @@ import java.util.*
 @Composable
 fun GymScreen(
     viewModel: LifeOsViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onLogTraining: ((String) -> Unit)? = null
 ) {
     val lifeColors = LocalLifeOsColors.current
     val context = LocalContext.current
@@ -86,6 +87,7 @@ fun GymScreen(
                 Text(next?.let { "Next up · ${it.exerciseName}" } ?: "Your saved sets are checked off.",
                     color = lifeColors.textSecondary, fontSize = 12.sp)
             }
+            if (onLogTraining != null) TextButton(onClick = { onLogTraining(selectedSplit) }) { Text("Log today's training effort") }
         }
 
         if (restTimer > 0) {

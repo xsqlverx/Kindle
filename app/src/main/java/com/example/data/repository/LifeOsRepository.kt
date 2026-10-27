@@ -1,7 +1,7 @@
 package com.example.data.repository
 
 import android.content.Context
-import androidx.room.Room
+import com.example.data.local.DatabaseProvider
 import com.example.data.local.LifeOsDatabase
 import com.example.data.model.*
 import kotlinx.coroutines.CoroutineScope
@@ -18,11 +18,7 @@ import java.util.Locale
 
 class LifeOsRepository(context: Context) {
 
-    private val db: LifeOsDatabase = Room.databaseBuilder(
-        context.applicationContext,
-        LifeOsDatabase::class.java,
-        "life_os_database_v6"
-    ).fallbackToDestructiveMigration().build()
+    private val db: LifeOsDatabase = DatabaseProvider.get(context)
 
     private val taskDao = db.taskDao()
     private val habitDao = db.habitDao()
@@ -56,20 +52,8 @@ class LifeOsRepository(context: Context) {
         }
     }
 
-    init {
-        CoroutineScope(Dispatchers.IO).launch {
-            if (!prefs.getBoolean("user_clean_slate", false)) {
-                seedDefaultDataIfEmpty()
-            }
-            if (!prefs.getBoolean("cleaned_legacy_mock_water_v2", false)) {
-                val currentWater = fitnessDao.getWaterLogs().first()
-                if (currentWater.size == 4 && currentWater.sumOf { it.amountMl } == 1750) {
-                    fitnessDao.clearWaterLogs()
-                }
-                prefs.edit().putBoolean("cleaned_legacy_mock_water_v2", true).apply()
-            }
-        }
-    }
+    // V2 never inserts example records or deletes look-alike records at startup.
+    // Preserve older stored data; its provenance cannot be inferred safely.
 
     // Tasks
     val allTasks: Flow<List<TaskItem>> = taskDao.getAllTasks()

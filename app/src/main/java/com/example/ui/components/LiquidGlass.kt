@@ -6,6 +6,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -120,7 +121,7 @@ fun LiquidGlassCard(
 
     val animatedScale by animateFloatAsState(
         targetValue = if (isPressed && onClick != null) 0.97f else 1f,
-        animationSpec = spring(dampingRatio = 0.75f, stiffness = 400f),
+        animationSpec = if (LocalReducedMotion.current) snap() else spring(dampingRatio = 0.75f, stiffness = 400f),
         label = "glassCardScale"
     )
 

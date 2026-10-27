@@ -2,6 +2,12 @@
 
 Historical first-pass notes for commit `6c8b447`. The user accepted that prototype and requested continuation. The shared dock, workspace palette, and task-to-focus integration have since been extended; see STATUS.md for the current implementation and checks.
 
+V2 continuation: this design is now accessible through **Settings > V1 design preview**.
+Live Today reads actual plan/session records and an explicit dated home check-in instead.
+The descriptions below remain historical V1 behavior; V2 source/verification boundaries are
+in V2_IMPLEMENTATION.md and V2_VERIFICATION.md. The shared session now archives history
+before clearing rather than losing a dismissed session.
+
 ## Try it
 
 Open Today. The first-look design starts in the Home moment. Select College, Home, or Running late to explore three explicitly labelled sample situations. Sample times are suggestions based on the user's approximate weekday, not activity detection or a verified timetable.

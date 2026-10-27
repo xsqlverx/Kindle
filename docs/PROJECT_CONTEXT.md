@@ -61,12 +61,29 @@ For attendance, the user chose a screenshot as the faster way to establish accur
 - MP4: `C:/Users/kenaz/Downloads/ux_ronasit_pindown.io_1793032755.mp4`.
 - Both were inspected. Their observations are recorded in REVAMP_DIRECTION.md. Local Downloads paths are not portable repository assets.
 
-## Read next
+## Implemented V2 foundation (2026-10-27)
+
+The first V2 source delivery now implements 13 destinations, unrestricted four-slot
+configuration, the morphing centre launcher, live Today/Plan, source-linked study/session
+history, Projects, Capture, Exam Prep, Coding Practice and Review. The chosen inventory is
+an implementation decision grounded in the brief, not a newly obtained final design approval.
+The existing College/Fitness/Tasks/Reset/Settings tools remain; the old sample moments live
+under Settings > V1 design preview. Appearance now applies to live Today as well.
+
+An additive Room 2-to-3 migration replaces destructive fallback. Automatic startup seeding
+and heuristic water deletion are disabled; existing records are preserved, including any
+older samples whose provenance cannot be inferred safely. Reminders are opt-in inexact local
+alarms with permission checks; delivery has not been observed. No local build/tests were run.
+See V2_IMPLEMENTATION.md, V2_VERIFICATION.md and STATUS.md for exact scope and limits.
+
+### Continue from these files
 
 - NEXT_CHAT_PROMPT.md: paste-ready implementation handoff for a new chat.
 - STATUS.md: current implementation, latest handoff, validation, and remaining work.
 - V2_EXPERIENCE_PLAN.md: device feedback, explicit V2 goals, and proposed product/navigation/motion plan.
 - REVAMP_DIRECTION.md: discovery answers, visual interpretation, and proposed feature depth.
 - TODAY_PROTOTYPE.md: prototype behavior and explicit limitations.
+- V2_IMPLEMENTATION.md: concise code-grounded stages and the implemented destination inventory.
+- V2_VERIFICATION.md: source evidence, supplied cloud tests, device journeys and known gaps.
 
 Update these documents when the user changes direction. Keep uncertain inputs uncertain; do not silently promote suggestions into requirements.

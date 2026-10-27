@@ -84,7 +84,7 @@ fun WorkspaceTopBar(
             title = { Text("Make yourself at home.", fontWeight = FontWeight.Medium) },
             text = {
                 Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Choose a palette for your workspace. Today keeps its first-look dark canvas.",
+                    Text("Choose a palette for your workspace. The V1 design preview keeps its original dark canvas.",
                         color = colors.textSecondary, fontSize = 13.sp, lineHeight = 20.sp)
                     Spacer(Modifier.height(8.dp))
                     AppThemeMode.entries.forEach { mode ->

@@ -32,6 +32,7 @@ import com.example.ui.theme.LocalLifeOsColors
 import com.example.ui.theme.RingGymRose
 import com.example.ui.theme.RingHabitEmerald
 import com.example.viewmodel.LifeOsViewModel
+import com.example.viewmodel.WorkspaceViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -42,7 +43,11 @@ import java.util.Locale
 fun SettingsScreen(
     viewModel: LifeOsViewModel,
     onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    workspace: WorkspaceViewModel? = null,
+    onPreview: () -> Unit = {},
+    onWipeWorkspace: () -> Unit = {},
+    canWipeWorkspace: Boolean = true
 ) {
     val lifeColors = LocalLifeOsColors.current
     val context = LocalContext.current
@@ -106,13 +111,18 @@ fun SettingsScreen(
                             color = lifeColors.primaryAccent
                         )
                         Text(
-                            text = "Settings & Lab Sync",
+                            text = "Make it yours",
                             fontSize = 22.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = lifeColors.textPrimary
                         )
                     }
                 }
+            }
+
+            if (workspace != null) item { NavigationEditor(workspace) }
+            item {
+                SettingsActionCard(Icons.Default.Palette, "V1 design preview", "The three sample moments, separate from your live day", "Preview", onPreview)
             }
 
             // Section 1: Timetable & Academic Data
@@ -208,9 +218,9 @@ fun SettingsScreen(
             item {
                 SettingsActionCard(
                     icon = Icons.Default.RestartAlt,
-                    title = "Wipe All App Data (Start Clean)",
-                    description = "Completely wipes all tasks, habits, assignments, workout logs, weight logs, and intake logs. Starts clean with zero mock data",
-                    actionLabel = "Wipe All Data",
+                    title = "Clear Tracked Records",
+                    description = "Clears tracked records and V2 workspace data. Timetable, targets, Daily Reset records and preferences remain.",
+                    actionLabel = "Clear Records",
                     isDestructive = true,
                     onClick = { showResetConfirmDialog = true },
                     testTag = "reset_all_data_button"
@@ -258,14 +268,14 @@ fun SettingsScreen(
             },
             title = {
                 Text(
-                    text = "Wipe All App Data?",
+                    text = "Clear Tracked Records?",
                     fontWeight = FontWeight.Bold,
                     color = lifeColors.textPrimary
                 )
             },
             text = {
                 Text(
-                    text = "This will permanently wipe all tasks, habits, assignments, workouts, weight logs, water & calorie logs, and reset attendance to 0/0. The app will be 100% clean with no mock data.",
+                    text = "This permanently clears tasks, habits, assignments, exercise sets, weight, water and calorie logs, plan blocks, sessions, projects, captures, exam topics and coding attempts. Attendance returns to 0/0. Timetable, targets, Daily Reset records and preferences remain.",
                     fontSize = 13.sp,
                     color = lifeColors.textSecondary
                 )
@@ -275,14 +285,16 @@ fun SettingsScreen(
                     onClick = {
                         playAppleHaptic(context, strong = true)
                         viewModel.resetAllDataToDefault()
+                        onWipeWorkspace()
                         showResetConfirmDialog = false
                         coroutineScope.launch {
-                            snackbarHostState.showSnackbar("All app data wiped. Clean slate ready!")
+                            snackbarHostState.showSnackbar("Record clearing requested")
                         }
                     },
+                    enabled = canWipeWorkspace,
                     colors = ButtonDefaults.buttonColors(containerColor = RingGymRose)
                 ) {
-                    Text("Wipe Everything")
+                    Text("Clear These Records")
                 }
             },
             dismissButton = {

@@ -1,6 +1,6 @@
 # Working on this app
 
-Read `docs/PROJECT_CONTEXT.md`, `docs/REVAMP_DIRECTION.md`, `docs/STATUS.md`, and `docs/V2_EXPERIENCE_PLAN.md` before making changes. Keep those files current when decisions, implementation, or verification status change. `docs/TODAY_PROTOTYPE.md` records the first implementation.
+Read `docs/PROJECT_CONTEXT.md`, `docs/REVAMP_DIRECTION.md`, `docs/STATUS.md`, `docs/V2_EXPERIENCE_PLAN.md`, `docs/V2_IMPLEMENTATION.md`, and `docs/V2_VERIFICATION.md` before making changes. Keep those files current when decisions, implementation, or verification status change. `docs/TODAY_PROTOTYPE.md` records the historical first implementation, now an optional Settings preview.
 
 ## Established requirements
 

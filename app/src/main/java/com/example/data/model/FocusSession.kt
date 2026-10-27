@@ -11,7 +11,15 @@ data class FocusSession(
     val phase: FocusPhase = FocusPhase.IDLE,
     val durationSeconds: Int = 25 * 60,
     val pausedSeconds: Int = 25 * 60,
-    val deadlineMillis: Long = 0L
+    val deadlineMillis: Long = 0L,
+    val id: String = "",
+    val startedAt: Long = 0L,
+    val sourceType: String = "CUSTOM",
+    val sourceId: String = "",
+    val blockId: String = "",
+    val material: String = "",
+    val firstStep: String = "",
+    val resumeNote: String = ""
 ) {
     val isActive: Boolean
         get() = phase == FocusPhase.RUNNING || phase == FocusPhase.PAUSED

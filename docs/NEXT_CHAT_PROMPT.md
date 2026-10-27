@@ -6,8 +6,10 @@ First read AGENTS.md and these repository documents:
 - docs/REVAMP_DIRECTION.md
 - docs/STATUS.md
 - docs/TODAY_PROTOTYPE.md (historical V1 notes)
+- docs/V2_IMPLEMENTATION.md
+- docs/V2_VERIFICATION.md
 
-Inspect Git status and the actual source. Preserve existing local changes. The current application baseline includes commits 6c8b447 and 40463c6; the later V2 requirement documents supersede treating V1 as the finished design.
+Inspect Git status and the actual source. Preserve existing local changes. V1 includes commits 6c8b447 and 40463c6, followed by the V2 delivery described in STATUS.md and the current Git log. The first V2 source now has 13 routed working destinations, the expanding launcher, persistent four-slot editor, shared plan/session history, opt-in local reminders and new learning/project modules. Do not rebuild another registry or shell. Continue from its concrete gaps and external build/device feedback; do not claim the unobserved cloud tests passed.
 
 WHAT I WANT
 
@@ -43,7 +45,7 @@ Preserve ALL current features and data: timetable/deadline editing, attendance, 
 EXECUTION AND DELIVERY
 
 - Start with a concise code-grounded plan, write implementation stages and acceptance checks into the repo, then begin coding. Do not repeat the discovery questionnaire or stop at a proposal.
-- Begin with the destination architecture, animated launcher, redesigned Settings, persistent four-slot configuration, and connected day/session foundation. Continue into useful working modules; a registry or attractive shell alone does not fulfil V2.
+- Inspect the implemented destination architecture, launcher, Settings, plan/session foundation and modules first. Continue with cloud/device repair, richer source-to-session transitions, recurring commitments, deeper longitudinal training/academic history and any observed journey failures. Preserve the working modules; a registry or attractive shell alone does not fulfil V2. V2_VERIFICATION.md records the exact remaining boundaries.
 - Do not compile the Android app locally, run Gradle, launch emulators, or execute Android tests locally. I have an external cloud builder.
 - Perform source/static checks and add meaningful tests for cloud execution where needed. Use explicit UTF-8 for file reads/writes; an earlier pass caught Windows text-encoding corruption.
 - Preserve the native Kotlin/Compose app and existing user data. Do not alter signing/cloud-build configuration or remove features to avoid build errors. Use proper migrations for any schema changes.

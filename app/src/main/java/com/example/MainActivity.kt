@@ -1,316 +1,224 @@
 package com.example
 
 import android.os.Bundle
+import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.view.WindowCompat
-import com.example.data.model.AppThemeMode
-import com.example.ui.components.LectureDetailSheet
-import com.example.ui.components.LifeOsTab
-import com.example.ui.components.TodayPrototypeDock
-import com.example.ui.components.WorkspaceTopBar
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.data.model.*
+import com.example.ui.components.*
 import com.example.ui.screens.academics.AcademicsScreen
 import com.example.ui.screens.gym.GymScreen
 import com.example.ui.screens.reset.DailyResetScreen
+import com.example.ui.screens.settings.SettingsScreen
 import com.example.ui.screens.tasks.TasksMatrixScreen
-import com.example.ui.screens.today.TodayScreen
+import com.example.ui.screens.today.TodayDesignPreview
+import com.example.ui.screens.today.TodayToolsScreen
+import com.example.ui.screens.workspace.*
 import com.example.ui.theme.LifeOsTheme
 import com.example.ui.theme.LocalLifeOsColors
-import com.example.viewmodel.LifeOsViewModel
-import com.example.viewmodel.TodayPrototypeViewModel
+import com.example.viewmodel.*
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
+    private var reminderRequest by mutableStateOf<Pair<String, String>?>(null)
+    private fun readReminder(intent: Intent) {
+        val action = intent.getStringExtra("work_action") ?: return
+        reminderRequest = action to intent.getStringExtra("block_id").orEmpty()
+        intent.removeExtra("work_action")
+    }
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        readReminder(intent)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        if (savedInstanceState == null) readReminder(intent)
         setContent {
-            val viewModel: LifeOsViewModel = composeViewModel()
-            val focusModel: TodayPrototypeViewModel = composeViewModel()
-            val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
-            val currentTab by viewModel.currentTab.collectAsStateWithLifecycle()
-
-            LifeOsTheme(mode = if (currentTab == LifeOsTab.TODAY) AppThemeMode.NIGHT_GRAPHITE else themeMode) {
-                val lifeColors = LocalLifeOsColors.current
-                val density = LocalDensity.current
-                val statusInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-                var headerHeight by remember { mutableStateOf(76.dp) }
-                val screenState = rememberSaveableStateHolder()
-                SideEffect {
-                    val insetsController = WindowCompat.getInsetsController(window, window.decorView)
-                    insetsController.isAppearanceLightStatusBars = !lifeColors.isDark
-                    insetsController.isAppearanceLightNavigationBars = !lifeColors.isDark
+            val life: LifeOsViewModel = viewModel()
+            val model: WorkspaceViewModel = viewModel()
+            val focus: TodayPrototypeViewModel = viewModel()
+            val destination by model.destination.collectAsStateWithLifecycle()
+            val slots by model.slots.collectAsStateWithLifecycle()
+            val reduced by model.reduceMotion.collectAsStateWithLifecycle()
+            val theme by life.themeMode.collectAsStateWithLifecycle()
+            val session by focus.session.collectAsStateWithLifecycle()
+            val savingSession by focus.saving.collectAsStateWithLifecycle()
+            val openSession by focus.openSessionPanel.collectAsStateWithLifecycle()
+            val message by model.message.collectAsStateWithLifecycle()
+            var launcher by rememberSaveable { mutableStateOf(false) }
+            var panel by rememberSaveable { mutableStateOf(false) }
+            var tools by rememberSaveable { mutableStateOf(false) }
+            var preview by rememberSaveable { mutableStateOf(false) }
+            var trainingSplit by rememberSaveable { mutableStateOf<String?>(null) }
+            var previous by rememberSaveable { mutableStateOf(Destination.TODAY.id) }
+            var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+            val lifecycle = LocalLifecycleOwner.current.lifecycle
+            val state = rememberSaveableStateHolder()
+            LaunchedEffect(reminderRequest) {
+                reminderRequest?.let { (action, id) -> model.handleReminder(action, id, focus); reminderRequest = null }
+            }
+            val navigate: (Destination) -> Unit = { to ->
+                if (to != destination) previous = destination.id
+                launcher = false
+                model.navigate(to)
+            }
+            val legacyNavigate: (LifeOsTab) -> Unit = { tab -> navigate(when (tab) {
+                LifeOsTab.TODAY -> Destination.TODAY
+                LifeOsTab.GYM -> Destination.FITNESS
+                LifeOsTab.ACADEMICS -> Destination.COLLEGE
+                LifeOsTab.TASKS -> Destination.TASKS
+                LifeOsTab.RESET -> Destination.RESET
+            }) }
+            LaunchedEffect(lifecycle, session.phase) {
+                lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    while (true) {
+                        now = System.currentTimeMillis()
+                        focus.refresh()
+                        delay(if (session.phase == FocusPhase.RUNNING) 1000L else 15_000L)
+                    }
                 }
-
-                // Full screen fluid canvas with atmospheric ambient light glows
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(lifeColors.background)
-                        .drawBehind {
-                            // Top subtle luminous orb in Iris
-                            drawCircle(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        lifeColors.primaryAccent.copy(alpha = if (lifeColors.isDark) 0.045f else 0.08f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(size.width * 0.8f, size.height * 0.12f),
-                                    radius = size.width * 0.7f
-                                )
-                            )
-                            // Bottom ambient glow in Secondary Accent
-                            drawCircle(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        lifeColors.secondaryAccent.copy(alpha = if (lifeColors.isDark) 0.025f else 0.05f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(size.width * 0.2f, size.height * 0.85f),
-                                    radius = size.width * 0.8f
-                                )
-                            )
-                        }
-                ) {
-                    var showSettings by remember { mutableStateOf(false) }
-                    val selectedLectureForDetail by viewModel.selectedLectureForDetail.collectAsStateWithLifecycle()
-                    val attendanceRecords by viewModel.attendanceRecords.collectAsStateWithLifecycle()
-                    val lectureStatus by viewModel.currentLectureStatus.collectAsStateWithLifecycle()
-
-                    val settingsProgress by animateFloatAsState(
-                        targetValue = if (showSettings) 1f else 0f,
-                        animationSpec = tween(
-                            durationMillis = if (showSettings) 340 else 320,
-                            easing = FastOutSlowInEasing
-                        ),
-                        label = "settingsProgress"
-                    )
-
-                    // Spring animation for hiding bottom nav bar when sheet or settings is open
-                    val navBarHideProgress by animateFloatAsState(
-                        targetValue = if (showSettings || selectedLectureForDetail != null) 1f else 0f,
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioLowBouncy,
-                            stiffness = Spring.StiffnessMediumLow
-                        ),
-                        label = "navBarHideProgress"
-                    )
-
-                    BackHandler(enabled = showSettings) {
-                        showSettings = false
-                    }
-
-                    Scaffold(
-                        modifier = Modifier.fillMaxSize(),
-                        containerColor = Color.Transparent,
-                        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-                        bottomBar = {
-                            val dockModifier = Modifier.graphicsLayer {
-                                alpha = (1f - navBarHideProgress * 1.5f).coerceIn(0f, 1f)
-                                translationY = navBarHideProgress * 64.dp.toPx()
-                            }
-                            TodayPrototypeDock(currentTab, { viewModel.setTab(it) }, dockModifier)
-                        }
-                    ) { innerPadding ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .statusBarsPadding()
-                                .padding(top = if (currentTab == LifeOsTab.TODAY) 0.dp else headerHeight)
-                                .padding(bottom = innerPadding.calculateBottomPadding())
-                                .clipToBounds()
-                        ) {
-                            AnimatedContent(
-                                targetState = currentTab,
-                                transitionSpec = {
-                                    val forward = targetState.ordinal > initialState.ordinal
-                                    val animationSpec = tween<IntOffset>(
-                                        durationMillis = 260,
-                                        easing = FastOutSlowInEasing
-                                    )
-                                    if (forward) {
-                                        slideInHorizontally(
-                                            initialOffsetX = { fullWidth -> fullWidth },
-                                            animationSpec = animationSpec
-                                        ) togetherWith slideOutHorizontally(
-                                            targetOffsetX = { fullWidth -> -fullWidth },
-                                            animationSpec = animationSpec
-                                        )
-                                    } else {
-                                        slideInHorizontally(
-                                            initialOffsetX = { fullWidth -> -fullWidth },
-                                            animationSpec = animationSpec
-                                        ) togetherWith slideOutHorizontally(
-                                            targetOffsetX = { fullWidth -> fullWidth },
-                                            animationSpec = animationSpec
-                                        )
-                                    }
-                                },
-                                label = "mainTabHorizontalSlide",
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clipToBounds()
-                            ) { tab ->
-                                screenState.SaveableStateProvider(tab.name) {
-                                    when (tab) {
-                                        LifeOsTab.TODAY -> TodayScreen(
-                                            viewModel = viewModel,
-                                            onNavigateToTab = { viewModel.setTab(it) },
-                                            onOpenSettings = { showSettings = true }
-                                        )
-                                        LifeOsTab.GYM -> GymScreen(
-                                            viewModel = viewModel
-                                        )
-                                        LifeOsTab.ACADEMICS -> AcademicsScreen(
-                                            viewModel = viewModel
-                                        )
-                                        LifeOsTab.TASKS -> TasksMatrixScreen(
-                                            viewModel = viewModel,
-                                            onStartFocus = { task ->
-                                                focusModel.start(task.title)
-                                                focusModel.requestSessionPanel()
-                                                viewModel.setTab(LifeOsTab.TODAY)
+            }
+            LaunchedEffect(openSession) { if (openSession) { panel = true; focus.consumeSessionPanelRequest() } }
+            BackHandler(enabled = launcher || tools || preview || destination != Destination.TODAY) {
+                when {
+                    launcher -> launcher = false
+                    tools -> tools = false
+                    preview -> preview = false
+                    destination == Destination.SETTINGS -> navigate(Destination.fromId(previous)?.takeIf { it != Destination.SETTINGS } ?: Destination.TODAY)
+                    else -> navigate(Destination.TODAY)
+                }
+            }
+            LifeOsTheme(mode = theme) {
+                val colors = LocalLifeOsColors.current
+                val density = LocalDensity.current
+                val dockReserve = workspaceDockHeight() + 20.dp
+                var capsuleHeight by remember { mutableStateOf(74.dp) }
+                val contentLayer = rememberGraphicsLayer()
+                val backdropLayer = rememberGraphicsLayer()
+                SideEffect {
+                    backdropLayer.renderEffect = if (android.os.Build.VERSION.SDK_INT >= 31) BlurEffect(20f, 20f, TileMode.Clamp) else null
+                    val controller = WindowCompat.getInsetsController(window, window.decorView)
+                    controller.isAppearanceLightStatusBars = !colors.isDark
+                    controller.isAppearanceLightNavigationBars = !colors.isDark
+                }
+                CompositionLocalProvider(LocalReducedMotion provides reduced, LocalWorkspaceBackdrop provides backdropLayer) {
+                    Box(Modifier.fillMaxSize().background(colors.background)) {
+                        // Capture only the page scene. Glass overlays cannot capture themselves.
+                        CompositionLocalProvider(LocalWorkspaceBackdrop provides null) {
+                            Box(Modifier.fillMaxSize().then(if (launcher) Modifier.clearAndSetSemantics {} else Modifier)
+                                .drawWithContent {
+                                    contentLayer.record { this@drawWithContent.drawContent() }
+                                    backdropLayer.record { drawLayer(contentLayer) }
+                                    drawLayer(contentLayer)
+                                }.background(Brush.radialGradient(listOf(colors.primaryAccent.copy(alpha = 0.14f), colors.background), center = Offset(750f, 300f), radius = 1300f))) {
+                                Column(Modifier.fillMaxSize()) {
+                                    WorkspaceTopBar(destination.title, destination.purpose, theme, life::setThemeMode,
+                                        { navigate(Destination.SETTINGS) }, false, 0f)
+                                    Box(Modifier.weight(1f).padding(bottom = dockReserve + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                                        if (session.phase != FocusPhase.IDLE) capsuleHeight + 12.dp else 0.dp).clipToBounds()) {
+                                        AnimatedContent(destination, transitionSpec = {
+                                            (fadeIn(tween(if (reduced) 0 else 180)) + slideInVertically(tween(if (reduced) 0 else 260)) { it / 20 }) togetherWith
+                                                fadeOut(tween(if (reduced) 0 else 140))
+                                        }, label = "workspace_destination") { target ->
+                                            state.SaveableStateProvider(target.id) {
+                                                when (target) {
+                                                    Destination.TODAY -> LiveTodayScreen(life, model, focus, now) { tools = true }
+                                                    Destination.PLAN -> PlanScreen(life, model, focus, now)
+                                                    Destination.COLLEGE -> AcademicsScreen(life, onStartWork = { assignment ->
+                                                        model.begin(focus, assignment.title, "ASSIGNMENT", assignment.id.toString(), firstStep = assignment.description)
+                                                    })
+                                                    Destination.STUDY -> StudyScreen(life, model, focus)
+                                                    Destination.FITNESS -> GymScreen(life, onLogTraining = { trainingSplit = it })
+                                                    Destination.TASKS -> TasksMatrixScreen(life, onStartFocus = { task -> model.begin(focus, task.title, "TASK", task.id.toString()) })
+                                                    Destination.PROJECTS -> ProjectsScreen(model, focus)
+                                                    Destination.CAPTURE -> CaptureScreen(model)
+                                                    Destination.EXAMS -> ExamPrepScreen(life, model, focus, now)
+                                                    Destination.PRACTICE -> PracticeScreen(model, focus, now)
+                                                    Destination.REVIEW -> ReviewScreen(life, model, focus, now)
+                                                    Destination.RESET -> DailyResetScreen(life, onFinishReset = { navigate(Destination.TODAY) })
+                                                    Destination.SETTINGS -> SettingsScreen(life, { navigate(Destination.fromId(previous) ?: Destination.TODAY) }, workspace = model, onPreview = { preview = true },
+                                                        onWipeWorkspace = { model.clearForUserWipe(focus) }, canWipeWorkspace = !savingSession)
+                                                }
                                             }
-                                        )
-                                        LifeOsTab.RESET -> DailyResetScreen(
-                                            viewModel = viewModel,
-                                            onFinishReset = { viewModel.setTab(LifeOsTab.TODAY) }
-                                        )
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-
-                    // Settings corner-origin expanding / collapsing overlay
-                    if (settingsProgress > 0.001f) {
-                        // Ambient dim scrim
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.35f * settingsProgress))
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null
-                                ) {
-                                    showSettings = false
-                                }
-                        )
-
-                        // Asymmetric Settings Motion: Bottom Sheet Slide-Up on open, Corner-origin Collapse on close
-                        val isOpening = showSettings
-                        val progress = settingsProgress
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .graphicsLayer {
-                                    if (isOpening) {
-                                        // Distinctive Full-Height Modal Sheet Slide-Up
-                                        val sheetHeight = if (size.height > 0f) size.height else 2000f
-                                        transformOrigin = TransformOrigin(0.5f, 1.0f)
-                                        translationX = 0f
-                                        translationY = sheetHeight * (1f - progress)
-                                        scaleX = 0.94f + 0.06f * progress
-                                        scaleY = 0.94f + 0.06f * progress
-                                        alpha = (progress * 1.5f).coerceIn(0f, 1f)
-                                        clip = true
-                                        shape = RoundedCornerShape(
-                                            topStart = (28.dp * (1f - progress)).coerceAtLeast(0.dp),
-                                            topEnd = (28.dp * (1f - progress)).coerceAtLeast(0.dp),
-                                            bottomStart = 0.dp,
-                                            bottomEnd = 0.dp
-                                        )
-                                    } else {
-                                        // Preserved closing collapse directly into the Settings icon
-                                        transformOrigin = TransformOrigin(0.92f, 0.045f)
-                                        scaleX = 0.04f + 0.96f * progress
-                                        scaleY = 0.04f + 0.96f * progress
-                                        translationX = (1f - progress) * 140.dp.toPx()
-                                        translationY = 0f
-                                        alpha = (progress * 2f).coerceIn(0f, 1f)
-                                        clip = true
-                                        shape = RoundedCornerShape((32.dp * (1f - progress)).coerceAtLeast(0.dp))
+                        AnimatedVisibility(session.phase != FocusPhase.IDLE && !launcher, modifier = Modifier.align(Alignment.BottomCenter),
+                            enter = fadeIn(tween(if (reduced) 0 else 220)) + expandVertically(tween(if (reduced) 0 else 300)),
+                            exit = fadeOut(tween(if (reduced) 0 else 140))) {
+                            BackdropGlass(Modifier.navigationBarsPadding().padding(start = 22.dp, end = 22.dp, bottom = dockReserve)
+                                .fillMaxWidth().onSizeChanged { capsuleHeight = with(density) { it.height.toDp() } }
+                                .clickable { panel = true }, radius = 24) {
+                                Row(Modifier.padding(horizontal = 18.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Column(Modifier.weight(1f)) {
+                                        Text(session.title, color = colors.textPrimary, fontSize = 13.sp, maxLines = 1)
+                                        Text(if (session.phase == FocusPhase.FINISHED) "Ready to review" else if (session.phase == FocusPhase.PAUSED) "Paused · tap to continue" else "In focus · tap to expand", color = colors.primaryAccent, fontSize = 11.sp)
                                     }
+                                    val seconds = session.remainingSeconds(now)
+                                    Text("%02d:%02d".format(seconds / 60, seconds % 60), color = colors.textPrimary, fontSize = 20.sp)
                                 }
-                        ) {
-                            com.example.ui.screens.settings.SettingsScreen(
-                                viewModel = viewModel,
-                                onBack = { showSettings = false }
-                            )
-                        }
-                    }
-
-                    // Top App Bar Glass anchored on top
-                    if (currentTab != LifeOsTab.TODAY || showSettings) WorkspaceTopBar(
-                        modifier = Modifier.onSizeChanged { size ->
-                            headerHeight = (with(density) { size.height.toDp() } - statusInset).coerceAtLeast(76.dp)
-                        },
-                        title = when (currentTab) {
-                            LifeOsTab.TODAY -> "Life OS"
-                            LifeOsTab.GYM -> "Fitness"
-                            LifeOsTab.ACADEMICS -> "College"
-                            LifeOsTab.TASKS -> "Tasks"
-                            LifeOsTab.RESET -> "Daily Reset"
-                        },
-                        subtitle = when (currentTab) {
-                            LifeOsTab.TODAY -> null
-                            LifeOsTab.GYM -> "TRAINING & HEALTH"
-                            LifeOsTab.ACADEMICS -> "TIMETABLE & ATTENDANCE"
-                            LifeOsTab.TASKS -> "FOCUS & PRIORITIES"
-                            LifeOsTab.RESET -> "NIGHT PROTOCOL"
-                        },
-                        currentThemeMode = themeMode,
-                        onThemeModeChanged = { viewModel.setThemeMode(it) },
-                        onOpenSettings = { showSettings = !showSettings },
-                        isSettingsOpen = showSettings,
-                        settingsProgress = settingsProgress
-                    )
-
-                    // 60% Slide-Up Lecture Detail Sheet with Spring Motion & Zero Overlap
-                    if (selectedLectureForDetail != null) {
-                        LectureDetailSheet(
-                            entry = selectedLectureForDetail,
-                            isOngoingOverride = if (selectedLectureForDetail?.id == lectureStatus.entry?.id) lectureStatus.isOngoing else null,
-                            attendanceRecords = attendanceRecords,
-                            onDismiss = { viewModel.closeLectureDetail() },
-                            onRecordAttendance = { code, attended ->
-                                viewModel.recordAttendance(code, attended)
                             }
-                        )
+                        }
+                        WorkspaceDock(slots, destination, launcher, { launcher = it }, navigate)
+                        val lecture by life.selectedLectureForDetail.collectAsStateWithLifecycle()
+                        val attendance by life.attendanceRecords.collectAsStateWithLifecycle()
+                        LaunchedEffect(lecture?.id) { if (lecture != null) { tools = false; preview = false } }
+                        if (lecture != null) LectureDetailSheet(lecture, attendanceRecords = attendance, onDismiss = life::closeLectureDetail,
+                            onRecordAttendance = life::recordAttendance)
+                        message?.let { text ->
+                            AlertDialog(onDismissRequest = model::clearMessage, title = { Text("Your workspace") }, text = { Text(text) },
+                                confirmButton = { TextButton(onClick = model::clearMessage) { Text("OK") } })
+                        }
+                        if (panel && session.phase != FocusPhase.IDLE) SessionPanel(focus, now, { model.resumeSession(focus) }) { panel = false }
+                        trainingSplit?.let { split ->
+                            RecordDialog("Training · $split", listOf("Actual duration in minutes", "Training note / next time"), onDismiss = { trainingSplit = null }) {
+                                model.recordTraining(split, it[0].toIntOrNull() ?: 0, it[1])
+                            }
+                        }
+                        if (tools || preview) Dialog(onDismissRequest = { tools = false; preview = false }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+                            Column(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().navigationBarsPadding()) {
+                                TextButton(onClick = { tools = false; preview = false }) { Text("Back to your live workspace") }
+                                Box(Modifier.weight(1f)) {
+                                    if (preview) TodayDesignPreview(life, legacyNavigate, onOpenSettings = { preview = false; navigate(Destination.SETTINGS) })
+                                    else TodayToolsScreen(life, { tools = false; legacyNavigate(it) })
+                                }
+                            }
+                        }
                     }
                 }
             }

@@ -60,7 +60,8 @@ import kotlin.math.floor
 @Composable
 fun AcademicsScreen(
     viewModel: LifeOsViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onStartWork: ((AssignmentItem) -> Unit)? = null
 ) {
     val lifeColors = LocalLifeOsColors.current
     val context = LocalContext.current
@@ -381,7 +382,8 @@ fun AcademicsScreen(
                         viewModel.toggleAssignment(assignment)
                     },
                     onEdit = { assignmentToEdit = assignment },
-                    onDelete = { assignmentToDelete = assignment }
+                    onDelete = { assignmentToDelete = assignment },
+                    onStartWork = if (onStartWork != null && !assignment.isSubmitted) ({ onStartWork(assignment) }) else null
                 )
             }
         }
@@ -916,7 +918,7 @@ private fun AttendanceBaselineDialog(record: AttendanceRecord, onDismiss: () -> 
 }
 
 @Composable
-private fun AssignmentGlassCard(assignment: AssignmentItem, onToggle: () -> Unit, onEdit: () -> Unit, onDelete: () -> Unit) {
+private fun AssignmentGlassCard(assignment: AssignmentItem, onToggle: () -> Unit, onEdit: () -> Unit, onDelete: () -> Unit, onStartWork: (() -> Unit)? = null) {
     val colors = LocalLifeOsColors.current
     val today = Calendar.getInstance().apply {
         set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
@@ -939,6 +941,7 @@ private fun AssignmentGlassCard(assignment: AssignmentItem, onToggle: () -> Unit
                 }
             }
             if (assignment.weightPercentage > 0) Text("${assignment.weightPercentage}% of course grade", color = colors.textTertiary, fontSize = 11.sp)
+            if (onStartWork != null) TextButton(onClick = onStartWork) { Text("Work on this deadline") }
             HorizontalDivider(color = colors.borderGlass)
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(when {

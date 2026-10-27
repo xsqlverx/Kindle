@@ -2,7 +2,7 @@
 
 Recorded 2026-10-27, Asia/Calcutta.
 
-Status: the user's V2 goals and the five-position navigation contract below are explicit requirements. The module inventory, expanded-panel composition, detailed motion, and implementation sequence remain proposals.
+Status: the V2 goals and five-position navigation contract below are explicit requirements. A first implementation of the inventory, centre expansion and connected flows is now in source. V2_IMPLEMENTATION.md records implementation choices; STATUS.md and V2_VERIFICATION.md distinguish source checks from unobserved cloud/device behavior. These choices are not final user design approval.
 
 ## Feedback that changes the brief
 
@@ -10,7 +10,7 @@ The user tested the app. They called it excellent **for a V1 prototype only**, b
 
 The V1 approval establishes a foundation. It must not be interpreted as an instruction to freeze the current quiet surfaces, navigation, feature set, or interaction depth. Preserve the original requirement to derive an original experience rather than copy supplied references.
 
-## Source-grounded diagnosis
+## Source-grounded diagnosis before V2 implementation
 
 - Today still defaults to the Home sample moment. Its proposed steps are static examples selected through College/Home/Running late controls.
 - The focus timer persists its current session, but there is no lasting study-session history or shared full-day plan. Dismissing the timer resets its session state.
@@ -99,4 +99,4 @@ The next meaningful prototype should let the user travel through a connected aft
 
 Native Compose supports shared bounds/elements; see https://developer.android.com/develop/ui/compose/animation/shared-elements . Blur capabilities vary by Android/Compose version; see https://developer.android.com/develop/ui/compose/graphics/images/customize . The project pins an older Compose BOM, so implementation must check available APIs before adopting current documentation examples. Blurring a foreground composable alone is not equivalent to capturing/softening a backdrop. Material effects need device verification.
 
-Continue the user's delivery restrictions: no local Android compilation or emulator; preserve data/features and use the external cloud builder for main. No new app code has been implemented merely by recording this plan. Exact attendance/timetable/workout inputs and the name/logo remain pending as recorded elsewhere.
+Continue the delivery restrictions: no local Android compilation or emulator; preserve data/features and use the external cloud builder for main. The first implementation now replaces the primary sample selector with a real shared day and sessions, adds the 13-space library and working modules, and introduces opt-in reminders. Source checks do not establish a successful build or delivered alert. Exact attendance/timetable/workout inputs and name/logo remain pending.
