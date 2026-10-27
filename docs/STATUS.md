@@ -23,11 +23,13 @@ Last updated: 2026-10-27, Asia/Calcutta.
 
 ## Outstanding product work
 
+The user tested the workspace continuation and explicitly scoped their praise to V1. Their latest feedback identifies disconnection, low motivation to open the app, insufficient breadth/depth, and a need for materially richer motion and glass. V2_EXPERIENCE_PLAN.md records the proposed response. This feedback supersedes treating the current shared styling as a finished experience.
+
 - Actual notifications and alarms, actionable delivery, permission handling, and device verification.
 - A real configurable day plan and recovery logic. The current Today moments remain explicitly labelled examples.
 - Official attendance baseline, per-class history, cancellation handling, undo, and duplicate-marking protection. Manual aggregate corrections are available in College.
 - Exact timetable, attendance screenshot, and the user's confirmed workout program.
-- Final navigation/side-panel decision and useful additions beyond the current areas.
+- Implement the confirmed fixed centre launcher with four fully assignable outer slots, the redesigned Settings editor, and a complete library of genuinely useful new destinations. The intended library is 12+; the current app has not implemented that inventory. Exact expanded geometry and module choices remain open.
 - Name and logo, after the product and design stabilize.
 
 ## Verification

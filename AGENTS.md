@@ -1,14 +1,15 @@
 # Working on this app
 
-Read `docs/PROJECT_CONTEXT.md`, `docs/REVAMP_DIRECTION.md`, and `docs/STATUS.md` before making changes. Keep those files current when decisions, implementation, or verification status change. `docs/TODAY_PROTOTYPE.md` records the first implementation.
+Read `docs/PROJECT_CONTEXT.md`, `docs/REVAMP_DIRECTION.md`, `docs/STATUS.md`, and `docs/V2_EXPERIENCE_PLAN.md` before making changes. Keep those files current when decisions, implementation, or verification status change. `docs/TODAY_PROTOTYPE.md` records the first implementation.
 
 ## Established requirements
 
 - Native Android, Kotlin, Jetpack Compose. Preserve all existing capabilities in Today, College, Fitness, Tasks, Daily Reset, and Settings.
 - The user enthusiastically accepted the Today prototype at commit `6c8b447`. Continue its charcoal, smoke-violet, pale-lavender visual language and sculpted day ribbon. Extend it with distinct layouts for each activity.
+- Later device feedback explicitly limits that praise to **V1**. V2 must address the reported disconnection and add more spaces, meaningful capability, unified behavior, much richer motion, and liquid glass. Do not use the earlier approval to freeze the current quiet presentation or five-destination structure. The detailed V2 plan is proposed, not an already approved final layout.
 - References supply material and interaction principles; do not copy their layouts and substitute this app's data.
 - The primary payoff is knowing what should happen now, the next concrete action, and how to recover after a missed start. The main failure point is the transition home from college.
-- Keep navigation discoverable and uncrowded. All five existing areas remain accessible. A final side-panel/navigation expansion is not yet agreed.
+- Confirmed navbar: four fully assignable outer slots around one fixed centre launcher replacing the current middle College button. Any available destination from the full 12+ tab library can occupy any outer slot in any order through a redesigned Settings destination. The centre button expands into the launcher. No permanent outer assignments or left/right category restrictions. Exact expanded geometry and module inventory remain open; the earlier nine-space split is not a locked plan. Preserve all existing areas and add genuinely new useful capabilities.
 - Naming and logo come last. The user dislikes both Life OS and Kindle; do not introduce another brand without discussion.
 - Approximate routine times and prototype scenarios must stay distinct from actual schedules, detected activity, or confirmed records.
 - Do not invent attendance, body measurements, study progress, successful actions, alert delivery, or cloud-build results.

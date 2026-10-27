@@ -17,6 +17,14 @@ The recurring questions the app should answer are: what is supposed to be happen
 - No local compilation. The user's external cloud builder consumes main; commit and push the work to main.
 - Requirements and status must live in the repository, beyond chat context.
 
+### V2 correction after device testing
+
+The user praised the app specifically **for V1 only**. They now report that it feels disconnected and gives too little reason to return, even for testing. They explicitly request more tabs/spaces, meaningful feature density, a unified experience, richer motion/animations, liquid glass, and a much stronger experiential identity. The V1 approval is a foundation, not final acceptance or a ceiling on richness. See V2_EXPERIENCE_PLAN.md for the proposed response and the subsequently confirmed navigation contract.
+
+### Confirmed navbar and Settings correction
+
+Replace the current middle College button with a fixed unified centre button that expands into the destination launcher. The other **four** positions, two on each side, can each hold **any** destination from the full 12+ tab library, in **any order** selected in a redesigned Settings destination. No outer destination is permanently glued into place, and there are no category restrictions by side. College becomes assignable like every other area. Settings remains reachable when unpinned. Exact launcher geometry and final module inventory remain open. The user explicitly wants useful new capabilities, not the existing app divided into nine labels.
+
 ## Routine and human constraints
 
 The full approximate weekday is in REVAMP_DIRECTION.md. Important anchors: college around 8:00 AM-1:30 PM; home around 2:30-2:50 PM; gym around 8:00-9:00 PM; family prayer around 9:30-10:30 PM; call with girlfriend around 10:30-11:45 PM. Exact boundaries remain uncertain.
@@ -37,7 +45,11 @@ For attendance, the user chose a screenshot as the faster way to establish accur
 | Notifications, alarms, useful follow-through | Desired; implementation still outstanding |
 | Attendance baseline from portal screenshot | Desired; screenshot not supplied |
 | More quality features without filler | Explicit requirement; candidate modules need a recurring purpose |
-| Natural access to additional tools / side panel | Desired; final navigation pattern deferred |
+| More tabs/spaces and greater feature density | Explicit V2 requirement after device testing |
+| Unified cross-space behavior, rich motion, and liquid glass | Explicit V2 requirement; extends beyond the current visual consistency |
+| Fixed expanding centre launcher plus four fully customizable outer slots | Explicit requirement; any available destination from the full 12+ library, any order |
+| Redesigned Settings with navbar assignment and ordering | Explicit requirement; selections persist |
+| Final launcher geometry and useful new module inventory | Still to design; the earlier nine-space partition is not approved |
 | Arrival flow and useful study sessions | Proposed direction grounded in the user's day; Today preview implemented |
 | Per-class attendance history and duplicate protection | Proposed reliability work; aggregate records currently remain |
 | Automatic activity or home detection | Not agreed or implemented |
@@ -51,7 +63,9 @@ For attendance, the user chose a screenshot as the faster way to establish accur
 
 ## Read next
 
+- NEXT_CHAT_PROMPT.md: paste-ready implementation handoff for a new chat.
 - STATUS.md: current implementation, latest handoff, validation, and remaining work.
+- V2_EXPERIENCE_PLAN.md: device feedback, explicit V2 goals, and proposed product/navigation/motion plan.
 - REVAMP_DIRECTION.md: discovery answers, visual interpretation, and proposed feature depth.
 - TODAY_PROTOTYPE.md: prototype behavior and explicit limitations.
 
