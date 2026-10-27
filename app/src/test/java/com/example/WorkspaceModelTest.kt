@@ -6,6 +6,11 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class WorkspaceModelTest {
+    @Test fun `intent groups expose every destination once without constraining pins`() {
+        val library = Destination.groups.flatMap { it.second }
+        assertEquals(Destination.entries.toSet(), library.toSet())
+        assertEquals(Destination.entries.size, library.size)
+    }
     @Test fun `every destination can occupy every outer slot`() {
         Destination.entries.forEach { destination -> (0..3).forEach { index ->
             val slots = Destination.assign(Destination.defaults, index, destination)

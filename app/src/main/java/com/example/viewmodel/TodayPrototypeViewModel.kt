@@ -10,12 +10,13 @@ import com.example.data.reminders.PlanReminders
 import com.example.data.model.FocusKind
 import com.example.data.model.FocusPhase
 import com.example.data.model.FocusSession
+import com.example.data.model.TrialResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-/** The first-look timer is independent of workout and Daily Reset timers. */
+/** Shared study/rest engine, independent of gym/Reset. PREVIEW never archives real history. */
 class TodayPrototypeViewModel(application: Application) : AndroidViewModel(application) {
     private val preferences = application.getSharedPreferences("today_focus_session", Context.MODE_PRIVATE)
     private val _session = MutableStateFlow(readSession())
@@ -26,6 +27,11 @@ class TodayPrototypeViewModel(application: Application) : AndroidViewModel(appli
     val saving = _saving.asStateFlow()
     private val _saveError = MutableStateFlow<String?>(null)
     val saveError = _saveError.asStateFlow()
+    private val _lastSaved = MutableStateFlow<WorkSessionRecord?>(null)
+    val lastSaved = _lastSaved.asStateFlow()
+    private val _lastTrial = MutableStateFlow<TrialResult?>(null)
+    val lastTrial = _lastTrial.asStateFlow()
+    fun clearSavedFeedback() { _lastSaved.value = null; _lastTrial.value = null }
 
     fun requestSessionPanel() { _openSessionPanel.value = true }
     fun consumeSessionPanelRequest() { _openSessionPanel.value = false }
@@ -38,9 +44,12 @@ class TodayPrototypeViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun start(title: String, kind: FocusKind = FocusKind.STUDY, sourceType: String = "CUSTOM", sourceId: String = "",
-              material: String = "", firstStep: String = "", blockId: String = "", minutes: Int = 25) {
+              material: String = "", firstStep: String = "", blockId: String = "", minutes: Int = if (kind == FocusKind.REST) 20 else 25) {
         if (_session.value.phase != FocusPhase.IDLE || _saving.value) return
-        val seconds = if (kind == FocusKind.REST) 20 * 60 else minutes.coerceIn(5, 180) * 60
+        val seconds = minutes.coerceIn(1, 180) * 60
+        _lastSaved.value = null
+        _lastTrial.value = null
+        _saveError.value = null
         save(
             FocusSession(
                 title = title.trim().ifBlank { "Review today's notes" },
@@ -72,6 +81,11 @@ class TodayPrototypeViewModel(application: Application) : AndroidViewModel(appli
         if (_saving.value) return
         val current = _session.value
         if (current.phase != FocusPhase.PAUSED) return
+        _saveError.value = null
+        if (current.sourceType == "PREVIEW") {
+            save(current.copy(phase = FocusPhase.RUNNING, deadlineMillis = System.currentTimeMillis() + current.pausedSeconds * 1000L))
+            return
+        }
         _saving.value = true
         viewModelScope.launch {
             try {
@@ -98,6 +112,9 @@ class TodayPrototypeViewModel(application: Application) : AndroidViewModel(appli
     fun updateResumeNote(note: String) { if (!_saving.value) save(_session.value.copy(resumeNote = note)) }
     fun clearForUserWipe() {
         check(!_saving.value)
+        _lastSaved.value = null
+        _lastTrial.value = null
+        _saveError.value = null
         save(FocusSession())
     }
 
@@ -106,17 +123,25 @@ class TodayPrototypeViewModel(application: Application) : AndroidViewModel(appli
         if (_saving.value || _session.value.phase == FocusPhase.IDLE) return
         if (_session.value.phase == FocusPhase.RUNNING) pause()
         val current = _session.value
+        if (current.sourceType == "PREVIEW") {
+            _lastTrial.value = TrialResult(current.id, current.title, current.durationSeconds - current.remainingSeconds(System.currentTimeMillis()), current.resumeNote)
+            save(FocusSession())
+            return
+        }
         _saving.value = true
         _saveError.value = null
         viewModelScope.launch {
             try {
-                DatabaseProvider.get(getApplication()).workspaceDao().finish(WorkSessionRecord(
+                val record = WorkSessionRecord(
                     id = current.id.ifBlank { UUID.randomUUID().toString() }, title = current.title,
                     sourceType = current.sourceType, sourceId = current.sourceId, blockId = current.blockId,
                     material = current.material, resumeNote = current.resumeNote, startedAt = current.startedAt,
                     endedAt = System.currentTimeMillis(), elapsedSeconds = current.durationSeconds - current.remainingSeconds(System.currentTimeMillis()),
                     outcome = if (current.phase == FocusPhase.FINISHED) "Timer elapsed" else "Stopped early"
-                ))
+                )
+                val dao = DatabaseProvider.get(getApplication()).workspaceDao()
+                dao.finish(record)
+                _lastSaved.value = dao.sessionById(record.id)
                 save(FocusSession())
             } catch (_: Exception) { _saveError.value = "History could not be saved. Your session and note are retained. Try again." }
             finally { _saving.value = false }

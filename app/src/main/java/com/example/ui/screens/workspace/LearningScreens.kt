@@ -48,7 +48,7 @@ fun ProjectsScreen(model: WorkspaceViewModel, focus: TodayPrototypeViewModel) {
                     }
                 }
                 val next = milestones.firstOrNull { !it.done }
-                if (next != null && !project.archived) Button(onClick = { model.begin(focus, next.title, "PROJECT_STEP", next.id, firstStep = project.blocker) }) { Text("Focus on next milestone") }
+                if (next != null && !project.archived) Button(onClick = { model.offerMove(DayMove(next.title, "PROJECT_STEP", next.id, firstStep = project.blocker, reason = "Next milestone · ${project.title}")) }) { Text("Focus on next milestone") }
                 Row {
                     TextButton(onClick = { addStepTo = project.id }) { Text("Add milestone") }
                     TextButton(onClick = { editProjectId = project.id }) { Text("Edit") }
@@ -126,7 +126,7 @@ fun ExamPrepScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: Toda
                         (0..3).forEach { level -> FilterChip(selected = topic.confidence == level,
                             onClick = { model.saveTopic(topic.copy(confidence = level)) }, label = { Text(if (level == 0) "?" else "$level") }) }
                     }
-                    Button(onClick = { model.begin(focus, "${topic.course} · ${topic.title}", "TOPIC", topic.id, topic.material) }) { Text("Study this topic") }
+                    Button(onClick = { model.offerMove(DayMove("${topic.course} · ${topic.title}", "TOPIC", topic.id, topic.material, reason = "From your revision topics")) }) { Text("Study this topic") }
                     RevisionActions(topic.revisionAt, onChange = { model.saveTopic(topic.copy(revisionAt = it)) })
                     TextButton(onClick = { editId = topic.id }) { Text("Edit topic & material") }
                 }
@@ -170,7 +170,7 @@ fun PracticeScreen(model: WorkspaceViewModel, focus: TodayPrototypeViewModel, no
             WorkCard(attempt.problem, "${attempt.difficulty} · ${attempt.outcome}" + if (attempt.retryAt > 0) "\nRetry · ${dated(attempt.retryAt)}" else "") {
                 if (attempt.link.isNotBlank()) MaterialReference(attempt.link)
                 if (attempt.notes.isNotBlank()) Text("Lesson · ${attempt.notes}", fontSize = 14.sp)
-                Button(onClick = { model.begin(focus, attempt.problem, "PRACTICE", attempt.id, attempt.link, attempt.notes) }) { Text("Work on this problem") }
+                Button(onClick = { model.offerMove(DayMove(attempt.problem, "PRACTICE", attempt.id, attempt.link, attempt.notes, "From your coding practice")) }) { Text("Work on this problem") }
                 Column {
                     listOf("Unattempted", "Stuck", "With help", "Solved").chunked(2).forEach { pair ->
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { pair.forEach { outcome ->
@@ -228,7 +228,7 @@ fun ReviewScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: TodayP
                     when (record.sourceType) {
                         "FITNESS" -> model.navigate(Destination.FITNESS)
                         "REST" -> model.navigate(Destination.PLAN)
-                        else -> model.begin(focus, record.title, record.sourceType, record.sourceId, record.material, record.resumeNote)
+                        else -> model.offerMove(DayMove(record.title, record.sourceType, record.sourceId, record.material, record.resumeNote, "Your saved place"))
                     }
                 }) { Text(when (record.sourceType) { "FITNESS" -> "Open Fitness"; "REST" -> "Plan the next window"; else -> "Continue this thread" }) }
                 HorizontalDivider(color = colors.borderGlass)

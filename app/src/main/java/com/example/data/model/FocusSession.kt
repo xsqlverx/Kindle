@@ -4,6 +4,9 @@ enum class FocusPhase { IDLE, RUNNING, PAUSED, FINISHED }
 
 enum class FocusKind { STUDY, REST }
 
+/** A real UI rehearsal result, kept in memory and excluded from academic/work history. */
+data class TrialResult(val id: String, val title: String, val elapsedSeconds: Int, val resumeNote: String = "")
+
 /** A deadline-based timer. No background polling or alarm delivery is implied. */
 data class FocusSession(
     val title: String = "",

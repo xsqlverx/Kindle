@@ -1,5 +1,8 @@
 package com.example.ui.screens.workspace
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -15,6 +18,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.model.*
 import com.example.ui.components.BackdropGlass
+import com.example.ui.components.focusSource
+import com.example.ui.components.LocalReducedMotion
 import com.example.ui.theme.LocalLifeOsColors
 import com.example.viewmodel.LifeOsViewModel
 import com.example.viewmodel.TodayPrototypeViewModel
@@ -66,8 +71,8 @@ fun SpaceHeading(kicker: String, title: String, detail: String) {
 @Composable
 fun WorkCard(title: String, detail: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit = {}) {
     val colors = LocalLifeOsColors.current
-    BackdropGlass(modifier.fillMaxWidth()) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    BackdropGlass(modifier.fillMaxWidth().focusSource()) {
+        Column(Modifier.animateContentSize(if (LocalReducedMotion.current) snap() else spring(1f, 450f)).padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(title, color = colors.textPrimary, fontSize = 19.sp, lineHeight = 25.sp, fontWeight = FontWeight.Medium)
             if (detail.isNotBlank()) Text(detail, color = colors.textSecondary, fontSize = 13.sp, lineHeight = 20.sp)
             content()

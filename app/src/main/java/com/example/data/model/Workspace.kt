@@ -22,6 +22,11 @@ enum class Destination(val id: String, val title: String, val purpose: String) {
     companion object {
         fun fromId(id: String?) = entries.firstOrNull { it.id == id }
         val defaults = listOf(TODAY, TASKS, COLLEGE, FITNESS)
+        val groups = listOf(
+            "Move today" to listOf(TODAY, PLAN, STUDY, TASKS, RESET),
+            "Build something" to listOf(COLLEGE, PROJECTS, EXAMS, PRACTICE, FITNESS),
+            "Keep the thread" to listOf(CAPTURE, REVIEW, SETTINGS)
+        )
         fun validateSlots(ids: List<String>): List<Destination> =
             (ids.mapNotNull(::fromId) + defaults + entries).distinct().take(4)
 

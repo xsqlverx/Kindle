@@ -12,14 +12,19 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.Calendar
 import java.util.UUID
+import org.json.JSONObject
 
 class WorkspaceViewModel(application: Application) : AndroidViewModel(application) {
     private val db = DatabaseProvider.get(application)
     private val dao = db.workspaceDao()
     private val prefs = application.getSharedPreferences("workspace_v2", Context.MODE_PRIVATE)
-    private val _destination = MutableStateFlow(Destination.fromId(prefs.getString("destination", null)) ?: Destination.TODAY)
+    private val writes = Mutex()
+    private val _destination = MutableStateFlow(if (!prefs.getBoolean("guided_day_introduced", false)) Destination.TODAY
+        else Destination.fromId(prefs.getString("destination", null)) ?: Destination.TODAY)
     val destination = _destination.asStateFlow()
     private val _slots = MutableStateFlow(Destination.validateSlots(prefs.getString("slots", "").orEmpty().split(',')))
     val slots = _slots.asStateFlow()
@@ -29,6 +34,13 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
     val homeAt = _homeAt.asStateFlow()
     private val _message = MutableStateFlow<String?>(null)
     val message = _message.asStateFlow()
+    private val _moveDraft = MutableStateFlow(if (application.getSharedPreferences("today_focus_session", Context.MODE_PRIVATE).getString("phase", "IDLE") == "IDLE") readMoveDraft() else null)
+    val moveDraft = _moveDraft.asStateFlow()
+    private val _journeyBusy = MutableStateFlow(false)
+    val journeyBusy = _journeyBusy.asStateFlow()
+    private val _showFirstLap = MutableStateFlow(!prefs.getBoolean("hide_first_lap", false))
+    val showFirstLap = _showFirstLap.asStateFlow()
+    fun hideFirstLap() { _showFirstLap.value = false; prefs.edit().putBoolean("hide_first_lap", true).apply() }
     private val _undo = MutableStateFlow<List<DayBlock>>(emptyList())
     val canUndo = _undo.map { it.isNotEmpty() }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
     private var recovered = emptyList<DayBlock>()
@@ -44,6 +56,7 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
     val reminders = _reminders.asStateFlow()
 
     init {
+        prefs.edit().putBoolean("guided_day_introduced", true).apply()
         viewModelScope.launch(Dispatchers.IO) {
             dao.blocks().collect {
                 try { PlanReminders.sync(application, it) }
@@ -54,7 +67,7 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
     fun setReminders(value: Boolean) {
         _reminders.value = value
         PlanReminders.setEnabled(getApplication(), value)
-        write { PlanReminders.sync(getApplication(), dao.blocks().first()) }
+        write { PlanReminders.sync(getApplication(), dao.blocksSnapshot()) }
     }
 
     fun handleReminder(action: String, id: String, focus: TodayPrototypeViewModel) = write {
@@ -66,7 +79,7 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
             return@write
         }
         navigate(Destination.PLAN)
-        val block = dao.blocks().first().firstOrNull { it.id == id && it.state == "PLANNED" && !it.fixed }
+        val block = dao.blocksSnapshot().firstOrNull { it.id == id && it.state == "PLANNED" && !it.fixed }
         if (block == null) { _message.value = "This block was removed or reviewed. Your current plan is shown."; return@write }
         when (action) {
             "START" -> begin(focus, block.title, block.sourceType, block.sourceId, block.material, block.firstStep, block.id, block.durationMinutes)
@@ -105,9 +118,138 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
     }
     fun clearMessage() { _message.value = null }
 
+    private fun readMoveDraft(): DayMove? = try {
+        prefs.getString("move_draft", null)?.let { raw ->
+            val value = JSONObject(raw)
+            DayMove(value.optString("title"), value.optString("type", "CUSTOM"), value.optString("source"),
+                value.optString("material"), value.optString("step"), value.optString("reason"), value.optString("block"),
+                value.optInt("minutes", 25).coerceIn(1, 180))
+        }
+    } catch (_: Exception) { null }
+
+    fun offerMove(move: DayMove? = null) {
+        clearMessage()
+        if (move?.sourceType == "PREVIEW" && readMoveDraft()?.sourceType != "PREVIEW") {
+            prefs.getString("move_draft", null)?.let { prefs.edit().putString("draft_before_preview", it).apply() }
+        }
+        updateMove(move ?: readMoveDraft() ?: DayMove(""))
+    }
+    private fun finishPreviewDraft() {
+        val backup = prefs.getString("draft_before_preview", null)
+        prefs.edit().apply { if (backup != null) putString("move_draft", backup) else remove("move_draft"); remove("draft_before_preview") }.apply()
+        _moveDraft.value = null
+    }
+    fun stashMove() {
+        if (_journeyBusy.value) return
+        if (_moveDraft.value?.sourceType == "PREVIEW") finishPreviewDraft() else _moveDraft.value = null
+    }
+    fun updateMove(move: DayMove) {
+        if (_journeyBusy.value) return
+        _moveDraft.value = move
+        val value = JSONObject().put("title", move.title).put("type", move.sourceType).put("source", move.sourceId)
+            .put("material", move.material).put("step", move.firstStep).put("reason", move.reason)
+            .put("block", move.blockId).put("minutes", move.minutes)
+        prefs.edit().putString("move_draft", value.toString()).apply()
+    }
+    fun closeMove() {
+        if (_journeyBusy.value) return
+        _moveDraft.value = null
+        prefs.edit().remove("move_draft").apply()
+    }
+
+    private suspend fun sourceAvailable(move: DayMove): Boolean = when (move.sourceType) {
+        "TASK" -> db.taskDao().taskById(move.sourceId.toLongOrNull() ?: -1)?.status == TaskStatus.PENDING
+        "ASSIGNMENT" -> db.academicDao().assignmentById(move.sourceId.toLongOrNull() ?: -1)?.isSubmitted == false
+        "PROJECT_STEP" -> dao.stepById(move.sourceId)?.let { step -> !step.done && dao.projectsSnapshot().any { it.id == step.projectId && !it.archived } } == true
+        "TOPIC" -> dao.topicById(move.sourceId) != null
+        "PRACTICE" -> dao.attemptById(move.sourceId) != null
+        "CUSTOM", "REST" -> true
+        else -> false
+    }
+
+    /** One explicit action links or creates work, places the same record, then starts if free now. */
+    fun placeMove(focus: TodayPrototypeViewModel, start: Boolean) = write {
+        if (_journeyBusy.value) return@write
+        val draft = _moveDraft.value ?: return@write
+        if (focus.session.value.phase != FocusPhase.IDLE) { stashMove(); focus.requestSessionPanel(); return@write }
+        if (draft.title.isBlank() || draft.minutes !in 1..180) return@write
+        _message.value = null
+        if (draft.sourceType == "PREVIEW") {
+            finishPreviewDraft()
+            focus.start(draft.title, sourceType = "PREVIEW", material = draft.material, firstStep = draft.firstStep, minutes = draft.minutes)
+            focus.requestSessionPanel()
+            return@write
+        }
+        _journeyBusy.value = true
+        try {
+            var placed: DayBlock? = null
+            db.withTransaction {
+                if (!sourceAvailable(draft)) { _message.value = "This work changed. Choose another next move."; return@withTransaction }
+                val original = if (draft.blockId.isNotBlank()) dao.blockById(draft.blockId) else null
+                if (draft.blockId.isNotBlank() && (original == null || original.fixed || original.state != "PLANNED")) {
+                    _message.value = "This block changed. Your current day is still here."; return@withTransaction
+                }
+                val now = System.currentTimeMillis()
+                val slot = DayPlanner.nextWindow(now, dayEnd(now), draft.minutes, occupied(now, setOf(draft.blockId)))
+                if (slot == null) { _message.value = "That doesn't fit today. Try fewer minutes or use Plan for tomorrow."; return@withTransaction }
+                if (start && slot > now + 1000L) {
+                    _message.value = "That window just changed. Review the new time before saving."; return@withTransaction
+                }
+                if (focus.session.value.phase != FocusPhase.IDLE) {
+                    _message.value = "Another session started. Your draft is kept; return to the capsule."; return@withTransaction
+                }
+                var type = draft.sourceType
+                var source = draft.sourceId
+                if (type == "CUSTOM") {
+                    source = db.taskDao().insertTask(TaskItem(title = draft.title.trim(), quadrant = Quadrant.Q2_SCHEDULE, category = "General")).toString()
+                    type = "TASK"
+                }
+                val block = DayBlock(original?.id ?: UUID.randomUUID().toString(), draft.title.trim(), slot, draft.minutes,
+                    sourceType = type, sourceId = source, material = draft.material.trim(), firstStep = draft.firstStep.trim())
+                dao.saveBlock(block)
+                placed = block
+                _undo.value = emptyList()
+            }
+            placed?.let { block ->
+                _moveDraft.value = null; prefs.edit().remove("move_draft").apply()
+                val now = System.currentTimeMillis()
+                if (start && block.startMillis <= now + 1000L) {
+                    focus.start(block.title, if (block.sourceType == "REST") FocusKind.REST else FocusKind.STUDY,
+                        block.sourceType, block.sourceId, block.material, block.firstStep, block.id, block.durationMinutes)
+                    focus.requestSessionPanel()
+                } else _message.value = "Saved in your day. The next move is ready when its window arrives."
+            }
+        } finally { _journeyBusy.value = false }
+    }
+
+    fun completeSource(record: WorkSessionRecord) = write {
+        db.withTransaction {
+            when (record.sourceType) {
+                "TASK" -> {
+                    val item = db.taskDao().taskById(record.sourceId.toLongOrNull() ?: -1)
+                    if (item == null) { _message.value = "That task is no longer in storage."; return@withTransaction }
+                    db.taskDao().updateStatus(item.id, TaskStatus.COMPLETED)
+                }
+                "ASSIGNMENT" -> {
+                    val item = db.academicDao().assignmentById(record.sourceId.toLongOrNull() ?: -1)
+                    if (item == null) { _message.value = "That deadline is no longer in storage."; return@withTransaction }
+                    db.academicDao().updateAssignment(item.copy(isSubmitted = true))
+                }
+                "PROJECT_STEP" -> {
+                    val item = dao.stepById(record.sourceId)
+                    if (item == null) { _message.value = "That milestone is no longer in storage."; return@withTransaction }
+                    dao.saveStep(item.copy(done = true))
+                }
+                else -> return@withTransaction
+            }
+            dao.sourcePlanState(record.sourceType, record.sourceId, "DONE")
+            _message.value = "Marked complete. Your session remains in Review."
+        }
+    }
+
     private fun write(action: suspend () -> Unit) = viewModelScope.launch {
         try {
-            action()
+            writes.withLock { action() }
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (_: Exception) {
@@ -115,7 +257,12 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
     fun saveProject(project: WorkProject) = write { dao.saveProject(project) }
-    fun saveStep(step: ProjectStep) = write { dao.saveStep(step) }
+    fun saveStep(step: ProjectStep) = write {
+        db.withTransaction {
+            dao.saveStep(step)
+            dao.sourcePlanState("PROJECT_STEP", step.id, if (step.done) "DONE" else "PLANNED")
+        }
+    }
     fun saveCapture(note: CaptureNote) = write { dao.saveCapture(note) }
     fun captureToTask(note: CaptureNote) = write {
         val id = dao.captureToTask(note, db.taskDao())
@@ -129,7 +276,8 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
         focus.clearForUserWipe()
         dao.clearWorkspace()
         _homeAt.value = 0L; _undo.value = emptyList()
-        prefs.edit().remove("home_at").apply()
+        _moveDraft.value = null
+        prefs.edit().remove("home_at").remove("move_draft").remove("draft_before_preview").apply()
     }
     fun recordTraining(split: String, minutes: Int, note: String) = write {
         if (minutes !in 1..360) { _message.value = "Enter 1–360 actual training minutes."; return@write }
@@ -178,7 +326,7 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
     private suspend fun occupied(day: Long, omit: Set<String> = emptySet(), includeSession: Boolean = true): List<Pair<Long, Long>> {
         val cal = Calendar.getInstance().apply { timeInMillis = day }
         val weekday = cal.get(Calendar.DAY_OF_WEEK)
-        val classes = db.academicDao().getAllTimetable().first().filter { it.dayOfWeek == weekday }.map { entry ->
+        val classes = db.academicDao().timetableSnapshot().filter { it.dayOfWeek == weekday }.map { entry ->
             fun at(hour: Int, minute: Int) = (cal.clone() as Calendar).apply {
                 set(Calendar.HOUR_OF_DAY, hour); set(Calendar.MINUTE, minute); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
             }.timeInMillis
@@ -189,8 +337,10 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
         val phase = focusPrefs.getString("phase", "")
         val activeEnd = if (phase == FocusPhase.RUNNING.name) focusPrefs.getLong("deadline", now)
             else if (phase == FocusPhase.PAUSED.name) now + focusPrefs.getInt("remaining", 0) * 1000L else now
-        val active = if (includeSession && activeEnd > now) listOf(now to activeEnd) else emptyList()
-        return classes + active + dao.blocks().first().filter { it.id !in omit && (it.fixed || it.state == "PLANNED") }
+        val active = if (includeSession && activeEnd > now && focusPrefs.getString("source_type", "") != "PREVIEW") listOf(now to activeEnd) else emptyList()
+        val records = DayInputs(day, tasks = db.taskDao().tasksSnapshot(), assignments = db.academicDao().assignmentsSnapshot(),
+            topics = dao.topicsSnapshot(), attempts = dao.attemptsSnapshot(), projects = dao.projectsSnapshot(), steps = dao.stepsSnapshot())
+        return classes + active + dao.blocksSnapshot().filter { it.id !in omit && (it.fixed || it.state == "PLANNED" && DayGuide.available(records, it.sourceType, it.sourceId)) }
             .map { it.startMillis to it.endMillis }
     }
 
@@ -213,8 +363,8 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun recover(from: Long, until: Long, activeBlockId: String) = write {
         db.withTransaction {
-            val overdue = dao.blocks().first().filter {
-                !it.fixed && it.state == "PLANNED" && it.startMillis in dayStart(from) until from && it.id != activeBlockId
+            val overdue = dao.blocksSnapshot().filter {
+                !it.fixed && it.state == "PLANNED" && it.startMillis in dayStart(from) until from && it.id != activeBlockId && sourceAvailable(DayGuide.fromBlock(it))
             }.sortedBy { it.startMillis }
             val busy = occupied(from, overdue.map { it.id }.toSet()).toMutableList()
             val replacements = overdue.mapNotNull { block ->
@@ -232,7 +382,7 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun undoRecovery() = write {
         db.withTransaction {
-            val current = dao.blocks().first()
+            val current = dao.blocksSnapshot()
             if (recovered.all { saved -> current.firstOrNull { it.id == saved.id } == saved }) {
                 dao.saveBlocks(_undo.value)
                 _message.value = "Previous block times restored."
@@ -242,8 +392,10 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun resumeSession(focus: TodayPrototypeViewModel) = write {
+        _message.value = null
         val session = focus.session.value
         if (session.phase != FocusPhase.PAUSED) return@write
+        if (session.sourceType == "PREVIEW") { focus.resume(); return@write }
         val now = System.currentTimeMillis()
         val end = now + session.pausedSeconds * 1000L
         if (end > dayEnd(now) || occupied(now, setOf(session.blockId), includeSession = false).any { now < it.second && end > it.first }) {
@@ -253,7 +405,11 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun begin(focus: TodayPrototypeViewModel, title: String, sourceType: String = "CUSTOM", sourceId: String = "",
               material: String = "", firstStep: String = "", blockId: String = "", minutes: Int = 25, kind: FocusKind = FocusKind.STUDY) = write {
+        _message.value = null
         if (focus.session.value.phase != FocusPhase.IDLE) { focus.requestSessionPanel(); return@write }
+        if (minutes !in 1..180 || !sourceAvailable(DayMove(title, sourceType, sourceId))) {
+            _message.value = "That work changed. Choose a current action and 1–180 minutes."; return@write
+        }
         val now = System.currentTimeMillis()
         val busy = occupied(now, setOf(blockId))
         val until = now + minutes * 60_000L

@@ -2,6 +2,23 @@
 
 2026-10-27. No local Android compilation, Gradle, emulator or Android test execution.
 
+## First path to try after the external build
+
+Open **Today → Try the daily loop · 60 sec** (also in Settings). Choose a title or saved work,
+start the preview, minimize with the down arrow, visit another space, reopen the capsule,
+and finish with a resume note. This is the same interaction surface as actual work, but the
+explicit PREVIEW path must create **no tasks, plan blocks, study history or timer alerts**.
+It must not reserve real planning time or suppress real plan reminders. A real draft existing
+before the tryout must be restored afterward. Existing actual sessions must never be replaced.
+
+Then try a real next move from Today: choose/capture → see its free window → start or save
+for later → focus/capsule → save progress → inspect the stored continuation. Only a separate
+explicit completion action may finish its task/milestone or mark a deadline submitted.
+
+The first introduction lands on Today once. The usual destination restoration follows that.
+The preview can be dismissed from Today and replayed in Settings. The old V1 sample moments
+remain separate from both the preview and the real day.
+
 ## Source evidence
 
 Run `python scripts/check_sources.py` after installing the optional tree-sitter packages
@@ -22,11 +39,16 @@ and [graphics modifiers](https://developer.android.com/develop/ui/compose/graphi
 
 - `WorkspaceModelTest`: all 13 destinations in each of four slots, assignment swaps, corrupt
   layout repair/round trip, exact interval boundaries, ongoing and overlapping commitments,
-  lack of space and invalid duration/window. Eight test methods.
+  lack of space, invalid duration/window and complete intent-group library coverage. Nine test methods.
 - `WorkspaceDatabaseTest`: build a version-2 fixture derived from the baseline entities,
   migrate through Room, validate the new schema and preserve task/attendance/weight records;
   idempotent capture conversion, idempotent session archive and unchanged task completion.
-  Two test methods. This fixture is source-derived, not a copy of the user's database.
+  Explicit completion/undo updates planned reservations without rewriting reviewed session
+  snapshots. Three test methods. This fixture is source-derived, not a copy of the user's database.
+- `DayGuideTest`: fifteen cases for honest empty state, dated arrival, active/expired sessions,
+  protected class/evening windows, smaller restarts with source identity, stale work, explainable
+  deadline ordering, continuation material, active-session occupancy, separate preview occupancy,
+  future/manual revision reachability, blocked/drop work and an already saved night reset.
 - Keep the existing timer and attendance tests. Existing screenshot/sample tests are not V2
   acceptance evidence; add/update screenshots using real rendered results from the cloud/device.
 
@@ -41,7 +63,8 @@ and [graphics modifiers](https://developer.android.com/develop/ui/compose/graphi
 3. Pin Settings/College/each new destination in each slot. Swap by picker, long-press drag and
    arrows. Unpin the active destination, rotate, kill/reopen and restore. Validate safe fallback
    from unknown/duplicate preference IDs. No outer slot or side is reserved.
-4. Check in at home. Add explicit evening commitments using actual times; none are inserted
+4. Check in at home. The primary next move must be concrete and carry a short reason, not
+   an equal-weight menu of modules. Add explicit evening commitments using actual times; none are inserted
    automatically from the approximate routine. Review/edit the optional evening draft and
    explicitly confirm today's times. Cancelling must create no records. Link a task or deadline to a feasible 25-minute window, add
    material and a first step. Today and Study must read that exact block and source ID.
@@ -73,6 +96,10 @@ and [graphics modifiers](https://developer.android.com/develop/ui/compose/graphi
     fallback on older Android. Check readability, clipping, stale frames, flicker, GPU frame
     pacing, large fonts, landscape, TalkBack traversal and drag alternatives. Reduced motion
     and system animator settings must keep all actions available without decorative delay.
+    Exercise the growing/contracting focus bounds, progressive material, saved-result bloom,
+    earned week trace, pause-light continuity, grouped library search and interrupted gestures.
+    Routine successes should use snackbars, not acknowledgement dialogs; errors must remain
+    visible inside an open chooser or focus surface. Confirm keyboard, rotation and font scaling.
 13. Exercise the existing imports/targets/appearance/data tools. Clearing tracked records is
     an explicit confirmed action and now includes V2 records; its text names retained data.
     The button is unavailable while a session archive is in progress.
@@ -87,14 +114,17 @@ and [graphics modifiers](https://developer.android.com/develop/ui/compose/graphi
 - Planning uses explicit dated blocks plus the existing saved timetable. There is no recurring
   commitment editor yet. Existing legacy records may originate from older sample seeding;
   they are preserved rather than automatically classified, removed or called verified facts.
-- Source-card-to-session shared-element geometry, richer in-page artwork and full motion
-  refinement remain; the first connected motion is the centre morph, dock press, session
-  capsule and animated recovery rows. Cards within the recorded page use tint/edge lighting;
-  the dock/launcher/capsule alone replay the softened backdrop. This avoids recursive capture.
+- Source/card/capsule-to-focus bounds interpolation is now implemented without relying on
+  newer shared-element/Expressive APIs. Its appearance, readability, interruption behavior and
+  frame cost still require device evidence. Cards within the recorded page use tint/edge lighting;
+  the dock/launcher/capsule replay the softened backdrop. This avoids recursive capture.
 - Active focus still uses the existing preference store with a stable UUID; history/plan are
   committed together in Room. Timer archive is deduplicated if interrupted before prefs clear.
 - New-topic/attempt editing and project archive are implemented; richer bulk management,
   source deep links from every history entry and longitudinal per-set training history remain.
+- The latest source pass parses 54 Kotlin files. Its 27 supplied V2-related test methods have
+  not been executed here. No source check establishes a successful cloud build or reduced
+  cognitive load. Primary research and applied decisions are in EXPERIENCE_RESEARCH.md.
 
 Push success is a repository delivery result. Record cloud compilation and device results
 separately when observed; no successful build or delivered alert is assumed here.

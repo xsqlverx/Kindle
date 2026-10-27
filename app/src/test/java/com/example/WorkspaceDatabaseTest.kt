@@ -61,4 +61,20 @@ class WorkspaceDatabaseTest {
             assertEquals(TaskStatus.PENDING, db.taskDao().getAllTasks().first().single().status)
         } finally { db.close() }
     }
+
+    @Test fun `explicit completion frees planned work without rewriting a saved session`() = runBlocking {
+        val db = Room.inMemoryDatabaseBuilder(context, LifeOsDatabase::class.java).build()
+        try {
+            val dao = db.workspaceDao()
+            dao.saveBlock(DayBlock("planned", "Next pass", 100, 25, sourceType = "TASK", sourceId = "7"))
+            dao.saveBlock(DayBlock("reviewed", "First pass", 0, 25, sourceType = "TASK", sourceId = "7", state = "REVIEWED"))
+            dao.sourcePlanState("TASK", "7", "DONE")
+            val done = dao.blocksSnapshot().associateBy { it.id }
+            assertEquals("DONE", done.getValue("planned").state)
+            assertEquals("REVIEWED", done.getValue("reviewed").state)
+            dao.sourcePlanState("TASK", "7", "PLANNED")
+            assertEquals("PLANNED", dao.blockById("planned")!!.state)
+            assertEquals("REVIEWED", dao.blockById("reviewed")!!.state)
+        } finally { db.close() }
+    }
 }

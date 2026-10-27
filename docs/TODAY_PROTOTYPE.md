@@ -8,6 +8,11 @@ The descriptions below remain historical V1 behavior; V2 source/verification bou
 in V2_IMPLEMENTATION.md and V2_VERIFICATION.md. The shared session now archives history
 before clearing rather than losing a dismissed session.
 
+The latest **Try the daily loop · 60 sec** feature is a different, explicitly labelled PREVIEW:
+it rehearses the new interaction without changing real task/plan/history data. The V1 design
+preview below retains its real tool actions and shared focus/rest timer. Use the new loop
+tryout when a separate rehearsal is wanted; do not describe V1's tools as a no-records sandbox.
+
 ## Try it
 
 Open Today. The first-look design starts in the Home moment. Select College, Home, or Running late to explore three explicitly labelled sample situations. Sample times are suggestions based on the user's approximate weekday, not activity detection or a verified timetable.

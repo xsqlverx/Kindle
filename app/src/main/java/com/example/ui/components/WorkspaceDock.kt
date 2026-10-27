@@ -1,6 +1,7 @@
 package com.example.ui.components
 
 import androidx.compose.animation.core.*
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +28,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
@@ -89,16 +93,18 @@ private fun DockItem(destination: Destination, selected: Boolean, modifier: Modi
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val reduced = LocalReducedMotion.current
-    val scale by animateFloatAsState(if (pressed) 0.92f else 1f, tween(if (reduced) 0 else 120), label = "dock_touch")
-    Column(modifier.graphicsLayer { scaleX = scale; scaleY = scale }.clip(RoundedCornerShape(20.dp))
-        .background(if (selected) colors.primaryAccent.copy(alpha = 0.18f) else androidx.compose.ui.graphics.Color.Transparent)
+    val scale by animateFloatAsState(if (pressed) 0.92f else 1f, if (reduced) snap() else spring(0.65f, 700f), label = "dock_touch")
+    val selectedAmount by animateFloatAsState(if (selected) 1f else 0f, if (reduced) snap() else spring(0.72f, 500f), label = "dock_lift")
+    val tint by animateColorAsState(if (selected) colors.primaryAccent else colors.textSecondary, tween(if (reduced) 0 else 180), label = "dock_tint")
+    Column(modifier.graphicsLayer { scaleX = scale; scaleY = scale; translationY = -1.5.dp.toPx() * selectedAmount }.clip(RoundedCornerShape(20.dp))
+        .background(colors.primaryAccent.copy(alpha = (0.18f * selectedAmount).coerceIn(0f, 1f)))
         .selectable(selected, enabled = enabled, interactionSource = interaction, indication = null, role = Role.Tab, onClick = onClick)
         .heightIn(min = 66.dp).padding(horizontal = 2.dp, vertical = 10.dp).testTag("destination_${destination.id}"),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Icon(destination.icon(), null, tint = if (selected) colors.primaryAccent else colors.textSecondary, modifier = Modifier.size(22.dp))
+        Icon(destination.icon(), null, tint = tint, modifier = Modifier.size(22.dp))
         Spacer(Modifier.height(5.dp))
         Text(if (destination == Destination.RESET) "Reset" else destination.title, fontSize = 10.sp,
-            color = if (selected) colors.textPrimary else colors.textSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            color = tint, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -107,18 +113,24 @@ private fun DockItem(destination: Destination, selected: Boolean, modifier: Modi
  */
 @Composable
 fun WorkspaceDock(slots: List<Destination>, active: Destination, expanded: Boolean,
-                  onExpanded: (Boolean) -> Unit, onNavigate: (Destination) -> Unit, modifier: Modifier = Modifier) {
+                  onExpanded: (Boolean) -> Unit, onNavigate: (Destination) -> Unit, modifier: Modifier = Modifier, onQuickMove: () -> Unit = {}) {
     val colors = LocalLifeOsColors.current
     val context = LocalContext.current
     val reduced = LocalReducedMotion.current
     val transition = updateTransition(expanded, label = "centre_unfold")
     val dockHeight = workspaceDockHeight()
-    val progress by transition.animateFloat(transitionSpec = { tween(if (reduced) 0 else 380, easing = FastOutSlowInEasing) }, label = "centre_shape") { if (it) 1f else 0f }
-    BoxWithConstraints(modifier.fillMaxSize()) {
+    var query by rememberSaveable { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    val close: () -> Unit = { focusManager.clearFocus(); keyboard?.hide(); onExpanded(false) }
+    val rawProgress by transition.animateFloat(transitionSpec = { if (reduced) snap() else spring(dampingRatio = 0.9f, stiffness = 320f) }, label = "centre_shape") { if (it) 1f else 0f }
+    val progress = rawProgress.coerceIn(0f, 1f)
+    LaunchedEffect(expanded) { if (!expanded) { query = ""; focusManager.clearFocus(); keyboard?.hide() } }
+    BoxWithConstraints(modifier.fillMaxSize().imePadding()) {
         val panelHeight = (maxHeight * 0.80f).coerceAtMost(640.dp)
         if (expanded || progress > 0f) {
             Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.42f * progress))
-                .clickable { onExpanded(false) }.semantics { contentDescription = "Close destination launcher" })
+                .clickable { close() }.semantics { contentDescription = "Close destination launcher" })
         }
         Row(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(horizontal = 16.dp, vertical = 10.dp)
             .fillMaxWidth().height(dockHeight).graphicsLayer { alpha = 1f - progress; translationY = progress * 18.dp.toPx() },
@@ -155,31 +167,47 @@ fun WorkspaceDock(slots: List<Destination>, active: Destination, expanded: Boole
                             Text("YOUR SPACES", color = colors.primaryAccent, fontSize = 11.sp, letterSpacing = 1.8.sp)
                             Text(active.title, color = colors.textPrimary, fontSize = 24.sp, fontWeight = FontWeight.Medium)
                         }
-                        IconButton(onClick = { playAppleHaptic(context); onExpanded(false) }) {
+                        IconButton(onClick = { playAppleHaptic(context); close() }) {
                             Icon(Icons.Outlined.Close, "Close launcher", tint = colors.textPrimary)
                         }
                     }
                     HorizontalDivider(color = colors.borderGlass, modifier = Modifier.padding(vertical = 12.dp))
-                    Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Destination.entries.chunked(2).forEach { pair ->
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                pair.forEach { destination ->
-                                    Column(Modifier.weight(1f).clip(RoundedCornerShape(18.dp))
-                                        .background(colors.primaryAccent.copy(alpha = if (active == destination) 0.18f else 0.05f))
-                                        .clickable(role = Role.Button) { playAppleHaptic(context); onNavigate(destination); onExpanded(false) }
-                                        .padding(14.dp).testTag("launcher_${destination.id}")) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(destination.icon(), null, tint = colors.primaryAccent, modifier = Modifier.size(20.dp))
-                                            if (destination in slots) Text("  PINNED", color = colors.textTertiary, fontSize = 8.sp)
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        MoveButton("Make a next move", Modifier.fillMaxWidth()) { close(); onQuickMove() }
+                        OutlinedTextField(query, { query = it }, label = { Text("Find a space") },
+                            modifier = Modifier.fillMaxWidth().testTag("launcher_search"), singleLine = true)
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        val groups = Destination.groups
+                        var found = false
+                        groups.forEach { (heading, entries) ->
+                            val matches = entries.filter { it.title.contains(query, true) || it.purpose.contains(query, true) }
+                            if (matches.isNotEmpty()) {
+                                found = true
+                                Text(heading.uppercase(), color = colors.textTertiary, fontSize = 10.sp, letterSpacing = 1.2.sp)
+                                matches.chunked(2).forEach { pair ->
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        pair.forEach { destination ->
+                                            LiquidGlassCard(Modifier.weight(1f).testTag("launcher_${destination.id}"), shape = RoundedCornerShape(18.dp),
+                                                tint = colors.primaryAccent.copy(alpha = if (active == destination) 0.18f else 0.045f),
+                                                onClick = { close(); onNavigate(destination) }) {
+                                                Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Icon(destination.icon(), null, tint = colors.primaryAccent, modifier = Modifier.size(20.dp))
+                                                        if (destination in slots) Text("  PINNED", color = colors.textTertiary, fontSize = 8.sp)
+                                                    }
+                                                    Text(destination.title, color = colors.textPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                                                    Text(destination.purpose, color = colors.textSecondary, fontSize = 10.sp, lineHeight = 14.sp)
+                                                }
+                                            }
                                         }
-                                        Spacer(Modifier.height(8.dp))
-                                        Text(destination.title, color = colors.textPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                                        Text(destination.purpose, color = colors.textSecondary, fontSize = 11.sp, lineHeight = 15.sp)
+                                        if (pair.size == 1) Spacer(Modifier.weight(1f))
                                     }
                                 }
-                                if (pair.size == 1) Spacer(Modifier.weight(1f))
                             }
                         }
+                        if (!found) Text("No matching space. All 13 are here when you clear the search.", color = colors.textSecondary, fontSize = 13.sp)
                     }
                 }
             }

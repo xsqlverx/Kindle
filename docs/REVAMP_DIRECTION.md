@@ -2,6 +2,12 @@
 
 Status: the first Today prototype was accepted for V1 only. V2 implementation now includes the connected shell, live day/session foundation and working new modules; see STATUS.md, V2_IMPLEMENTATION.md and V2_VERIFICATION.md. Cloud compilation/device verification remain unobserved. Naming and logo work come last.
 
+Latest correction: the user could not immediately see an average day or what to test. The
+research-driven pass now centers one next action, a shared short entry flow, a clear agenda,
+connected focus/capsule motion and confirmed progress feedback. An optional labelled 60-second
+tryout uses the interaction flow without changing real records. EXPERIENCE_RESEARCH.md records
+the primary references; this is implemented source, not another proposed catalogue.
+
 ## Purpose
 
 Opening the app should answer: what is supposed to be happening now, what is the next useful action, and how can the day recover when something was missed?

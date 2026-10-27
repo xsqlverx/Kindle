@@ -23,4 +23,12 @@ The user authorized pushing this ongoing revamp to `origin/main`. Verify the che
 
 ## Continuity
 
+Latest feedback after `4951ae3`: a feature library alone did not make the average day or
+testing path understandable. The user prioritized removing cognitive load and rewarding
+motion, requested internet research, and explicitly asked for implementation/push without
+another design pitch. Read `docs/EXPERIENCE_RESEARCH.md` and the current STATUS.md before
+reworking the guided daily loop. Keep one obvious next action, progressive detail, honest
+feedback and the separately labelled no-records tryout; do not replace them with a module
+catalogue or invented productivity metrics.
+
 Update the project documents as part of implementation. Preserve explicit requests, accepted visual decisions, uncertain inputs, remaining requirements, and evidence. Do not store credentials in these files. The user's attendance screenshot and exact routine/timetable have not yet been supplied.

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.model.*
 import com.example.ui.components.LocalReducedMotion
+import com.example.ui.components.MoveButton
 import com.example.ui.theme.LocalLifeOsColors
 import com.example.viewmodel.*
 import java.util.Calendar
@@ -72,70 +73,7 @@ private fun LiveRibbon(blocks: List<DayBlock>, now: Long) {
 @Composable
 fun LiveTodayScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: TodayPrototypeViewModel, now: Long,
                     onTools: () -> Unit) {
-    val blocks by model.blocks.collectAsStateWithLifecycle()
-    val history by model.history.collectAsStateWithLifecycle()
-    val homeAt by model.homeAt.collectAsStateWithLifecycle()
-    val session by focus.session.collectAsStateWithLifecycle()
-    val lecture by life.currentLectureStatus.collectAsStateWithLifecycle()
-    val colors = LocalLifeOsColors.current
-    val today = blocks.filter { it.startMillis in WorkspaceViewModel.dayStart(now) until WorkspaceViewModel.dayEnd(now) }
-    val current = today.firstOrNull { it.startMillis <= now && it.endMillis > now && (it.fixed || it.state == "PLANNED") }
-    val next = today.firstOrNull { it.startMillis > now && (it.fixed || it.state == "PLANNED") }
-    val missed = today.count { !it.fixed && it.state == "PLANNED" && it.startMillis < now && it.id != session.blockId }
-    val checkedIn = homeAt in WorkspaceViewModel.dayStart(now)..now
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
-        item { SpaceHeading("Your live day", if (session.phase != FocusPhase.IDLE) "Your place is held." else if (checkedIn) "Home. A fresh start." else "A day you can shape.",
-            "${dated(now)}\nYour saved plan and explicit actions guide this space.") }
-        item { LiveRibbon(today, now) }
-        item {
-            val title = when {
-                session.phase != FocusPhase.IDLE -> session.title
-                lecture.isOngoing -> lecture.entry?.courseName.orEmpty()
-                current != null -> current.title
-                else -> "Choose one concrete action"
-            }
-            WorkCard("NOW · $title", when {
-                session.phase != FocusPhase.IDLE -> "Continue from any space using the session capsule."
-                lecture.isOngoing -> "From your saved timetable · ${lecture.timeRemainingOrUntil}"
-                current != null -> "${clock(current.startMillis)}–${clock(current.endMillis)} · ${if (current.fixed) "Confirmed commitment" else current.firstStep.ifBlank { "Planned work" }}"
-                else -> "No confirmed activity is happening in the saved plan. Name a small study or coding step."
-            }) {
-                Button(onClick = {
-                    if (session.phase != FocusPhase.IDLE) focus.requestSessionPanel()
-                    else if (current != null && !current.fixed) model.begin(focus, current.title, current.sourceType, current.sourceId, current.material, current.firstStep, current.id, current.durationMinutes)
-                    else model.navigate(if (lecture.isOngoing) Destination.COLLEGE else Destination.STUDY)
-                }) { Text(if (session.phase != FocusPhase.IDLE) "Open session" else if (current != null && !current.fixed) "Start planned work" else if (lecture.isOngoing) "Open College" else "Choose work") }
-            }
-        }
-        item {
-            WorkCard(if (checkedIn) "Checked in at ${clock(homeAt)}" else "The transition home", if (checkedIn)
-                "This is your check-in, not automatic detection. Food and rest can have a bounded place in Plan."
-                else "When you arrive, mark the transition. Then reserve a feasible window before the evening fills up.") {
-                if (!checkedIn) Button(onClick = model::checkIn) { Text("I'm home") }
-                OutlinedButton(onClick = { model.navigate(Destination.PLAN) }) { Text("Make room for study") }
-                if (checkedIn) TextButton(onClick = { model.begin(focus, "A bounded rest", "REST", minutes = 20, kind = FocusKind.REST) }) { Text("Take a 20-minute rest") }
-            }
-        }
-        if (missed > 0) item {
-            WorkCard("A start slipped. Recover the day.", "$missed flexible block(s) started earlier. Recovery finds later room around your saved classes and commitments.") {
-                Button(onClick = { model.recover(now, WorkspaceViewModel.dayEnd(now), session.blockId) }) { Text("Find a later window") }
-                TextButton(onClick = { model.navigate(Destination.PLAN) }) { Text("Edit duration or move to tomorrow") }
-            }
-        }
-        item { WorkCard("NEXT · ${next?.title ?: "Keep the next step small"}", next?.let { "${clock(it.startMillis)} · ${it.durationMinutes} min" }
-            ?: "Add confirmed commitments and one flexible action in Plan. Approximate routine times are never inserted automatically.") {
-            TextButton(onClick = { model.navigate(Destination.PLAN) }) { Text("See the shared plan") }
-        } }
-        history.firstOrNull { it.sourceType != "FITNESS" && it.sourceType != "REST" }?.let { last -> item {
-            WorkCard("Pick up the thread", "${last.title}\n${last.resumeNote.ifBlank { "No resume note saved" }}") {
-                TextButton(onClick = { model.navigate(Destination.STUDY) }) { Text("Open Study & continuation") }
-            }
-        } }
-        item {
-            TextButton(onClick = onTools) { Text("Everyday tools · habits, water & activity rings", color = colors.primaryAccent) }
-            TextButton(onClick = { model.navigate(Destination.RESET) }) { Text("Daily Reset") }
-        }
-    }
+    GuidedTodayScreen(life, model, focus, now, onTools) { model.navigate(Destination.SETTINGS) }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -147,27 +85,33 @@ fun PlanScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: TodayPro
     val timetable by life.allTimetable.collectAsStateWithLifecycle()
     val choices = workChoices(life, model)
     val reduced = LocalReducedMotion.current
+    val input = dayInputs(life, model, focus, now)
     var add by rememberSaveable { mutableStateOf(false) }
     var resizeId by rememberSaveable { mutableStateOf<String?>(null) }
     var eveningDraft by rememberSaveable { mutableStateOf(false) }
+    var editing by rememberSaveable { mutableStateOf(false) }
     val cal = Calendar.getInstance().apply { timeInMillis = now }
     val classes = timetable.filter { it.dayOfWeek == cal.get(Calendar.DAY_OF_WEEK) }
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        item { SpaceHeading("Shared plan", "Make room.", "Confirmed anchors hold their place. Flexible work finds a gap around them.") }
-        item { LiveRibbon(blocks.filter { it.startMillis in WorkspaceViewModel.dayStart(now) until WorkspaceViewModel.dayEnd(now) }, now) }
+        item { SpaceHeading("${dated(now)}", "The day, in order.", "One small move, with room around the things you've committed to.") }
         item {
-            Button(onClick = { add = true }) { Text("Add work or a commitment") }
-            TextButton(onClick = { eveningDraft = true }) { Text("Review approximate evening routine") }
+            MoveButton("Make room for one thing", Modifier.fillMaxWidth()) { model.offerMove(DayGuide.choices(input).firstOrNull() ?: DayMove("")) }
+            TextButton(onClick = { add = true }) { Text("Add a fixed time or open the detailed editor") }
+        }
+        item { DayAgenda(input, model, onAddCommitment = { add = true }) }
+        item {
+            TextButton(onClick = { eveningDraft = true }) { Text("Review my evening · approximate draft") }
             TextButton(onClick = { model.recover(now, WorkspaceViewModel.dayEnd(now), session.blockId) }) { Text("Recover missed starts") }
             if (undo) TextButton(onClick = { model.undoRecovery() }) { Text("Undo last recovery") }
+            TextButton(onClick = { editing = !editing }) { Text(if (editing) "Hide block controls" else "Edit blocks & see later days") }
         }
-        if (classes.isNotEmpty()) item {
+        if (editing && classes.isNotEmpty()) item {
             WorkCard("Saved timetable · today", classes.joinToString("\n") {
                 "%02d:%02d–%02d:%02d · %s".format(it.startHour, it.startMinute, it.endHour, it.endMinute, it.courseName)
             }) { TextButton(onClick = { model.navigate(Destination.COLLEGE) }) { Text("Edit classes in College") } }
         }
-        if (blocks.isEmpty()) item { WorkCard("An honest blank page", "Add fixed times you confirm: gym, prayer, calls, classes, travel or rest. Then fit one useful action around them.") }
-        items(blocks.filter { it.endMillis >= WorkspaceViewModel.dayStart(now) }, key = { it.id }) { block ->
+        if (editing) item { LiveRibbon(blocks.filter { it.startMillis in WorkspaceViewModel.dayStart(now) until WorkspaceViewModel.dayEnd(now) }, now) }
+        if (editing) items(blocks.filter { it.endMillis >= WorkspaceViewModel.dayStart(now) }, key = { it.id }) { block ->
             WorkCard("${if (block.fixed) "●" else "○"} ${block.title}", "${dated(block.startMillis)} · ${block.durationMinutes} min · ${if (block.fixed) "Fixed" else block.state.lowercase()}",
                 Modifier.animateItemPlacement(tween(if (reduced) 0 else 460))) {
                 if (block.firstStep.isNotBlank()) Text(block.firstStep)
@@ -280,25 +224,20 @@ private fun PlanDialog(choices: List<WorkChoice>, onDismiss: () -> Unit,
 fun StudyScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: TodayPrototypeViewModel) {
     val history by model.history.collectAsStateWithLifecycle()
     val blocks by model.blocks.collectAsStateWithLifecycle()
-    val choices = workChoices(life, model)
-    var compose by rememberSaveable { mutableStateOf(false) }
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         item { SpaceHeading("Study", "Return to the thread.", "Choose actual work, keep the material beside it, and leave a useful place to resume.") }
-        item { Button(onClick = { compose = true }) { Text("Choose work & focus") } }
+        item { MoveButton("Choose one move", Modifier.fillMaxWidth()) { model.offerMove() } }
         history.filter { it.sourceType != "FITNESS" && it.sourceType != "REST" }.distinctBy { it.sourceType to it.sourceId.ifBlank { it.title } }.take(6).forEach { record -> item(key = record.id) {
             WorkCard(record.title, "${record.elapsedSeconds / 60} min recorded · ${dated(record.endedAt)}\n${record.resumeNote.ifBlank { "No resume note was saved." }}") {
                 if (record.material.isNotBlank()) Text(record.material, fontSize = 13.sp)
-                Button(onClick = { model.begin(focus, record.title, record.sourceType, record.sourceId, record.material, record.resumeNote) }) { Text("Continue this work") }
+                MoveButton("Continue this thread", Modifier.fillMaxWidth()) { model.offerMove(DayMove(record.title, record.sourceType, record.sourceId, record.material, record.resumeNote, "Your saved place")) }
             }
         } }
         items(blocks.filter { !it.fixed && it.state == "PLANNED" }, key = { "plan_${it.id}" }) { block ->
             WorkCard("Planned · ${block.title}", "${dated(block.startMillis)} · ${block.durationMinutes} minutes\n${block.firstStep}") {
-                TextButton(onClick = { model.begin(focus, block.title, block.sourceType, block.sourceId, block.material, block.firstStep, block.id, block.durationMinutes) }) { Text("Start in a free window now") }
+                TextButton(onClick = { model.offerMove(DayGuide.fromBlock(block)) }) { Text("Find this work a window") }
             }
         }
         if (history.isEmpty() && blocks.none { !it.fixed }) item { WorkCard("Start with something small", "A task, a deadline, a page of notes or a coding step. Sessions appear here only after you save real work.") }
-    }
-    if (compose) WorkComposer(choices, { compose = false }) { work, material, step, minutes ->
-        model.begin(focus, work.title, work.type, work.id, material, step, minutes = minutes)
     }
 }

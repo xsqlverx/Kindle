@@ -139,6 +139,7 @@ fun LiquidGlassCard(
 
     Box(
         modifier = modifier
+            .focusSource()
             .scale(animatedScale)
             .liquidGlass(
                 shape = shape,

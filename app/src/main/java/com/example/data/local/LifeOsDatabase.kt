@@ -6,6 +6,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TaskDao {
+    @Query("SELECT * FROM tasks WHERE id = :id")
+    suspend fun taskById(id: Long): TaskItem?
+    @Query("SELECT * FROM tasks WHERE status != 'DROPPED'")
+    suspend fun tasksSnapshot(): List<TaskItem>
     @Query("SELECT * FROM tasks WHERE status != 'DROPPED' ORDER BY isTopThree DESC, createdAt DESC")
     fun getAllTasks(): Flow<List<TaskItem>>
 
@@ -60,6 +64,12 @@ interface HabitDao {
 
 @Dao
 interface AcademicDao {
+    @Query("SELECT * FROM assignments WHERE id = :id")
+    suspend fun assignmentById(id: Long): AssignmentItem?
+    @Query("SELECT * FROM assignments ORDER BY dueDateMillis")
+    suspend fun assignmentsSnapshot(): List<AssignmentItem>
+    @Query("SELECT * FROM timetable_entries")
+    suspend fun timetableSnapshot(): List<TimetableEntry>
     @Query("SELECT * FROM timetable_entries ORDER BY dayOfWeek ASC, startHour ASC, startMinute ASC")
     fun getAllTimetable(): Flow<List<TimetableEntry>>
 

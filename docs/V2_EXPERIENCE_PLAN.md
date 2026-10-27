@@ -4,6 +4,12 @@ Recorded 2026-10-27, Asia/Calcutta.
 
 Status: the V2 goals and five-position navigation contract below are explicit requirements. A first implementation of the inventory, centre expansion and connected flows is now in source. V2_IMPLEMENTATION.md records implementation choices; STATUS.md and V2_VERIFICATION.md distinguish source checks from unobserved cloud/device behavior. These choices are not final user design approval.
 
+Latest daily-use pass: after feedback that the ordinary day/testing path was unclear, the app
+now opens a guided next move, shared chooser/window, focus/capsule, resume-note and confirmed
+feedback loop. The centre library is searchable and grouped without restricting outer slots.
+The optional 60-second preview stays separate from real plan/history data. Research and actual
+implementation decisions are in EXPERIENCE_RESEARCH.md; no pitch/approval stage was added.
+
 ## Feedback that changes the brief
 
 The user tested the app. They called it excellent **for a V1 prototype only**, but report that it feels disconnected and gives them too little reason to open it even for testing. They explicitly want more tabs/spaces, more meaningful capability, a unified experience, richer animations and motion, liquid glass, and a much more compelling visual experience for an app intended to organize their whole life.

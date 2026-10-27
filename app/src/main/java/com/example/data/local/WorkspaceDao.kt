@@ -6,11 +6,22 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WorkspaceDao {
+    @Query("SELECT * FROM day_blocks ORDER BY startMillis") suspend fun blocksSnapshot(): List<DayBlock>
+    @Query("SELECT * FROM work_projects") suspend fun projectsSnapshot(): List<WorkProject>
+    @Query("SELECT * FROM project_steps") suspend fun stepsSnapshot(): List<ProjectStep>
+    @Query("SELECT * FROM exam_topics") suspend fun topicsSnapshot(): List<ExamTopic>
+    @Query("SELECT * FROM coding_attempts") suspend fun attemptsSnapshot(): List<CodingAttempt>
+    @Query("SELECT * FROM day_blocks WHERE id = :id") suspend fun blockById(id: String): DayBlock?
+    @Query("SELECT * FROM project_steps WHERE id = :id") suspend fun stepById(id: String): ProjectStep?
+    @Query("SELECT * FROM exam_topics WHERE id = :id") suspend fun topicById(id: String): ExamTopic?
+    @Query("SELECT * FROM coding_attempts WHERE id = :id") suspend fun attemptById(id: String): CodingAttempt?
     @Query("SELECT * FROM day_blocks ORDER BY startMillis") fun blocks(): Flow<List<DayBlock>>
     @Upsert suspend fun saveBlock(block: DayBlock)
     @Upsert suspend fun saveBlocks(blocks: List<DayBlock>)
     @Query("DELETE FROM day_blocks WHERE id = :id") suspend fun deleteBlock(id: String)
     @Query("UPDATE day_blocks SET state = 'REVIEWED' WHERE id = :id") suspend fun reviewBlock(id: String)
+    @Query("UPDATE day_blocks SET state = :state WHERE sourceType = :type AND sourceId = :source AND fixed = 0 AND state IN ('PLANNED', 'DONE', 'DEFERRED', 'DROPPED')")
+    suspend fun sourcePlanState(type: String, source: String, state: String)
     @Query("SELECT * FROM work_sessions ORDER BY endedAt DESC") fun sessions(): Flow<List<WorkSessionRecord>>
     @Query("SELECT * FROM work_sessions WHERE id = :id") suspend fun sessionById(id: String): WorkSessionRecord?
     @Query("UPDATE work_sessions SET resumeNote = :note WHERE id = :id") suspend fun updateSessionNote(id: String, note: String)

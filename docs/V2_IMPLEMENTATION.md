@@ -65,6 +65,11 @@ is user-editable, not verified against the absent official timetable. Naming/log
 
 Progress and actual verification are recorded in STATUS.md; this document is the stage map.
 
+The subsequent daily-use pass starts from `4951ae3`; EXPERIENCE_RESEARCH.md records the latest
+feedback and primary research. It implements the guided chooser/window/focus/continuation loop,
+safe tryout, agenda, grouped searchable launcher and richer motion. This stage map's baseline
+diagnosis above is historical; do not rebuild the original five-tab shell.
+
 Current first delivery: stages 1–3 have working source implementations; stage 4 includes
 opt-in plan/timer reminders, source checks and ten supplied cloud test methods. Cloud
 compilation, Android test execution, rendering, delivery and device refinement remain open.

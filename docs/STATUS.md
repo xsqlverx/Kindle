@@ -2,118 +2,111 @@
 
 Last updated: 2026-10-27, Asia/Calcutta.
 
-## Current delivery: first connected V2 implementation
+## Current delivery: research-driven daily use
 
-V2 is in implementation, **not declared complete**. This delivery started from clean
-`main` at `1d14d90`, refreshed and equal to origin/main. The implementation plan is
-V2_IMPLEMENTATION.md; the precise evidence and acceptance journeys are V2_VERIFICATION.md.
+Baseline `4951ae3`, clean main and equal to origin/main before editing. The user understood
+the feature vision but could not immediately understand testing or an average day. They
+prioritized reduced cognitive load and rewarding motion, and authorized research, implementation
+and push without another design pitch. Primary sources and design observations are in
+EXPERIENCE_RESEARCH.md. There is no claim that engagement, dopamine or cognitive load was measured.
 
-Implemented in source:
+### Implemented in source
 
-- A stable 13-destination library: Today, Plan, College, Study, Fitness, Tasks, Projects,
-  Capture, Exam Prep, Coding Practice, Review, Daily Reset and Settings. These are working
-  flows, with seven new areas alongside the six preserved areas.
-- A fixed centre surface that expands from the dock button into the full scrollable library
-  and reverses on close. The four outer slots accept any destination in any order. Settings
-  includes a live preview, full picker, swap assignment, long-press drag, accessible arrows,
-  immediate preference persistence and repair of unknown/duplicate saved IDs. Active unpinned
-  destinations stay active and reachable; Back closes the launcher before returning to Today.
-- Live Today reads shared dated blocks and the active session. Explicit home check-in is
-  dated and persisted. The sculpted ribbon reflects the actual saved day and clock. V1 sample
-  moments remain available only in Settings > V1 design preview; original everyday tools,
-  water, habits and activity rings remain reachable from live Today.
-- Plan stores fixed commitments and flexible work with source IDs, material and first step.
-  Gap finding includes saved timetable intervals, other blocks and the active session.
-  The optional evening draft uses explicitly labelled approximate routine times, editable
-  before confirmation; it creates no commitments until the user confirms today's times.
-  Recovery moves missed flexible blocks around anchors; undo is available in the active
-  ViewModel session. Duration edits, removal and tomorrow moves are implemented. No routine
-  times are automatically inserted or promoted into confirmed commitments.
-- One shared focus session retains its source ID, material and resume note across spaces,
-  backgrounding and process recreation. A global capsule expands into controls. Late resume
-  checks for collisions. Save/end archives actual elapsed time and reviews the linked plan
-  block transactionally before clearing preferences. Stable session IDs deduplicate retry.
-  Expiry never completes a task, milestone or submission.
-  Live Today also retains a bounded 20-minute rest action after home check-in. A stale paused
-  timer already archived before process death cannot resume into the same history ID.
-- Study selects a task/deadline/topic/project milestone/problem or custom action and resumes
-  saved threads. Tasks and College deadlines start the same shared activity. Session source
-  links survive title edits until explicitly unlinked.
-- Projects stores goals, blockers, ordered milestones and archive state. Checkboxes record
-  explicit completion; the next unfinished milestone leads into focus.
-- Capture stores notes/links and processed state. Conversion creates one real task in the
-  Schedule quadrant, transactionally preserving the original note and preventing duplicate
-  conversion on repeated taps.
-- Exam Prep stores real course/topic/material input, self-rated confidence and revision dates.
-  Coding Practice stores problem/link/difficulty, reported outcome, lesson and retry dates.
-  Both lead into focus and provide honest empty states. Material links can be opened.
-- Review reads actual saved session snapshots, seven-day recorded minutes and clearly labelled
-  stored legacy counts. Fitness adds explicit self-reported training duration/note history;
-  routine set checks are not represented as a dated workout history.
-- Opt-in plan and timer-review reminders use inexact local alarms. Settings requests Android
-  notification permission when needed. Plan notifications expose Start, Delay 10m and Replan
-  through the activity, rechecking current plan state. Protected blocks, saved classes and
-  active work suppress relevant alerts. Reboot/time-change rescheduling is wired. Delivery
-  remains unverified and can be delayed/skipped by Android.
-- Glass overlays replay a separate content-only GraphicsLayer with softening on Android 12+,
-  denser fallback below it, readable tint and edge lighting. In-page cards use surface lighting
-  to avoid recursive capture. Coordinated centre morph, tactile dock press, session capsule,
-  moving recovery rows and reduced-motion controls are implemented. Font-scaled dock height
-  and measured capsule reservation reduce overlap risk; actual rendering is unverified.
-- Settings retains imports, exam target, appearance and data tools. Confirmed tracked-record
-  clearing includes V2 records; copy explicitly names retained timetable/targets/Reset records
-  and preferences. Clearing is disabled while a session archive is in progress.
+- **One next move on Today.** Actual active work/expiry comes first, then saved class or fixed
+  time, explicit home check-in, a missed-start recovery, a chosen plan block or a concrete
+  source action. The task title is the main visual. Short reasons come from real priorities,
+  deadlines, due revisions/retries, open coding problems and project milestones. Completed,
+  deleted, archived, blocked-project and Drop-quadrant work do not become automatic busywork.
+  Future revisions remain manually reachable without being proposed as due now.
+- **A short, shared entry flow.** Choose an existing source or name one action, pick a duration
+  and see the first free window. Material, resume point, first step and custom 1–180-minute
+  duration are progressive detail. A new real action becomes a real task and linked block
+  together in Room; starting now follows that successful placement. Future work is saved,
+  never started early without the user's start action. Fresh source/interval checks run again
+  on commit. Drafts persist, and ongoing work is not overwritten.
+- **An immediately available tryout.** Today exposes **Try the daily loop · 60 sec**; Settings
+  can replay it after dismissal. It uses the same chooser, real countdown, focus surface,
+  capsule, pause/continue and resume-note interaction. It is labelled PREVIEW throughout,
+  can run during a commitment, and creates no task, plan block, study history or timer alert.
+  The result is transient UI feedback, not a study record. A pre-existing real draft is backed
+  up and restored. Existing actual work must be saved before another session can start.
+- **A connected focus surface.** Focus grows from the touched card or capsule in the same
+  root, with actual elapsed arc, a restrained travelling light, reachable pause/finish controls,
+  progressive material and an in-place resume-note step. Minimize returns to the capsule.
+  Card bounds, page transitions, dock springs, scene lighting, changing card sizes, the
+  sculpted three-stage ribbon and earned week traces connect actions to visible changes.
+  Reduced motion removes custom travel/loops while retaining every action.
+- **Real completion feedback.** Saving a real session returns to Today after Room confirms
+  the record, with its actual elapsed seconds/minutes, note and a short completion bloom.
+  Marking a linked task/milestone complete or a deadline submitted is a separate explicit
+  action. Its confirmed state then appears. The preview has its own completion response and
+  never contributes to real history or earned traces.
+- **A legible day.** Today and Plan share an agenda of saved classes, confirmed anchors and
+  flexible blocks. Plan offers the same next-move flow; detailed editing, future blocks,
+  duration/tomorrow/removal, the full-day ribbon, bulk recovery, undo and the editable evening
+  draft remain available. No approximate routine becomes a confirmed schedule automatically.
+- **A useful launcher.** The centre still morphs into the library. Search, a quick next-move
+  action and intent groups expose all 13 destinations. Groups affect discovery only. Every
+  destination still fits any outer slot, with live preview, picker, drag, arrows and persistence.
+- **Consistent follow-through.** Tasks, College deadlines, Study, projects, topics, coding
+  practice and Review continuations enter the same short flow. Explicit task/submission/
+  milestone changes update associated plan reservations without rewriting saved session
+  snapshots. Success messages are non-blocking snackbars; errors stay visible inside an
+  open work/focus surface. Old acknowledgement popups are removed.
+- The first introduction lands on Today once; subsequent navigation restoration is retained.
+  All original Today tools, habits, hydration, activity rings, College/attendance/exam editors,
+  Fitness/sets/rest/meals/weight, task tools, Daily Reset, imports, appearance and data controls
+  remain wired. V1 sample moments remain a separately labelled Settings preview.
 
-## Data preservation
+## Data and platform boundaries
 
-Room advances from version 2 to 3 through seven additive tables in WORKSPACE_MIGRATION_2_3.
-The database filename, application ID, package identity, signing and cloud-builder setup
-are unchanged. Destructive fallback is removed. Unsupported older schemas fail closed rather
-than wiping data; an upgrade from version 1 has no supplied migration and needs investigation
-if such an installation exists.
+Room remains version 3 with the existing additive 2-to-3 migration and database filename.
+This pass changes queries and behavior, not entity columns or schema. No destructive fallback,
+startup mock seeding, heuristic record deletion, branding, package/signing or builder changes.
+Unsupported version-1 installations still have no supplied migration; fail closed rather than wipe.
 
-Startup mock seeding and heuristic deletion of water records are disabled. Existing records
-are never automatically classified or removed, even if they resemble older sample data.
-No attendance, body measurements, completed work or schedule was manufactured in this delivery.
+No automatic home/activity detection, app blocking, credential login or online AI. No invented
+attendance, measurements, task completion or readiness/productivity score. Older stored data
+may contain historical samples; preserve it rather than guess its provenance.
+
+Opt-in inexact plan/timer reminders remain. Preview timers are excluded from alerts and do
+not suppress real plan notifications. Delivery, permissions and device behavior are unverified.
 
 ## Verification actually performed
 
-- `python scripts/check_sources.py`: all 48 Kotlin source/test files parse with tree-sitter;
-  manifest XML and documentation UTF-8 pass; all 13 destination routes are present; original
-  LifeOsViewModel action names remain; additive SQL declarations execute in Python SQLite
-  while preserving a legacy-row sentinel.
-- `git diff --check`: no whitespace errors.
-- Source comparison confirms the existing College, Fitness, Tasks, Reset, Today tools and
-  settings imports/targets remain wired. This is source evidence, not end-to-end evidence.
+- `python scripts/check_sources.py`: **54 Kotlin files** pass grammar parsing. Manifest XML,
+  strict documentation/source UTF-8, all 13 routes, original LifeOsViewModel action names,
+  disabled mock/destructive startup paths and additive SQL declaration checks pass.
+- Python SQLite executes the source-derived V2 fixture and existing migration declarations
+  while preserving a legacy sentinel. This is not Room schema or Android runtime validation.
+- `git diff --check`: no whitespace errors. Source inspection confirms original routes/action
+  APIs remain. No Gradle, emulator, local Android compilation or Android test execution.
 
-No local compilation, Gradle, emulator or Android test execution. Ten new cloud test methods
-are supplied (eight model/interval/navigation cases and two Room migration/transaction cases),
-alongside the existing timer/attendance tests. They have **not** been executed here.
-No cloud compilation, physical-device rendering, alert delivery or frame pacing was observed.
+Cloud tests supplied, **not run here**: 15 DayGuide decision/window/continuation/preview cases,
+9 navigation/interval/library cases and 3 Room migration/transaction/state cases (27 methods),
+plus the existing timer/attendance tests. Device journeys are in V2_VERIFICATION.md.
+No external cloud-build result, phone rendering, frame pacing, touch response, accessibility
+journey or reminder delivery was observed.
 
-## Remaining work and unresolved decisions
+## Next required evidence / remaining work
 
-- External cloud compilation and supplied test execution, followed by complete device
-  journeys in V2_VERIFICATION.md. Fix any type/API, migration, layout, motion or reminder
-  failure based on that evidence. The 13-space inventory and expanded geometry are first
-  implementation choices, not final user acceptance.
-- Richer source-card-to-session shared geometry, artwork, full motion continuity and device
-  tuning. The source implements real backdrop replay only for dock/launcher/capsule.
-- Recurring commitment editing; recovery undo across process death; stronger source deep
-  links and wider editing/bulk-management tools; longitudinal per-set training records.
-- Per-class attendance events, cancellation, correction/undo and duplicate prevention.
-  Existing aggregate correction and target projections remain.
-- Exact timetable, official attendance screenshot and confirmed workout program remain
-  unsupplied. Automatic detection, app blocking, credential login and online AI remain
-  unselected. Naming and logo remain last.
+- External compilation and test execution; run the short loop and ordinary-day journeys on
+  the device. Repair observed type/API, state, gesture, keyboard, large-font or animation failures.
+  Source checks and a push are not build/device proof; V2 is not declared complete.
+- Tune the root bounds transition, glass readability, micro motion and frame cost using actual
+  rendering/frame evidence. The focus surface uses custom bounds interpolation rather than
+  assuming newer experimental shared-element/Expressive APIs exist in the pinned BOM.
+- Recurring commitments, undo across process death, deeper bulk management/source navigation,
+  longitudinal training history and per-class attendance events/correction/duplicate protection.
+- Official attendance screenshot, exact timetable, confirmed workout program and name/logo
+  remain unresolved. Preserve family, relationship, coding and training commitments.
 
 ## Historical deliveries
 
-- `6c8b447`: the accepted **V1-only** Today prototype with three sample moments and a
-  persisted focus/rest timer. The user later explicitly requested substantially richer V2.
-- `40463c6`: V1 workspace continuation preserving editors, attendance projection/correction,
-  priority matrix, fitness/rest/nutrition, Reset drafts/packing confirmation and appearance.
-- `1d14d90`: requirements and implementation handoff, before this V2 source delivery.
+- `6c8b447`: accepted Today prototype, explicitly excellent for V1 only.
+- `40463c6`: V1 workspace continuation with the original tools preserved.
+- `1d14d90`: V2 requirements and implementation handoff.
+- `4951ae3`: first connected 13-space V2 foundation; source checks only, no observed cloud build.
 
-Push success must be reported separately from cloud build or device success. Consult the
-current Git log for this delivery's commit; no unobserved builder result is recorded.
+Use the current Git log for this delivery's commit. Report an ordinary push separately from
+external cloud compilation and physical-device results.

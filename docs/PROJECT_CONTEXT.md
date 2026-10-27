@@ -25,6 +25,18 @@ The user praised the app specifically **for V1 only**. They now report that it f
 
 Replace the current middle College button with a fixed unified centre button that expands into the destination launcher. The other **four** positions, two on each side, can each hold **any** destination from the full 12+ tab library, in **any order** selected in a redesigned Settings destination. No outer destination is permanently glued into place, and there are no category restrictions by side. College becomes assignable like every other area. Settings remains reachable when unpinned. Exact launcher geometry and final module inventory remain open. The user explicitly wants useful new capabilities, not the existing app divided into nine labels.
 
+### Latest daily-use correction
+
+After the first V2 source delivery (`4951ae3`), the user could not immediately understand
+what to test or how an average day would work. They explicitly asked for internet research
+across planner apps and life dashboards, followed by building/pushing without another pitch.
+The top priorities are reduced decision work and rewarding animation, page transitions and
+micro feedback. Research and applied decisions are recorded in EXPERIENCE_RESEARCH.md.
+The new Today is a guided next-action surface, with a distinct optional 60-second preview
+that does not create real tasks, plans or study history. Real activity keeps the existing
+data/session contract. Neither cognitive-load reduction nor visual quality is called verified
+without user/device evidence.
+
 ## Routine and human constraints
 
 The full approximate weekday is in REVAMP_DIRECTION.md. Important anchors: college around 8:00 AM-1:30 PM; home around 2:30-2:50 PM; gym around 8:00-9:00 PM; family prayer around 9:30-10:30 PM; call with girlfriend around 10:30-11:45 PM. Exact boundaries remain uncertain.
@@ -42,15 +54,15 @@ For attendance, the user chose a screenshot as the faster way to establish accur
 | Keep all five areas and current functions | Explicit requirement |
 | Extend the accepted visual direction across the app | Authorized current work |
 | Know now / next / recovery | Explicit desired payoff |
-| Notifications, alarms, useful follow-through | Desired; implementation still outstanding |
+| Notifications, alarms, useful follow-through | Opt-in inexact local implementation; delivery remains unverified |
 | Attendance baseline from portal screenshot | Desired; screenshot not supplied |
 | More quality features without filler | Explicit requirement; candidate modules need a recurring purpose |
 | More tabs/spaces and greater feature density | Explicit V2 requirement after device testing |
 | Unified cross-space behavior, rich motion, and liquid glass | Explicit V2 requirement; extends beyond the current visual consistency |
 | Fixed expanding centre launcher plus four fully customizable outer slots | Explicit requirement; any available destination from the full 12+ library, any order |
 | Redesigned Settings with navbar assignment and ordering | Explicit requirement; selections persist |
-| Final launcher geometry and useful new module inventory | Still to design; the earlier nine-space partition is not approved |
-| Arrival flow and useful study sessions | Proposed direction grounded in the user's day; Today preview implemented |
+| Final launcher geometry and useful new module inventory | First 13-space implementation and grouped/searchable centre morph; device/user refinement remains |
+| Arrival flow and useful study sessions | Guided live Today, explicit check-in, shared work and resume history implemented in source |
 | Per-class attendance history and duplicate protection | Proposed reliability work; aggregate records currently remain |
 | Automatic activity or home detection | Not agreed or implemented |
 | App blocking, online AI, credentials-based portal login | Not authorized as a chosen design |
@@ -85,5 +97,6 @@ See V2_IMPLEMENTATION.md, V2_VERIFICATION.md and STATUS.md for exact scope and l
 - TODAY_PROTOTYPE.md: prototype behavior and explicit limitations.
 - V2_IMPLEMENTATION.md: concise code-grounded stages and the implemented destination inventory.
 - V2_VERIFICATION.md: source evidence, supplied cloud tests, device journeys and known gaps.
+- EXPERIENCE_RESEARCH.md: latest daily-use feedback, primary research and applied implementation decisions.
 
 Update these documents when the user changes direction. Keep uncertain inputs uncertain; do not silently promote suggestions into requirements.

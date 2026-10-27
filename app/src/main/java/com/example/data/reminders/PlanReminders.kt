@@ -33,7 +33,7 @@ object PlanReminders {
         manager.cancel(pending)
         val focus = context.getSharedPreferences("today_focus_session", Context.MODE_PRIVATE)
         val deadline = focus.getLong("deadline", 0L)
-        if (enabled(context) && permitted(context) && focus.getString("phase", "") == FocusPhase.RUNNING.name && deadline > System.currentTimeMillis())
+        if (enabled(context) && permitted(context) && focus.getString("source_type", "") != "PREVIEW" && focus.getString("phase", "") == FocusPhase.RUNNING.name && deadline > System.currentTimeMillis())
             manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, deadline, pending)
     }
 
@@ -59,6 +59,7 @@ object PlanReminders {
     suspend fun sessionElapsed(context: Context) {
         if (!enabled(context) || !permitted(context)) return
         val prefs = context.getSharedPreferences("today_focus_session", Context.MODE_PRIVATE)
+        if (prefs.getString("source_type", "") == "PREVIEW") return
         val now = System.currentTimeMillis()
         val deadline = prefs.getLong("deadline", 0L)
         if (prefs.getString("phase", "") != FocusPhase.RUNNING.name || deadline <= 0L || now < deadline) return
@@ -88,7 +89,7 @@ object PlanReminders {
         if (now < block.startMillis || now > block.startMillis + 60 * 60_000L) return
         val focus = context.getSharedPreferences("today_focus_session", Context.MODE_PRIVATE)
         val phase = focus.getString("phase", "")
-        if (phase == FocusPhase.RUNNING.name || phase == FocusPhase.PAUSED.name) return
+        if (focus.getString("source_type", "") != "PREVIEW" && (phase == FocusPhase.RUNNING.name || phase == FocusPhase.PAUSED.name)) return
         if (blocks.any { it.fixed && now >= it.startMillis && now < it.endMillis }) return
         val cal = Calendar.getInstance()
         val minute = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)

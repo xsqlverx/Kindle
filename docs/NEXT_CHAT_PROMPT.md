@@ -8,10 +8,19 @@ First read AGENTS.md and these repository documents:
 - docs/TODAY_PROTOTYPE.md (historical V1 notes)
 - docs/V2_IMPLEMENTATION.md
 - docs/V2_VERIFICATION.md
+- docs/EXPERIENCE_RESEARCH.md
 
 Inspect Git status and the actual source. Preserve existing local changes. V1 includes commits 6c8b447 and 40463c6, followed by the V2 delivery described in STATUS.md and the current Git log. The first V2 source now has 13 routed working destinations, the expanding launcher, persistent four-slot editor, shared plan/session history, opt-in local reminders and new learning/project modules. Do not rebuild another registry or shell. Continue from its concrete gaps and external build/device feedback; do not claim the unobserved cloud tests passed.
 
 WHAT I WANT
+
+Latest feedback: the first connected V2 did not make the average day or testing path clear.
+The user prioritized removing cognitive load and rewarding animation/transitions/micro feedback,
+asked for internet research, and told the agent to implement/push without another pitch.
+The current source now has a guided Today → one move → free window → focus/capsule → resume
+note → confirmed progress loop, plus an explicitly separate no-records 60-second tryout.
+Continue from STATUS.md and EXPERIENCE_RESEARCH.md; preserve this daily-use spine and the full
+destination/data contract. Do not replace it with a catalogue or another discovery interview.
 
 I am a B.Tech CSE student serious about academics, coding, working out, and improving my daily life. V1 looks excellent for a prototype, but the app feels disconnected and gives me too little reason to return. V2 needs genuinely useful new capabilities, feature density, unified behavior, richer visuals, tactile motion, and convincing liquid glass. My most important payoff is opening the app and knowing what should happen now, what to do next, and how to recover after missing something.
 

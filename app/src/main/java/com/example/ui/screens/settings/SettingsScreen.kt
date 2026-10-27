@@ -121,6 +121,11 @@ fun SettingsScreen(
             }
 
             if (workspace != null) item { NavigationEditor(workspace) }
+            if (workspace != null) item {
+                SettingsActionCard(Icons.Default.PlayCircleOutline, "Try the daily loop · 60 sec", "Rehearse focus, the capsule and saving your place. Your real plan and study totals stay unchanged.", "Try it", {
+                    workspace.offerMove(com.example.data.model.DayMove("", "PREVIEW", reason = "A safe daily-loop preview", minutes = 1))
+                })
+            }
             item {
                 SettingsActionCard(Icons.Default.Palette, "V1 design preview", "The three sample moments, separate from your live day", "Preview", onPreview)
             }

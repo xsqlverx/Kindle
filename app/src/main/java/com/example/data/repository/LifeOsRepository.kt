@@ -2,6 +2,7 @@ package com.example.data.repository
 
 import android.content.Context
 import com.example.data.local.DatabaseProvider
+import androidx.room.withTransaction
 import com.example.data.local.LifeOsDatabase
 import com.example.data.model.*
 import kotlinx.coroutines.CoroutineScope
@@ -62,9 +63,20 @@ class LifeOsRepository(context: Context) {
     suspend fun getPendingTasks(): List<TaskItem> = taskDao.getPendingTasks().first()
     suspend fun insertTask(task: TaskItem): Long = taskDao.insertTask(task)
     suspend fun updateTask(task: TaskItem) = taskDao.updateTask(task)
-    suspend fun deleteTask(task: TaskItem) = taskDao.deleteTask(task)
+    suspend fun deleteTask(task: TaskItem) = db.withTransaction {
+        taskDao.deleteTask(task)
+        db.workspaceDao().sourcePlanState("TASK", task.id.toString(), "DROPPED")
+    }
     suspend fun clearTasks() = taskDao.clearAllTasks()
-    suspend fun setTaskStatus(id: Long, status: TaskStatus) = taskDao.updateStatus(id, status)
+    suspend fun setTaskStatus(id: Long, status: TaskStatus) = db.withTransaction {
+        taskDao.updateStatus(id, status)
+        db.workspaceDao().sourcePlanState("TASK", id.toString(), when (status) {
+            TaskStatus.PENDING -> "PLANNED"
+            TaskStatus.COMPLETED -> "DONE"
+            TaskStatus.DROPPED -> "DROPPED"
+            else -> "DEFERRED"
+        })
+    }
     suspend fun toggleTopThree(id: Long, isTopThree: Boolean) = taskDao.updateTopThree(id, isTopThree)
 
     // Habits
@@ -82,10 +94,16 @@ class LifeOsRepository(context: Context) {
 
     val allAssignments: Flow<List<AssignmentItem>> = academicDao.getAllAssignments()
     suspend fun insertAssignment(assignment: AssignmentItem) = academicDao.insertAssignment(assignment)
-    suspend fun updateAssignment(assignment: AssignmentItem) = academicDao.updateAssignment(assignment)
-    suspend fun deleteAssignment(assignment: AssignmentItem) = academicDao.deleteAssignment(assignment)
+    suspend fun updateAssignment(assignment: AssignmentItem) = db.withTransaction {
+        academicDao.updateAssignment(assignment)
+        db.workspaceDao().sourcePlanState("ASSIGNMENT", assignment.id.toString(), if (assignment.isSubmitted) "DONE" else "PLANNED")
+    }
+    suspend fun deleteAssignment(assignment: AssignmentItem) = db.withTransaction {
+        academicDao.deleteAssignment(assignment)
+        db.workspaceDao().sourcePlanState("ASSIGNMENT", assignment.id.toString(), "DROPPED")
+    }
     suspend fun toggleAssignmentSubmitted(assignment: AssignmentItem) {
-        academicDao.updateAssignment(assignment.copy(isSubmitted = !assignment.isSubmitted))
+        updateAssignment(assignment.copy(isSubmitted = !assignment.isSubmitted))
     }
 
     val allAttendance: Flow<List<AttendanceRecord>> = academicDao.getAllAttendance()
