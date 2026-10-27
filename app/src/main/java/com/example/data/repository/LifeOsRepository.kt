@@ -10,8 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -28,7 +26,7 @@ class LifeOsRepository(context: Context) {
     private val dailyResetDao = db.dailyResetDao()
 
     private val prefs = context.getSharedPreferences("life_os_prefs", Context.MODE_PRIVATE)
-    private val attendanceWrites = Mutex()
+    private val attendanceLedger = AttendanceLedger(db)
 
     fun getThemeMode(): AppThemeMode = AppThemeMode.entries.firstOrNull {
         it.name == prefs.getString("appearance_mode", "")
@@ -46,11 +44,7 @@ class LifeOsRepository(context: Context) {
     }
 
     suspend fun correctAttendance(courseCode: String, attended: Int, total: Int, target: Int) {
-        require(attended >= 0 && total >= attended && target in 1..100)
-        attendanceWrites.withLock {
-            val record = academicDao.getAllAttendance().first().find { it.courseCode == courseCode } ?: return@withLock
-            academicDao.updateAttendance(record.copy(attendedClasses = attended, totalClasses = total, targetPercentage = target))
-        }
+        attendanceLedger.correctTotals(courseCode, attended, total, target)
     }
 
     // V2 never inserts example records or deletes look-alike records at startup.
@@ -107,24 +101,18 @@ class LifeOsRepository(context: Context) {
     }
 
     val allAttendance: Flow<List<AttendanceRecord>> = academicDao.getAllAttendance()
+    val attendanceEvents: Flow<List<AttendanceEvent>> = academicDao.attendanceEvents()
+    suspend fun markAttendance(occurrence: AttendanceOccurrence, choice: AttendanceChoice, expectedStatus: String?) =
+        attendanceLedger.mark(occurrence, choice, expectedStatus)
+
+    /** Compatibility entry point: only an unambiguous ongoing class can supply a date. */
     suspend fun logAttendance(courseCode: String, attended: Boolean) {
-        attendanceWrites.withLock {
-            val records = academicDao.getAllAttendance().first()
-            val record = records.find { it.courseCode == courseCode }
-            if (record != null) {
-                val newAttended = if (attended) record.attendedClasses + 1 else record.attendedClasses
-                academicDao.updateAttendance(record.copy(attendedClasses = newAttended, totalClasses = record.totalClasses + 1))
-            } else {
-                academicDao.insertAttendance(
-                    AttendanceRecord(
-                        courseCode = courseCode,
-                        attendedClasses = if (attended) 1 else 0,
-                        totalClasses = 1,
-                        targetPercentage = 80
-                    )
-                )
-            }
-        }
+        val now = System.currentTimeMillis()
+        val day = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
+        val candidates = academicDao.timetableSnapshot().filter { it.courseCode == courseCode && it.dayOfWeek == day }
+            .map { attendanceOccurrence(it, now) }.filter { now >= it.startMillis && now < it.startMillis + (it.endMinute - it.startMinute) * 60_000L }
+        require(candidates.size == 1) { "Choose a dated class before marking attendance." }
+        markAttendance(candidates.single(), if (attended) AttendanceChoice.PRESENT else AttendanceChoice.ABSENT, null)
     }
 
     // Fitness
@@ -233,7 +221,6 @@ class LifeOsRepository(context: Context) {
         prefs.edit().putBoolean("user_clean_slate", true).apply()
         taskDao.clearAllTasks()
         habitDao.clearAllHabits()
-        academicDao.clearAttendance()
         academicDao.clearAssignments()
         fitnessDao.clearAllSets()
         fitnessDao.clearWeightLogs()
@@ -242,9 +229,10 @@ class LifeOsRepository(context: Context) {
         resetAttendanceData()
     }
 
-    suspend fun resetAttendanceData() {
+    suspend fun resetAttendanceData() = db.withTransaction {
+        academicDao.clearAttendanceEvents()
         academicDao.clearAttendance()
-        val timetable = academicDao.getAllTimetable().first()
+        val timetable = academicDao.timetableSnapshot()
         val courses = timetable.map { it.courseCode }.distinct().ifEmpty {
             listOf("MAT", "ATP", "ATP LAB", "CHY", "BEE", "BEC", "EG", "LS", "CHY LAB/EE-EC W/S")
         }

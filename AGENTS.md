@@ -32,3 +32,10 @@ feedback and the separately labelled no-records tryout; do not replace them with
 catalogue or invented productivity metrics.
 
 Update the project documents as part of implementation. Preserve explicit requests, accepted visual decisions, uncertain inputs, remaining requirements, and evidence. Do not store credentials in these files. The user's attendance screenshot and exact routine/timetable have not yet been supplied.
+
+Attendance follow-up: read docs/ATTENDANCE_RELIABILITY.md. Present/Absent spam, weak press
+confirmation and mismatched styling are explicit feedback. Both marking entry points now
+use the dated Room ledger and shared control; do not restore unscoped increment buttons or
+replace persistent deduplication with a cooldown. The current attendance screenshot is still
+pending. Preserve aggregates, reconcile explicit baseline replacements, and distinguish
+source checks from the unobserved cloud build/device results.

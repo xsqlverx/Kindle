@@ -63,7 +63,7 @@ For attendance, the user chose a screenshot as the faster way to establish accur
 | Redesigned Settings with navbar assignment and ordering | Explicit requirement; selections persist |
 | Final launcher geometry and useful new module inventory | First 13-space implementation and grouped/searchable centre morph; device/user refinement remains |
 | Arrival flow and useful study sessions | Guided live Today, explicit check-in, shared work and resume history implemented in source |
-| Per-class attendance history and duplicate protection | Proposed reliability work; aggregate records currently remain |
+| Per-class attendance history and duplicate protection | Requested after spam/feedback complaint; dated ledger, shared controls and corrections now implemented in source; cloud/device checks pending |
 | Automatic activity or home detection | Not agreed or implemented |
 | App blocking, online AI, credentials-based portal login | Not authorized as a chosen design |
 
@@ -82,11 +82,24 @@ an implementation decision grounded in the brief, not a newly obtained final des
 The existing College/Fitness/Tasks/Reset/Settings tools remain; the old sample moments live
 under Settings > V1 design preview. Appearance now applies to live Today as well.
 
-An additive Room 2-to-3 migration replaces destructive fallback. Automatic startup seeding
+Additive Room 2-to-3 and 3-to-4 migrations replace destructive fallback. The latter preserves
+aggregate attendance and adds a dated period ledger plus a baseline reconciliation timestamp.
+Automatic startup seeding
 and heuristic water deletion are disabled; existing records are preserved, including any
 older samples whose provenance cannot be inferred safely. Reminders are opt-in inexact local
 alarms with permission checks; delivery has not been observed. No local build/tests were run.
 See V2_IMPLEMENTATION.md, V2_VERIFICATION.md and STATUS.md for exact scope and limits.
+
+### Attendance feedback, 2026-10-27
+
+The user reports that Present/Absent can be spammed, have no convincing press confirmation,
+and do not match the visual design. Both marking entry points now use one dated-class control
+with press spring/ripple/haptic, storage-confirmed feedback, explicit Change and persistent
+duplicate protection. Corrections replace a class's contribution; cancelled/removed marks
+contribute zero. History records only actual marks made through the new ledger. Existing
+aggregate totals cannot disclose previously counted class identities and are preserved.
+The user's promised current attendance screenshot/counts are still pending. Do not seed them.
+See ATTENDANCE_RELIABILITY.md for scope, baseline behavior and evidence boundaries.
 
 ### Continue from these files
 

@@ -64,6 +64,18 @@ interface HabitDao {
 
 @Dao
 interface AcademicDao {
+    @Query("SELECT * FROM attendance_records WHERE courseCode = :courseCode ORDER BY id LIMIT 1")
+    suspend fun attendanceByCourse(courseCode: String): AttendanceRecord?
+    @Query("SELECT * FROM attendance_events ORDER BY startMillis DESC")
+    fun attendanceEvents(): Flow<List<AttendanceEvent>>
+    @Query("SELECT * FROM attendance_events WHERE `key` = :key")
+    suspend fun attendanceEvent(key: String): AttendanceEvent?
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun saveAttendanceEvent(event: AttendanceEvent)
+    @Query("UPDATE attendance_events SET includedInBaseline = 1 WHERE courseCode = :courseCode")
+    suspend fun absorbAttendanceEvents(courseCode: String)
+    @Query("DELETE FROM attendance_events")
+    suspend fun clearAttendanceEvents()
     @Query("SELECT * FROM assignments WHERE id = :id")
     suspend fun assignmentById(id: Long): AssignmentItem?
     @Query("SELECT * FROM assignments ORDER BY dueDateMillis")
@@ -103,7 +115,7 @@ interface AcademicDao {
     @Query("DELETE FROM assignments")
     suspend fun clearAssignments()
 
-    @Query("SELECT * FROM attendance_records ORDER BY courseCode ASC")
+    @Query("SELECT * FROM attendance_records ORDER BY courseCode ASC, id ASC")
     fun getAllAttendance(): Flow<List<AttendanceRecord>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -179,7 +191,7 @@ interface DailyResetDao {
         HabitItem::class,
         TimetableEntry::class,
         AssignmentItem::class,
-        AttendanceRecord::class,
+        AttendanceRecord::class, AttendanceEvent::class,
         WorkoutSession::class,
         ExerciseSetLog::class,
         BodyWeightLog::class,
@@ -188,7 +200,7 @@ interface DailyResetDao {
         DayBlock::class, WorkSessionRecord::class, WorkProject::class, ProjectStep::class,
         CaptureNote::class, ExamTopic::class, CodingAttempt::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class LifeOsDatabase : RoomDatabase() {

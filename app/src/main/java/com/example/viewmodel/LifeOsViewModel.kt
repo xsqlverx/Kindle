@@ -254,6 +254,27 @@ class LifeOsViewModel(application: Application) : AndroidViewModel(application) 
     // Attendance
     val attendanceRecords: StateFlow<List<AttendanceRecord>> = repository.allAttendance
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val attendanceEvents = repository.attendanceEvents
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    private val _attendanceAction = MutableStateFlow(AttendanceActionState())
+    val attendanceAction = _attendanceAction.asStateFlow()
+
+    fun markAttendance(occurrence: AttendanceOccurrence, choice: AttendanceChoice, expectedStatus: String?) {
+        if (_attendanceAction.value.busy) return
+        _attendanceAction.value = AttendanceActionState(busy = true, key = occurrence.key,
+            confirmationId = _attendanceAction.value.confirmationId)
+        viewModelScope.launch {
+            try {
+                val result = repository.markAttendance(occurrence, choice, expectedStatus)
+                if (result.changed) com.example.ui.components.playAppleHaptic(getApplication<Application>(), strong = true)
+                _attendanceAction.value = AttendanceActionState(key = result.key, confirmation = result.message,
+                    confirmationId = _attendanceAction.value.confirmationId + if (result.changed) 1 else 0)
+            } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled
+            } catch (failure: Exception) {
+                _attendanceAction.value = _attendanceAction.value.copy(busy = false, error = failure.message ?: "Could not save. Try again.")
+            }
+        }
+    }
 
     // Selected lecture for 60% detail slide-up sheet
     private val _selectedLectureForDetail = MutableStateFlow<TimetableEntry?>(null)
@@ -268,14 +289,32 @@ class LifeOsViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun recordAttendance(courseCode: String, attended: Boolean) {
+        if (_attendanceAction.value.busy) return
+        _attendanceAction.value = AttendanceActionState(busy = true, key = courseCode, confirmationId = _attendanceAction.value.confirmationId)
         viewModelScope.launch {
-            repository.logAttendance(courseCode, attended)
+            try {
+                repository.logAttendance(courseCode, attended)
+                _attendanceAction.value = _attendanceAction.value.copy(busy = false, confirmation = "Attendance saved")
+            } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled
+            } catch (failure: Exception) {
+                _attendanceAction.value = _attendanceAction.value.copy(busy = false, error = failure.message ?: "Could not save attendance.")
+            }
         }
     }
 
     fun correctAttendance(courseCode: String, attended: Int, total: Int, target: Int) {
         if (attended < 0 || total < attended || target !in 1..100) return
-        viewModelScope.launch { repository.correctAttendance(courseCode, attended, total, target) }
+        if (_attendanceAction.value.busy) return
+        _attendanceAction.value = AttendanceActionState(busy = true, key = courseCode, confirmationId = _attendanceAction.value.confirmationId)
+        viewModelScope.launch {
+            try {
+                repository.correctAttendance(courseCode, attended, total, target)
+                _attendanceAction.value = _attendanceAction.value.copy(busy = false, confirmation = "Totals saved · classes through now included")
+            } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled
+            } catch (failure: Exception) {
+                _attendanceAction.value = _attendanceAction.value.copy(busy = false, error = failure.message ?: "Could not save totals. Try again.")
+            }
+        }
     }
 
     // Fitness: Splits, Exercises, Sets

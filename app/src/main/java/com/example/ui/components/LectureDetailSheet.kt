@@ -165,7 +165,7 @@ fun LectureDetailSheet(
     isOngoingOverride: Boolean? = null,
     attendanceRecords: List<AttendanceRecord> = emptyList(),
     onDismiss: () -> Unit,
-    onRecordAttendance: ((courseCode: String, attended: Boolean) -> Unit)? = null
+    attendanceControl: (@Composable (TimetableEntry) -> Unit)? = null
 ) {
     if (entry == null) return
 
@@ -243,6 +243,7 @@ fun LectureDetailSheet(
     val record = attendanceRecords.find { it.courseCode.equals(entry.courseCode, ignoreCase = true) }
     val attended = record?.attendedClasses ?: 0
     val total = record?.totalClasses ?: 0
+    val target = record?.targetPercentage ?: 80
     val pct = if (total > 0) (attended * 100 / total) else 0
 
     Box(
@@ -673,7 +674,7 @@ fun LectureDetailSheet(
                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
                                 Text(
-                                    text = "80% Target",
+                                    text = "$target% Target",
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = RingHabitEmerald,
@@ -693,54 +694,14 @@ fun LectureDetailSheet(
                             text = if (total > 0) "$pct% ($attended/$total)" else "No logs yet",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (total > 0 && pct >= 80) RingHabitEmerald else if (total > 0) RingGymRose else lifeColors.textSecondary
+                            color = if (total > 0 && pct >= target) RingHabitEmerald else if (total > 0) RingGymRose else lifeColors.textSecondary
                         )
                     }
 
-                    // Optional Quick Attendance Logging buttons
-                    if (onRecordAttendance != null) {
+                    // One shared dated-class control, backed by the persistent attendance ledger.
+                    if (attendanceControl != null) {
                         Spacer(modifier = Modifier.height(14.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Button(
-                                onClick = {
-                                    playAppleHaptic(context)
-                                    onRecordAttendance(entry.courseCode, true)
-                                },
-                                modifier = Modifier.weight(1f),
-                                colors = ButtonDefaults.buttonColors(containerColor = RingHabitEmerald),
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "Mark Attended",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
-                            }
-
-                            OutlinedButton(
-                                onClick = {
-                                    playAppleHaptic(context)
-                                    onRecordAttendance(entry.courseCode, false)
-                                },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Text(
-                                    text = "Mark Absent",
-                                    fontSize = 12.sp,
-                                    color = RingGymRose,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
-                            }
-                        }
+                        attendanceControl(entry)
                     }
 
                     Spacer(modifier = Modifier.height(36.dp))

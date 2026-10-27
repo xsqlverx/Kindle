@@ -73,3 +73,15 @@ diagnosis above is historical; do not rebuild the original five-tab shell.
 Current first delivery: stages 1–3 have working source implementations; stage 4 includes
 opt-in plan/timer reminders, source checks and ten supplied cloud test methods. Cloud
 compilation, Android test execution, rendering, delivery and device refinement remain open.
+
+## Attendance reliability follow-up
+
+Baseline `56f8d3a`; refreshed clean main. The user explicitly reports spammable counters,
+weak press feedback and mismatched button style. The concrete implementation stages and
+acceptance checks are in ATTENDANCE_RELIABILITY.md. Source now adds Room version 4 via
+3-to-4 migration; a persistent course/date/start/end key and transaction update one class's
+contribution exactly once. Re-imported identical timetable rows keep that identity. Both
+College and the lecture sheet use the shared dated selector, press spring, saving state,
+confirmed saved row, Change/cancel/remove actions and course history. Totals correction
+reconciles through now and locks included history. Missing real baselines never create guessed
+historical totals. Nine regression test methods are supplied for the cloud runner, not run.

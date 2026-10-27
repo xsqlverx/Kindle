@@ -10,6 +10,12 @@ feedback loop. The centre library is searchable and grouped without restricting 
 The optional 60-second preview stays separate from real plan/history data. Research and actual
 implementation decisions are in EXPERIENCE_RESEARCH.md; no pitch/approval stage was added.
 
+Attendance follow-up: Present/Absent spam protection, recognizable press/saved feedback and
+matching button design are now explicit requests. ATTENDANCE_RELIABILITY.md records the
+implemented additive ledger, dated-class selector, shared tactile control, corrections and
+honest history. Counts remain unchanged until real user input; cloud/device verification is
+pending. This resolves the source-level gap in the historical diagnosis below.
+
 ## Feedback that changes the brief
 
 The user tested the app. They called it excellent **for a V1 prototype only**, but report that it feels disconnected and gives them too little reason to open it even for testing. They explicitly want more tabs/spaces, more meaningful capability, a unified experience, richer animations and motion, liquid glass, and a much more compelling visual experience for an app intended to organize their whole life.

@@ -14,6 +14,15 @@ Inspect Git status and the actual source. Preserve existing local changes. V1 in
 
 WHAT I WANT
 
+Latest request after `56f8d3a`: Present/Absent buttons were spammable, had weak feedback and
+did not fit the visual style. Continue from ATTENDANCE_RELIABILITY.md and current STATUS.md.
+The source now uses a version-4 additive Room ledger, dated-class controls shared by College
+and the lecture sheet, persisted one-class marking, explicit corrections/cancel/remove and
+course history. Press feedback is immediate; saved feedback waits for the transaction.
+The user's promised current attendance screenshot/counts have NOT been supplied. Existing
+totals are preserved. Do not invent an attendance baseline. Check cloud/device behavior before
+calling the fix verified. Keep the daily-use spine and all existing functionality.
+
 Latest feedback: the first connected V2 did not make the average day or testing path clear.
 The user prioritized removing cognitive load and rewarding animation/transitions/micro feedback,
 asked for internet research, and told the agent to implement/push without another pitch.

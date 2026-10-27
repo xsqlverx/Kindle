@@ -244,7 +244,7 @@ class MainActivity : ComponentActivity() {
                         val attendance by life.attendanceRecords.collectAsStateWithLifecycle()
                         LaunchedEffect(lecture?.id) { if (lecture != null) { tools = false; preview = false } }
                         if (lecture != null) LectureDetailSheet(lecture, attendanceRecords = attendance, onDismiss = life::closeLectureDetail,
-                            onRecordAttendance = life::recordAttendance)
+                            attendanceControl = { AttendanceClassControl(it, life) })
                         if (moveDraft != null && !panel) NextMoveSheet(life, model, focus, now)
                         FocusSurface(panel, focusOrigin ?: capsuleBounds, focus, now, { model.resumeSession(focus) },
                             { focusOrigin = capsuleBounds; panel = false }, message)

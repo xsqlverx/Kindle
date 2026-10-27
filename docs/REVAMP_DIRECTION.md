@@ -8,6 +8,13 @@ connected focus/capsule motion and confirmed progress feedback. An optional labe
 tryout uses the interaction flow without changing real records. EXPERIENCE_RESEARCH.md records
 the primary references; this is implemented source, not another proposed catalogue.
 
+Latest attendance feedback: the user reports spammed Present/Absent totals, insufficient
+press feedback and mismatched buttons. The dated ledger and shared College/detail controls
+now implement one contribution per course/date/period, explicit corrections/cancellation/
+removal, press response and storage-confirmed feedback in the existing palette. This replaces
+the aggregate counter-button behavior described historically below. Real baseline screenshot
+is still pending; no totals were guessed. See ATTENDANCE_RELIABILITY.md and STATUS.md.
+
 ## Purpose
 
 Opening the app should answer: what is supposed to be happening now, what is the next useful action, and how can the day recover when something was missed?

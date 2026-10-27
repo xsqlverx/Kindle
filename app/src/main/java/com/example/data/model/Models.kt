@@ -1,6 +1,7 @@
 package com.example.data.model
 
 import androidx.room.Entity
+import androidx.room.ColumnInfo
 import androidx.room.PrimaryKey
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -50,7 +51,7 @@ data class TimetableEntry(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val courseCode: String,
     val courseName: String,
-    val dayOfWeek: Int, // 1 = Monday ... 5 = Friday
+    val dayOfWeek: Int, // java.util.Calendar: Sunday = 1, Monday = 2, ... Saturday = 7
     val startHour: Int,
     val startMinute: Int,
     val endHour: Int,
@@ -78,7 +79,8 @@ data class AttendanceRecord(
     val courseCode: String,
     val attendedClasses: Int = 0,
     val totalClasses: Int = 0,
-    val targetPercentage: Int = 80
+    val targetPercentage: Int = 80,
+    @ColumnInfo(defaultValue = "0") val baselineAt: Long = 0
 )
 
 @Entity(tableName = "fitness_logs")

@@ -38,12 +38,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.model.AttendanceProjection
 import com.example.data.model.AssignmentItem
 import com.example.data.model.AttendanceRecord
+import com.example.data.model.AttendanceActionState
 import com.example.data.model.ExamTarget
 import com.example.data.model.TimetableEntry
 import com.example.ui.components.WorkspaceIntro
 import com.example.ui.components.WorkspaceLabel
 import com.example.ui.components.LectureDetailSheet
 import com.example.ui.components.LiquidGlassCard
+import com.example.ui.components.CourseAttendanceControl
+import com.example.ui.components.AttendanceHistory
 import com.example.ui.components.playAppleHaptic
 import com.example.ui.theme.LocalLifeOsColors
 import com.example.ui.theme.RingGymRose
@@ -70,6 +73,8 @@ fun AcademicsScreen(
     val timetable by viewModel.dayTimetable.collectAsStateWithLifecycle()
     val assignments by viewModel.assignments.collectAsStateWithLifecycle()
     val attendanceRecords by viewModel.attendanceRecords.collectAsStateWithLifecycle()
+    val allClasses by viewModel.allTimetable.collectAsStateWithLifecycle()
+    val attendanceAction by viewModel.attendanceAction.collectAsStateWithLifecycle()
     val lectureStatus by viewModel.currentLectureStatus.collectAsStateWithLifecycle()
     val targetExam by viewModel.targetExam.collectAsStateWithLifecycle()
 
@@ -285,14 +290,17 @@ fun AcademicsScreen(
             }
         }
 
-        items(attendanceRecords, key = { it.courseCode }) { record ->
+        items((attendanceRecords.map { it.courseCode } + allClasses.map { it.courseCode }).distinct().sorted(), key = { it }) { courseCode ->
+            val record = attendanceRecords.firstOrNull { it.courseCode == courseCode }
             AttendanceGlassRow(
-                record = record,
-                onLogAttendance = { attended ->
-                    playAppleHaptic(context)
-                    viewModel.recordAttendance(record.courseCode, attended)
-                },
-                onUpdate = { attended, total, target -> viewModel.correctAttendance(record.courseCode, attended, total, target) }
+                record = record ?: AttendanceRecord(courseCode = courseCode),
+                hasBaseline = record != null && (record.totalClasses > 0 || record.baselineAt > 0),
+                action = attendanceAction,
+                onUpdate = { attended, total, target -> viewModel.correctAttendance(courseCode, attended, total, target) },
+                controls = {
+                    CourseAttendanceControl(allClasses.filter { it.courseCode == courseCode }, viewModel)
+                    AttendanceHistory(courseCode, viewModel)
+                }
             )
         }
 
@@ -840,7 +848,8 @@ private fun TimetableGlassCard(entry: TimetableEntry, onClick: () -> Unit, onDel
 }
 
 @Composable
-private fun AttendanceGlassRow(record: AttendanceRecord, onLogAttendance: (Boolean) -> Unit, onUpdate: (Int, Int, Int) -> Unit) {
+private fun AttendanceGlassRow(record: AttendanceRecord, hasBaseline: Boolean, action: AttendanceActionState,
+    onUpdate: (Int, Int, Int) -> Unit, controls: @Composable () -> Unit) {
     val colors = LocalLifeOsColors.current
     var adjust by rememberSaveable(record.courseCode) { mutableStateOf(false) }
     val valid = record.attendedClasses >= 0 && record.totalClasses >= record.attendedClasses && record.targetPercentage in 1..100
@@ -853,42 +862,43 @@ private fun AttendanceGlassRow(record: AttendanceRecord, onLogAttendance: (Boole
                 Column(Modifier.weight(1f)) {
                     Text(record.courseCode, color = colors.textPrimary, fontSize = 19.sp, fontWeight = FontWeight.Medium)
                     Spacer(Modifier.height(6.dp))
-                    Text("${record.attendedClasses} of ${record.totalClasses} attended", color = colors.textSecondary, fontSize = 12.sp)
+                    Text(if (hasBaseline) "${record.attendedClasses} of ${record.totalClasses} attended" else "Real attendance totals needed", color = colors.textSecondary, fontSize = 12.sp)
                 }
-                Text(projection?.percentage?.let { "$it%" } ?: "—", color = accent, fontSize = 32.sp, fontWeight = FontWeight.Light)
+                Text(if (hasBaseline) projection?.percentage?.let { "$it%" } ?: "—" else "—", color = accent, fontSize = 32.sp, fontWeight = FontWeight.Light)
             }
             Box(Modifier.fillMaxWidth().height(4.dp).clip(CircleShape).background(colors.surfaceGlassHighlight)) {
                 Box(Modifier.fillMaxWidth(progress).fillMaxHeight().background(accent))
             }
             Text(when {
                 projection == null -> "Check your saved totals."
-                projection.percentage == null -> "Add your baseline to start tracking."
+                projection.percentage == null -> if (hasBaseline) "No classes held yet · your baseline is saved." else "Add your baseline to start tracking."
                 projection.isAtTarget -> "At ${record.targetPercentage}% target · ${projection.absenceBuffer} class buffer"
                 projection.classesNeeded == null -> "A 100% target cannot be recovered after a recorded absence."
                 else -> "Attend the next ${projection.classesNeeded} classes to reach ${record.targetPercentage}%."
             }, color = colors.textSecondary, fontSize = 12.sp, lineHeight = 19.sp)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                FilledTonalButton(onClick = { onLogAttendance(true) }, modifier = Modifier.weight(1f).heightIn(min = 48.dp),
-                    shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(horizontal = 8.dp),
-                    colors = ButtonDefaults.filledTonalButtonColors(containerColor = RingHabitEmerald.copy(alpha = 0.12f), contentColor = RingHabitEmerald)) {
-                    Text("Present", fontSize = 12.sp)
+                TextButton(enabled = !action.busy, onClick = { adjust = true }) {
+                    Icon(Icons.Outlined.Edit, null, Modifier.size(16.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(if (hasBaseline) "Correct totals" else "Add real totals", fontSize = 12.sp)
                 }
-                OutlinedButton(onClick = { onLogAttendance(false) }, modifier = Modifier.weight(1f).heightIn(min = 48.dp),
-                    shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(horizontal = 8.dp)) {
-                    Text("Absent", color = colors.textSecondary, fontSize = 12.sp)
-                }
-                IconButton(onClick = { adjust = true }) { Icon(Icons.Outlined.Edit, "Correct attendance totals", tint = colors.primaryAccent, modifier = Modifier.size(19.dp)) }
             }
+            if (action.key == record.courseCode && !action.busy && action.confirmation.isNotBlank())
+                Text(action.confirmation, color = colors.primaryAccent, fontSize = 12.sp)
+            controls()
         }
     }
-    if (adjust) AttendanceBaselineDialog(record, onDismiss = { adjust = false }, onSave = { attended, total, target ->
+    if (adjust) AttendanceBaselineDialog(record, action, onDismiss = { adjust = false }, onSave = { attended, total, target ->
         onUpdate(attended, total, target)
-        adjust = false
     })
 }
 
 @Composable
-private fun AttendanceBaselineDialog(record: AttendanceRecord, onDismiss: () -> Unit, onSave: (Int, Int, Int) -> Unit) {
+private fun AttendanceBaselineDialog(record: AttendanceRecord, action: AttendanceActionState, onDismiss: () -> Unit, onSave: (Int, Int, Int) -> Unit) {
+    var requested by remember { mutableStateOf(false) }
+    LaunchedEffect(action, requested) {
+        if (requested && !action.busy && action.key == record.courseCode && action.confirmation.startsWith("Totals saved")) onDismiss()
+    }
     var attended by remember { mutableStateOf(record.attendedClasses.toString()) }
     var total by remember { mutableStateOf(record.totalClasses.toString()) }
     var target by remember { mutableStateOf(record.targetPercentage.toString()) }
@@ -900,7 +910,7 @@ private fun AttendanceBaselineDialog(record: AttendanceRecord, onDismiss: () -> 
         title = { Text("${record.courseCode} · correct totals", fontWeight = FontWeight.Medium) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Copy the counts from your college portal. This changes only this course's saved attendance.", fontSize = 13.sp, lineHeight = 20.sp)
+                Text("Copy this course's real totals as of now. They replace its totals and include all classes through now. Existing class marks stay in history and are locked into this baseline. Future classes add once.", fontSize = 13.sp, lineHeight = 20.sp)
                 OutlinedTextField(attended, { attended = it }, label = { Text("Classes attended") }, singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(total, { total = it }, label = { Text("Total classes held") }, singleLine = true,
@@ -908,10 +918,12 @@ private fun AttendanceBaselineDialog(record: AttendanceRecord, onDismiss: () -> 
                 OutlinedTextField(target, { target = it }, label = { Text("Your target (%)") }, singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth())
                 if (!valid) Text("Attended must be between 0 and total. Target must be 1–100%.", fontSize = 12.sp)
+                if (requested && action.key == record.courseCode && action.error != null) Text(action.error, fontSize = 12.sp)
+                if (action.busy) Text("Saving totals…", fontSize = 12.sp)
             }
         },
-        confirmButton = { TextButton(enabled = valid, onClick = {
-            if (valid) onSave(requireNotNull(a), requireNotNull(t), requireNotNull(goal))
+        confirmButton = { TextButton(enabled = valid && !action.busy, onClick = {
+            if (valid) { requested = true; onSave(requireNotNull(a), requireNotNull(t), requireNotNull(goal)) }
         }) { Text("Save totals") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
     )

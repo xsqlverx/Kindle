@@ -2,7 +2,41 @@
 
 Last updated: 2026-10-27, Asia/Calcutta.
 
-## Current delivery: research-driven daily use
+## Current delivery: attendance reliability
+
+Baseline `56f8d3a`, clean main, fetched and equal to origin/main before editing. The user
+reported spammable Present/Absent counters, weak press feedback and mismatched styling.
+ATTENDANCE_RELIABILITY.md records the saved implementation plan and acceptance criteria.
+
+- Both College and lecture details use one lavender/charcoal dated-class control. The selected
+  date and exact period are visible; multiple periods can be selected independently. Press
+  spring/ripple/haptic is immediate. In-flight writes disable marking. Storage-confirmed saves
+  fold into a saved row with a short check pulse, haptic and explicit Change action.
+- A persistent course/date/start/end key and Room transaction update the ledger and aggregates
+  together. Repeated marking, reopening and identical timetable re-imports cannot count that
+  period again. Present/Absent correction changes its contribution; cancelled/removed marks
+  count zero. Stale changes are rejected instead of overwriting a newer mark. Removed marks
+  retain their identity. Future periods and missing/unconfirmed baselines cannot be marked.
+- Course history shows actual stored dated marks, including removed and reconciled records.
+  Correct totals accepts a real snapshot as of now, retains and locks included ledger marks,
+  and prevents recounting earlier periods. A failed correction stays open with an error.
+- Room is now version 4. The additive 3-to-4 migration creates the ledger and adds baselineAt
+  with default zero; it does not change existing counts. Existing 2-to-3 migration remains.
+  Explicit attendance reset clears ledger and aggregates together. No automatic data reset.
+- The promised attendance screenshot/counts are still pending. Existing aggregate history
+  cannot reveal previously counted class identities; there is no invented retrospective ledger.
+  No real totals were supplied or changed during implementation.
+
+Source checks: 58 Kotlin files parse; strict UTF-8, manifest, 13 routes, original action APIs
+and additive SQL pass. Python SQLite preserves legacy task/attendance sentinels through the
+declarations. `git diff --check` passes. Nine attendance cloud regression methods are supplied
+but **not executed locally**, including concurrent repeats, restart persistence, correction,
+baseline locking, invalid/stale writes, rollback and direct V3 migration. The existing V2
+migration case now reaches V4. No local compilation, Gradle, emulator or Android tests.
+External compilation, Room execution, phone visuals/touch/haptics and accessibility remain
+unverified. Delivery/push is reported separately. See V2_VERIFICATION.md for the test path.
+
+## Previous delivery: research-driven daily use
 
 Baseline `4951ae3`, clean main and equal to origin/main before editing. The user understood
 the feature vision but could not immediately understand testing or an average day. They
@@ -60,8 +94,8 @@ EXPERIENCE_RESEARCH.md. There is no claim that engagement, dopamine or cognitive
 
 ## Data and platform boundaries
 
-Room remains version 3 with the existing additive 2-to-3 migration and database filename.
-This pass changes queries and behavior, not entity columns or schema. No destructive fallback,
+The previous daily-use pass kept Room version 3 and the existing database filename.
+The attendance follow-up above adds version 4. No destructive fallback,
 startup mock seeding, heuristic record deletion, branding, package/signing or builder changes.
 Unsupported version-1 installations still have no supplied migration; fail closed rather than wipe.
 
@@ -74,7 +108,7 @@ not suppress real plan notifications. Delivery, permissions and device behavior 
 
 ## Verification actually performed
 
-- `python scripts/check_sources.py`: **54 Kotlin files** pass grammar parsing. Manifest XML,
+- The daily-use pass checked **54 Kotlin files**; the attendance follow-up checks **58**. Manifest XML,
   strict documentation/source UTF-8, all 13 routes, original LifeOsViewModel action names,
   disabled mock/destructive startup paths and additive SQL declaration checks pass.
 - Python SQLite executes the source-derived V2 fixture and existing migration declarations
@@ -97,7 +131,7 @@ journey or reminder delivery was observed.
   rendering/frame evidence. The focus surface uses custom bounds interpolation rather than
   assuming newer experimental shared-element/Expressive APIs exist in the pinned BOM.
 - Recurring commitments, undo across process death, deeper bulk management/source navigation,
-  longitudinal training history and per-class attendance events/correction/duplicate protection.
+  longitudinal training history and device verification of the new attendance ledger/controls.
 - Official attendance screenshot, exact timetable, confirmed workout program and name/logo
   remain unresolved. Preserve family, relationship, coding and training commitments.
 

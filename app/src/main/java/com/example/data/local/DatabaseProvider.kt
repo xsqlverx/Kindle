@@ -18,10 +18,17 @@ val WORKSPACE_MIGRATION_2_3 = object : Migration(2, 3) {
     }
 }
 
+val ATTENDANCE_MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE attendance_records ADD COLUMN baselineAt INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("CREATE TABLE IF NOT EXISTS attendance_events (`key` TEXT NOT NULL PRIMARY KEY, courseCode TEXT NOT NULL, date TEXT NOT NULL, startMillis INTEGER NOT NULL, startMinute INTEGER NOT NULL, endMinute INTEGER NOT NULL, status TEXT NOT NULL, updatedAt INTEGER NOT NULL, includedInBaseline INTEGER NOT NULL)")
+    }
+}
+
 object DatabaseProvider {
     @Volatile private var instance: LifeOsDatabase? = null
     fun get(context: Context): LifeOsDatabase = instance ?: synchronized(this) {
         instance ?: Room.databaseBuilder(context.applicationContext, LifeOsDatabase::class.java, "life_os_database_v6")
-            .addMigrations(WORKSPACE_MIGRATION_2_3).build().also { instance = it }
+            .addMigrations(WORKSPACE_MIGRATION_2_3, ATTENDANCE_MIGRATION_3_4).build().also { instance = it }
     }
 }

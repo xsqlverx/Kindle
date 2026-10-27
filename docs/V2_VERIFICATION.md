@@ -4,6 +4,18 @@
 
 ## First path to try after the external build
 
+Latest attendance fix: open **College → Attendance → choose class/date → Present or Absent**.
+Repeatedly tap and reopen the same class through lecture details: totals must increase at
+most once. The pressed control should compress/ripple immediately, show saving as needed,
+then fold into the persisted saved row with check pulse/haptic. Use **Change** to switch
+Present to Absent: total held stays constant. Cancel/remove reverses only this class's
+contribution; a second removal does nothing. Mark a distinct period and inspect Class history.
+Restart/rotate and repeat through both entry points. Never pre-count a future class. Missing
+or unconfirmed zero baselines require real counts. Correct totals is explicitly a snapshot
+through now; it must preserve/lock included history and stop recounting older periods.
+Check storage-failure UI, narrow/large-font layouts, TalkBack, reduced motion and system haptics.
+The user's screenshot is still pending; use a separate test database for synthetic test counts.
+
 Open **Today → Try the daily loop · 60 sec** (also in Settings). Choose a title or saved work,
 start the preview, minimize with the down arrow, visit another space, reopen the capsule,
 and finish with a resume note. This is the same interaction surface as actual work, but the
@@ -51,6 +63,11 @@ and [graphics modifiers](https://developer.android.com/develop/ui/compose/graphi
   future/manual revision reachability, blocked/drop work and an already saved night reset.
 - Keep the existing timer and attendance tests. Existing screenshot/sample tests are not V2
   acceptance evidence; add/update screenshots using real rendered results from the cloud/device.
+- `AttendanceLedgerTest`: nine methods for 50 concurrent repeats, corrections/cancellation/
+  removal/remark, distinct versus re-imported periods, missing/explicit-zero baselines,
+  baseline reconciliation, future/missing-timetable/stale calls, SQL-trigger failure rollback,
+  direct V3-to-V4 Room migration and close/reopen persistence. The existing workspace fixture
+  now migrates V2 through V3 to V4. None of these Android/Room tests ran locally.
 
 ## Device acceptance journeys
 
@@ -108,7 +125,9 @@ and [graphics modifiers](https://developer.android.com/develop/ui/compose/graphi
 
 - V2 is **not declared complete**. Visual quality, frame pacing, Room migration correctness,
   permissions, reminder delivery and complete journeys still require cloud/device evidence.
-- No per-class attendance events/undo/duplicate protection yet; existing aggregate tools remain.
+- Dated attendance events/correction/removal/duplicate protection are now implemented in source;
+  cloud Room execution and device touch/feedback still need verification. Legacy aggregate
+  counts have no per-class provenance; old marks are not inferred or automatically repaired.
 - No official attendance screenshot, exact timetable or confirmed workout program supplied.
 - No automatic home detection, blocking, credential login, online AI or new branding.
 - Planning uses explicit dated blocks plus the existing saved timetable. There is no recurring
@@ -122,7 +141,7 @@ and [graphics modifiers](https://developer.android.com/develop/ui/compose/graphi
   committed together in Room. Timer archive is deduplicated if interrupted before prefs clear.
 - New-topic/attempt editing and project archive are implemented; richer bulk management,
   source deep links from every history entry and longitudinal per-set training history remain.
-- The latest source pass parses 54 Kotlin files. Its 27 supplied V2-related test methods have
+- The latest source pass parses 58 Kotlin files. Its 36 supplied V2-related test methods have
   not been executed here. No source check establishes a successful cloud build or reduced
   cognitive load. Primary research and applied decisions are in EXPERIENCE_RESEARCH.md.
 
