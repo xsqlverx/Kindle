@@ -2,7 +2,29 @@
 
 Last updated: 2026-10-28, Asia/Calcutta.
 
-## Current delivery: coherent controls
+## Current delivery: next-move composer and exact minutes
+
+Baseline `19f8915`, clean main, fetched and equal to origin/main. The user says “Give it a
+little room” looks like an HTML form and wants their own minutes instead of four presets.
+NEXT_MOVE_REFINEMENT.md records the saved plan, implementation and evidence.
+
+- The native sheet now has inset editors, a sculpted editable time surface, searchable saved
+  sources, linked-source context, live start/end receipt and an action footer outside the scroll.
+  Exact minutes are always exposed: type, slide or adjust by one; no preset chips. The existing
+  1–180-minute focus-engine boundary is visible. Material/first step remain optional details.
+- Raw input persists in the draft JSON, with backward-compatible fallback for old drafts.
+  Invalid/blank text remains invalid across reopening/recreation; source/title changes preserve
+  chosen time even from stale callbacks. UI and placeMove validate the same whole-minute input.
+  No silent fallback to a previous valid value. Source/collision/transaction/session safeguards
+  and the no-records preview/real-draft backup remain. No Room schema or data reset.
+- Source checks parse **62 Kotlin files** and pass route/API/UTF-8/manifest/additive SQL checks;
+  `git diff --check` passes. Exact pinned Foundation 1.7.0 / Material3 1.3.0 signatures were
+  inspected. Six meaningful cloud regressions supplied, **not executed**; total 42 V2-related
+  methods in these groups. No local build, Gradle, emulator or Android tests.
+- Cloud build, test execution, native layout/art direction, touch/slider/keyboard behavior,
+  large fonts, TalkBack and frame pacing remain unverified. V2 is not declared complete.
+
+## Previous delivery: coherent controls
 
 Baseline `fbaa1f5`, clean main, fetched and equal to origin/main. The user reports that most
 buttons look unprofessional/out of place, specifically Whole day and Habits/water/everyday

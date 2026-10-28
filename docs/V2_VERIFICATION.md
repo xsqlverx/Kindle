@@ -4,6 +4,15 @@
 
 ## First path to try after the external build
 
+Latest composer path: **Today → next move → type exact minutes** in the large time control.
+Try 17, 37 and 90, ±1 and slider, then inspect the exact start/end receipt. Choose/change saved
+work and material without losing minutes; close/reopen, rotate/recreate, then save/start and
+inspect block/timer duration. Blank/0/181/decimal/nonnumeric input must disable new work and
+be rejected by placeMove, with no fallback to an old duration. Preview must preserve the real
+draft/source/custom time and still create no real records. Confirm keyboard/Done, scroll,
+footer, long labels, 200% fonts, each palette, TalkBack and Reduce motion. Source/API inspection
+is recorded in NEXT_MOVE_REFINEMENT.md; no native screenshot/build/phone result is claimed.
+
 Latest control polish: **Today → Whole day/Less**, then College/Fitness/Capture in the shared
 shelf, **Everyday tools → Back**, Review and Daily Reset. All existing actions must still be
 reachable. Inspect aligned surfaces, label wrapping, focus borders, pressed/disabled states
@@ -67,10 +76,14 @@ and [graphics modifiers](https://developer.android.com/develop/ui/compose/graphi
   idempotent capture conversion, idempotent session archive and unchanged task completion.
   Explicit completion/undo updates planned reservations without rewriting reviewed session
   snapshots. Three test methods. This fixture is source-derived, not a copy of the user's database.
-- `DayGuideTest`: fifteen cases for honest empty state, dated arrival, active/expired sessions,
+- `DayGuideTest`: sixteen cases for honest empty state, dated arrival, active/expired sessions,
   protected class/evening windows, smaller restarts with source identity, stale work, explainable
   deadline ordering, continuation material, active-session occupancy, separate preview occupancy,
   future/manual revision reachability, blocked/drop work and an already saved night reset.
+  The added case preserves exact arbitrary 17/37-minute placement around a commitment.
+- `NextMoveDurationTest`: five cases for exact custom time through stale metadata/source
+  changes, reopening/recreation, invalid writes followed by an exact preview timer, invalid
+  raw draft restoration, preview backup and old-draft fallback. Supplied for cloud; not run.
 - Keep the existing timer and attendance tests. Existing screenshot/sample tests are not V2
   acceptance evidence; add/update screenshots using real rendered results from the cloud/device.
 - `AttendanceLedgerTest`: nine methods for 50 concurrent repeats, corrections/cancellation/
@@ -151,7 +164,7 @@ and [graphics modifiers](https://developer.android.com/develop/ui/compose/graphi
   committed together in Room. Timer archive is deduplicated if interrupted before prefs clear.
 - New-topic/attempt editing and project archive are implemented; richer bulk management,
   source deep links from every history entry and longitudinal per-set training history remain.
-- The latest source pass parses 59 Kotlin files. Its 36 supplied V2-related test methods have
+- The latest source pass parses 62 Kotlin files. Its 42 supplied V2-related test methods have
   not been executed here. No source check establishes a successful cloud build or reduced
   cognitive load. Primary research and applied decisions are in EXPERIENCE_RESEARCH.md.
 

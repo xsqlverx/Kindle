@@ -74,6 +74,15 @@ Current first delivery: stages 1–3 have working source implementations; stage 
 opt-in plan/timer reminders, source checks and ten supplied cloud test methods. Cloud
 compilation, Android test execution, rendering, delivery and device refinement remain open.
 
+## Next-move composer follow-up
+
+Next-move follow-up, baseline `19f8915`: NEXT_MOVE_REFINEMENT.md records a cohesive native
+composer redesign and always-visible exact-duration control. Preset chips/hidden custom field
+are removed. Raw duration text is a backward-compatible draft-JSON addition; metadata updates
+preserve it and the write guard rejects invalid values. Existing real/preview/session/source/
+collision behavior remains. Six cloud regression methods supplied, not executed; source-only
+checks pass for 62 Kotlin files. No local Android build/tests or observed cloud/device result.
+
 ## Control design follow-up
 
 Latest presentation stage, 2026-10-28, baseline `fbaa1f5`: CONTROL_DESIGN.md defines the

@@ -36,6 +36,8 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
     val message = _message.asStateFlow()
     private val _moveDraft = MutableStateFlow(if (application.getSharedPreferences("today_focus_session", Context.MODE_PRIVATE).getString("phase", "IDLE") == "IDLE") readMoveDraft() else null)
     val moveDraft = _moveDraft.asStateFlow()
+    private val _moveMinutesText = MutableStateFlow(readMoveMinutesText(_moveDraft.value))
+    val moveMinutesText = _moveMinutesText.asStateFlow()
     private val _journeyBusy = MutableStateFlow(false)
     val journeyBusy = _journeyBusy.asStateFlow()
     private val _showFirstLap = MutableStateFlow(!prefs.getBoolean("hide_first_lap", false))
@@ -127,17 +129,26 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
         }
     } catch (_: Exception) { null }
 
+    private fun readMoveMinutesText(move: DayMove?): String = try {
+        val fallback = move?.minutes?.toString().orEmpty()
+        prefs.getString("move_draft", null)?.let { JSONObject(it).optString("durationText", fallback).take(12) } ?: fallback
+    } catch (_: Exception) { move?.minutes?.toString().orEmpty() }
+
     fun offerMove(move: DayMove? = null) {
+        if (_journeyBusy.value) return
         clearMessage()
         if (move?.sourceType == "PREVIEW" && readMoveDraft()?.sourceType != "PREVIEW") {
             prefs.getString("move_draft", null)?.let { prefs.edit().putString("draft_before_preview", it).apply() }
         }
-        updateMove(move ?: readMoveDraft() ?: DayMove(""))
+        val selected = move ?: readMoveDraft() ?: DayMove("")
+        _moveMinutesText.value = if (move == null) readMoveMinutesText(selected) else selected.minutes.toString()
+        persistMove(selected)
     }
     private fun finishPreviewDraft() {
         val backup = prefs.getString("draft_before_preview", null)
         prefs.edit().apply { if (backup != null) putString("move_draft", backup) else remove("move_draft"); remove("draft_before_preview") }.apply()
         _moveDraft.value = null
+        _moveMinutesText.value = ""
     }
     fun stashMove() {
         if (_journeyBusy.value) return
@@ -145,15 +156,30 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
     }
     fun updateMove(move: DayMove) {
         if (_journeyBusy.value) return
+        val current = _moveDraft.value ?: return
+        // Metadata callbacks may carry an older snapshot. The time editor owns the duration.
+        val minutes = MoveDuration.parse(_moveMinutesText.value) ?: current.minutes
+        persistMove(move.copy(minutes = minutes))
+    }
+    fun updateMoveMinutes(text: String) {
+        if (_journeyBusy.value) return
+        val draft = _moveDraft.value ?: return
+        _message.value = null
+        _moveMinutesText.value = text.take(12)
+        val minutes = MoveDuration.parse(_moveMinutesText.value)
+        persistMove(if (minutes == null) draft else draft.copy(minutes = minutes))
+    }
+    private fun persistMove(move: DayMove) {
         _moveDraft.value = move
         val value = JSONObject().put("title", move.title).put("type", move.sourceType).put("source", move.sourceId)
             .put("material", move.material).put("step", move.firstStep).put("reason", move.reason)
-            .put("block", move.blockId).put("minutes", move.minutes)
+            .put("block", move.blockId).put("minutes", move.minutes).put("durationText", _moveMinutesText.value)
         prefs.edit().putString("move_draft", value.toString()).apply()
     }
     fun closeMove() {
         if (_journeyBusy.value) return
         _moveDraft.value = null
+        _moveMinutesText.value = ""
         prefs.edit().remove("move_draft").apply()
     }
 
@@ -170,9 +196,12 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
     /** One explicit action links or creates work, places the same record, then starts if free now. */
     fun placeMove(focus: TodayPrototypeViewModel, start: Boolean) = write {
         if (_journeyBusy.value) return@write
-        val draft = _moveDraft.value ?: return@write
+        val storedDraft = _moveDraft.value ?: return@write
         if (focus.session.value.phase != FocusPhase.IDLE) { stashMove(); focus.requestSessionPanel(); return@write }
-        if (draft.title.isBlank() || draft.minutes !in 1..180) return@write
+        val minutes = MoveDuration.parse(_moveMinutesText.value)
+        if (minutes == null) { _message.value = "Enter 1–180 whole minutes before placing this move."; return@write }
+        val draft = storedDraft.copy(minutes = minutes)
+        if (draft.title.isBlank()) return@write
         _message.value = null
         if (draft.sourceType == "PREVIEW") {
             finishPreviewDraft()
@@ -212,6 +241,7 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
             }
             placed?.let { block ->
                 _moveDraft.value = null; prefs.edit().remove("move_draft").apply()
+                _moveMinutesText.value = ""
                 val now = System.currentTimeMillis()
                 if (start && block.startMillis <= now + 1000L) {
                     focus.start(block.title, if (block.sourceType == "REST") FocusKind.REST else FocusKind.STUDY,
@@ -277,6 +307,7 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
         dao.clearWorkspace()
         _homeAt.value = 0L; _undo.value = emptyList()
         _moveDraft.value = null
+        _moveMinutesText.value = ""
         prefs.edit().remove("home_at").remove("move_draft").remove("draft_before_preview").apply()
     }
     fun recordTraining(split: String, minutes: Int, note: String) = write {

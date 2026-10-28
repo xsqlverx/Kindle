@@ -23,6 +23,12 @@ The user authorized pushing this ongoing revamp to `origin/main`. Verify the che
 
 ## Continuity
 
+Latest composer feedback (2026-10-28): “Give it a little room” should feel more native and
+aesthetic, with exact custom minutes as the main input, not four preset prompts or a hidden
+field. Read docs/NEXT_MOVE_REFINEMENT.md. Preserve raw duration drafts, validation at placement,
+source identity, preview backup, session protection and collision checks. Keep 1–180 bounds
+visible and do not treat source checks as cloud/native visual verification.
+
 Latest control feedback (2026-10-28): most buttons feel unprofessional/out of place, naming
 Today's Whole day and Habits/water/everyday tools. Read docs/CONTROL_DESIGN.md. Use the shared
 native controls and deliberate primary/secondary/disclosure hierarchy in live UI; preserve

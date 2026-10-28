@@ -18,6 +18,12 @@ pending. This resolves the source-level gap in the historical diagnosis below.
 
 ## Feedback that changes the brief
 
+Latest 2026-10-28 correction: the next-move composer feels like an HTML form; the user wants
+custom minutes instead of four preset prompts. The implemented native time surface, direct
+whole-minute entry/slider/stepper, draft preservation and placement guard are documented in
+NEXT_MOVE_REFINEMENT.md. This request supersedes the earlier preset-chip presentation.
+Keep the existing 1–180-minute engine boundary visible; cloud/device validation is pending.
+
 2026-10-28: the user reports widespread button inconsistency, specifically Whole day and
 Everyday tools. CONTROL_DESIGN.md records the implementation: shared native control roles,
 consistent labels/corners/padding and press response, a bounded day disclosure and integrated

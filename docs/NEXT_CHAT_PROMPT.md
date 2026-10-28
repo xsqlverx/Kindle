@@ -14,6 +14,14 @@ Inspect Git status and the actual source. Preserve existing local changes. V1 in
 
 WHAT I WANT
 
+Latest request after `19f8915`: “Give it a little room” looks like an HTML form; choose my
+own minutes instead of four fixed prompts. Read NEXT_MOVE_REFINEMENT.md. The composer now
+has a native time surface with direct exact 1–180-minute input, slider and ±1 controls, inset
+editors, source picker, live placement receipt and a footer outside the scroll. Raw input is
+persisted in the draft and validated again at placeMove; invalid text cannot use old minutes.
+Keep source/preview/session/collision behavior and user data intact. Six new cloud regressions
+are supplied but unrun; 62 Kotlin files pass source checks. Cloud/device results are unverified.
+
 Latest feedback, 2026-10-28 after `fbaa1f5`: most buttons feel unprofessional/out of place,
 specifically Whole day and Habits/water/everyday tools. Read CONTROL_DESIGN.md. Shared native
 button roles, geometry/type/press/focus states now cover live actions; Today has a bounded day

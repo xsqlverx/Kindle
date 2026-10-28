@@ -55,6 +55,15 @@ class DayGuideTest {
         assertEquals(at(21), DayGuide.window(input, 25))
         assertEquals(at(19, 50), DayGuide.window(input, 10))
     }
+    @Test fun `arbitrary entered minutes fit exactly or move past a commitment without preset rounding`() {
+        val input = DayInputs(at(19), blocks = listOf(DayBlock("fixed", "Fixed commitment", at(19, 20), 40, fixed = true)))
+        val seventeen = requireNotNull(MoveDuration.parse("17"))
+        val thirtySeven = requireNotNull(MoveDuration.parse("37"))
+        assertEquals(at(19), DayGuide.window(input, seventeen))
+        assertEquals(at(19, 17), requireNotNull(DayGuide.window(input, seventeen)) + seventeen * 60_000L)
+        assertEquals(at(20), DayGuide.window(input, thirtySeven))
+        assertEquals(at(20, 37), requireNotNull(DayGuide.window(input, thirtySeven)) + thirtySeven * 60_000L)
+    }
     @Test fun `a smaller restart keeps the original source and material`() {
         val block = DayBlock("study", task.title, at(14), 25, sourceType = "TASK", sourceId = "7", material = "Notes p12", firstStep = "Example 3")
         val input = DayInputs(at(15), homeAt = at(14), tasks = listOf(task), blocks = listOf(block))

@@ -29,6 +29,12 @@ The main difficulty described by the user is losing structure after returning ho
 
 ## Existing scope to preserve
 
+Latest composer request: “Give it a little room” needs a stronger native visual design and
+direct custom minutes. The source now replaces preset chips with a large numeric editor,
+full-range slider and one-minute adjustment, live placement and a reachable action footer.
+The input is not hidden under details. NEXT_MOVE_REFINEMENT.md records the safeguards and
+unverified native/cloud boundaries; retain exact chosen time and all source/session behavior.
+
 Keep every current capability across Today, Fitness, College, Tasks, Daily Reset, and Settings. The confirmed fixed centre launcher and four fully assignable outer slots now route the 13-space library. The expanded centre geometry is an implemented first design, pending device feedback; no side restrictions or permanent outer assignments apply.
 
 ## User's weekday: approximate, not a fixed schedule

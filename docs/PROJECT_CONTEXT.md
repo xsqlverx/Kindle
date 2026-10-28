@@ -46,6 +46,14 @@ show clear primary/secondary/disclosure roles, and retain tactile response and a
 This visual refinement is implemented in source; device acceptance/cloud build are unverified.
 No data, brand, navigation contract or feature scope change was requested.
 
+### Next-move feedback, 2026-10-28
+
+The user says “Give it a little room” feels like an HTML form and wants to choose exact
+minutes rather than four prompts. NEXT_MOVE_REFINEMENT.md records the implemented native
+composer/time surface, visible numeric input/slider/one-minute controls and 1–180-minute
+boundary. Raw input persists and is validated at the write, including after restoring/changing
+sources. Preserve the real-work/preview contract. Cloud/device visual acceptance is pending.
+
 ## Routine and human constraints
 
 The full approximate weekday is in REVAMP_DIRECTION.md. Important anchors: college around 8:00 AM-1:30 PM; home around 2:30-2:50 PM; gym around 8:00-9:00 PM; family prayer around 9:30-10:30 PM; call with girlfriend around 10:30-11:45 PM. Exact boundaries remain uncertain.
