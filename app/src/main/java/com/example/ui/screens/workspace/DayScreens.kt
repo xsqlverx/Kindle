@@ -108,6 +108,7 @@ fun PlanScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: TodayPro
             WorkspaceActionRow("Add to your day", "Work blocks or fixed commitments", Icons.Outlined.AddCircleOutline) { add = true }
         }
         item { DayAgenda(input, model, onAddCommitment = { add = true }) }
+        item { AcademicCalendarBrief(model, now) }
         item {
             WorkspaceActionRow("Evening commitments", "Review the approximate draft before saving", Icons.Outlined.Bedtime) { eveningDraft = true }
             WorkspaceTextButton(onClick = { model.recover(now, WorkspaceViewModel.dayEnd(now), session.blockId) }) { Text("Recover missed starts") }

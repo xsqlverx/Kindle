@@ -76,6 +76,7 @@ fun GuidedTodayScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: T
                 else NextMoveHero(target.second, input, model, focus)
             }
         }
+        item { AcademicCalendarBrief(model, now) }
         if (input.session.phase == FocusPhase.IDLE && firstLap) item {
             Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(colors.primaryAccent.copy(alpha = 0.06f))
                 .clickable { model.offerMove(DayMove("", "PREVIEW", reason = "A safe daily-loop preview", minutes = 1)) }.padding(16.dp).testTag("first_lap"), verticalAlignment = Alignment.CenterVertically) {

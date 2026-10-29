@@ -8,9 +8,11 @@ import androidx.room.withTransaction
 import com.example.data.local.DatabaseProvider
 import com.example.data.model.*
 import com.example.data.reminders.PlanReminders
+import com.example.data.repository.AcademicStore
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -22,6 +24,14 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
     private val db = DatabaseProvider.get(application)
     private val dao = db.workspaceDao()
     private val prefs = application.getSharedPreferences("workspace_v2", Context.MODE_PRIVATE)
+    private val academicStore = AcademicStore(application, db)
+    private val _academicPack = MutableStateFlow<AcademicPack?>(null)
+    val academicPack = _academicPack.asStateFlow()
+    private val _academicError = MutableStateFlow<String?>(null)
+    val academicError = _academicError.asStateFlow()
+    private val _academicRoadmap = MutableStateFlow(AcademicRoadmap())
+    val academicRoadmap = _academicRoadmap.asStateFlow()
+    private val academicInitialization = Mutex()
     private val writes = Mutex()
     private val _destination = MutableStateFlow(if (!prefs.getBoolean("guided_day_introduced", false)) Destination.TODAY
         else Destination.fromId(prefs.getString("destination", null)) ?: Destination.TODAY)
@@ -58,6 +68,19 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
     val reminders = _reminders.asStateFlow()
 
     init {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                academicInitialization.withLock {
+                    val pack = academicStore.load()
+                    academicStore.install(pack)
+                    val roadmap = academicStore.readRoadmap() ?: AcademicRoadmap(
+                        targets = SyllabusPlanner.build(pack, AcademicDates.key(System.currentTimeMillis()), 50)).also(academicStore::saveRoadmap)
+                    _academicRoadmap.value = roadmap
+                    _academicPack.value = pack
+                }
+            } catch (cancelled: CancellationException) { throw cancelled
+            } catch (_: Exception) { _academicError.value = "Could not open your syllabus and calendar. Your existing records and tools are still available." }
+        }
         prefs.edit().putBoolean("guided_day_introduced", true).apply()
         viewModelScope.launch(Dispatchers.IO) {
             dao.blocks().collect {
@@ -65,6 +88,44 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
                 catch (_: SecurityException) { _message.value = "Android could not schedule reminders. Your plan is saved and remains available here." }
             }
         }
+    }
+    private suspend fun saveAcademic(value: AcademicRoadmap) {
+        withContext(Dispatchers.IO) { academicStore.saveRoadmap(value) }
+        _academicRoadmap.value = value
+    }
+    fun replanAcademic(minutes: Int, modules: Set<String>) = write {
+        val pack = _academicPack.value ?: return@write
+        if (minutes !in 10..180) { _message.value = "Choose 10–180 suggested study minutes per day."; return@write }
+        val old = _academicRoadmap.value
+        val targets = SyllabusPlanner.build(pack, AcademicDates.key(System.currentTimeMillis()), minutes, old.covered, modules)
+        saveAcademic(old.copy(targets = (old.targets.filter { it.id in old.done } + targets).distinctBy { it.id }, dailyMinutes = minutes, modules = modules))
+        _message.value = "Preparation targets refreshed. Your actual scheduled blocks and history stay intact."
+    }
+    fun setAcademicCovered(id: String, covered: Boolean) = write {
+        if (_academicPack.value?.items?.none { it.id == id } != false) return@write
+        val old = _academicRoadmap.value
+        saveAcademic(old.copy(covered = if (covered) old.covered + id else old.covered - id))
+    }
+    fun setAcademicTargetDone(id: String, done: Boolean) = write {
+        val old = _academicRoadmap.value
+        if (old.targets.none { it.id == id }) return@write
+        saveAcademic(old.copy(done = if (done) old.done + id else old.done - id))
+    }
+    fun offerAcademic(id: String) = write {
+        val pack = _academicPack.value ?: return@write
+        val item = pack.items.firstOrNull { it.id == id } ?: return@write
+        withContext(Dispatchers.IO) { academicStore.addItem(pack, item) }
+        val date = AcademicDates.key(System.currentTimeMillis())
+        val target = _academicRoadmap.value.targets.firstOrNull { it.itemId == id && it.date <= date && it.id !in _academicRoadmap.value.done }
+        val existing = dao.blocksSnapshot().firstOrNull { it.sourceType == item.sourceType && it.sourceId == id && it.state == "PLANNED" && AcademicDates.key(it.startMillis) == date }
+        val topic = dao.topicById(id)
+        val attempt = dao.attemptById(id)
+        val last = dao.sessions().first().firstOrNull { it.sourceType == item.sourceType && it.sourceId == id }
+            ?.takeIf { it.resumeNote.isNotBlank() }
+        offerMove(DayMove("${pack.courses.first { it.id == item.course }.short} · ${topic?.title ?: attempt?.problem ?: item.title}",
+            item.sourceType, id, last?.material?.takeIf { it.isNotBlank() } ?: topic?.material ?: attempt?.link ?: item.material,
+            last?.resumeNote ?: attempt?.notes?.takeIf { it.isNotBlank() } ?: item.firstStep,
+            "From your supplied syllabus · ${item.module}. Scope and portion are shown in Exam Prep.", existing?.id.orEmpty(), target?.minutes ?: 25))
     }
     fun setReminders(value: Boolean) {
         _reminders.value = value
@@ -303,6 +364,10 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
     fun saveAttempt(attempt: CodingAttempt) = write { dao.saveAttempt(attempt) }
     fun clearForUserWipe(focus: TodayPrototypeViewModel) = write {
         if (focus.saving.value) { _message.value = "Wait for the current session save to finish before clearing records."; return@write }
+        academicInitialization.withLock {
+            withContext(Dispatchers.IO) { academicStore.clearRoadmap() }
+            _academicRoadmap.value = AcademicRoadmap()
+        }
         focus.clearForUserWipe()
         dao.clearWorkspace()
         _homeAt.value = 0L; _undo.value = emptyList()

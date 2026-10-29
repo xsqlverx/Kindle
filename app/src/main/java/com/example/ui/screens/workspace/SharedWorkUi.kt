@@ -24,6 +24,7 @@ import com.example.data.model.*
 import com.example.ui.components.BackdropGlass
 import com.example.ui.components.focusSource
 import com.example.ui.components.LocalReducedMotion
+import com.example.ui.components.AcademicReference
 import com.example.ui.theme.LocalLifeOsColors
 import com.example.viewmodel.LifeOsViewModel
 import com.example.viewmodel.TodayPrototypeViewModel
@@ -54,6 +55,7 @@ fun uid(): String = UUID.randomUUID().toString()
 
 @Composable
 fun MaterialReference(text: String) {
+    if (text.startsWith("syllabus://")) { AcademicReference(text); return }
     val handler = LocalUriHandler.current
     var failed by remember { mutableStateOf(false) }
     if (text.startsWith("https://") || text.startsWith("http://")) {

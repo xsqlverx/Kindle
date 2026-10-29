@@ -23,6 +23,15 @@ The user authorized pushing this ongoing revamp to `origin/main`. Verify the che
 
 ## Continuity
 
+Academic input (2026-10-30): all seven listed S1 syllabus PDFs and the S1/S2 calendar have
+now been supplied. Read docs/ACADEMIC_IMPORT.md. Preserve the deduplicated original assets,
+source/page/hash metadata, stable IDs and non-overwriting import. The editable roadmap's
+initial budget/order are suggestions, not confirmed availability, teacher portions or progress.
+Keep calendar dates apart from actual subject papers/times/personal blocks; S2 syllabus,
+attendance screenshot, exact timetable and completed coverage remain unknown. Keep user wipe
+intent, explicit completion and source-linked session/history behavior. No local Android
+execution; source checks and supplied cloud tests do not establish a build or device result.
+
 Latest composer feedback (2026-10-28): “Give it a little room” should feel more native and
 aesthetic, with exact custom minutes as the main input, not four preset prompts or a hidden
 field. Read docs/NEXT_MOVE_REFINEMENT.md. Preserve raw duration drafts, validation at placement,

@@ -14,6 +14,20 @@ Inspect Git status and the actual source. Preserve existing local changes. V1 in
 
 WHAT I WANT
 
+Latest request, 2026-10-30 after `1f486e1`: the user supplied seven syllabus PDFs and a two-page
+S1/S2 academic calendar and asked the app to plan from them. Read ACADEMIC_IMPORT.md in full.
+The current source bundles seven unchanged PDF assets (Electrical/Electronics are identical),
+six actual courses, 140 source-linked groups and 26 milestones. Exam Prep has the editable
+date-only roadmap, scope/budget, explicit progress and original-page viewer. Due targets feed
+Today's existing next-move/custom-minute/session/Review flow. Original manual topics and all
+other features/data stay. Default 50 min/day and course rotation are assistant suggestions,
+not confirmed personal time; teacher portions, paper assignments/times and completed coverage
+are unknown. S2 syllabus is missing. Do not merge attendance aliases, invent completion or
+replace the manual exam target. Stable IDs/IGNORE imports preserve edits; wipe must prevent
+automatic reseeding. 68 Kotlin source files and catalog/hash checks pass; eleven new cloud
+methods supplied but unrun. No native/cloud build/device result observed. Check actual Git
+state and current STATUS.md before continuing; don't repeat extraction or another questionnaire.
+
 Latest request after `19f8915`: “Give it a little room” looks like an HTML form; choose my
 own minutes instead of four fixed prompts. Read NEXT_MOVE_REFINEMENT.md. The composer now
 has a native time surface with direct exact 1–180-minute input, slider and ±1 controls, inset

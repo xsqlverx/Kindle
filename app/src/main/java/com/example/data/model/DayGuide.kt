@@ -31,7 +31,8 @@ data class DayInputs(
     val projects: List<WorkProject> = emptyList(),
     val steps: List<ProjectStep> = emptyList(),
     val history: List<WorkSessionRecord> = emptyList(),
-    val resetDone: Boolean = false
+    val resetDone: Boolean = false,
+    val academicMoves: List<DayMove> = emptyList()
 )
 
 /** A transparent local ordering of real records. No inferred activity or readiness score. */
@@ -79,6 +80,7 @@ object DayGuide {
 
     fun choices(input: DayInputs): List<DayMove> {
         val ranked = mutableListOf<Pair<Int, DayMove>>()
+        input.academicMoves.filter { available(input, it.sourceType, it.sourceId) }.forEach { ranked.add(38 to it) }
         input.assignments.filter { !it.isSubmitted }.sortedBy { it.dueDateMillis }.forEach { item ->
             val urgent = item.dueDateMillis <= input.now + 2 * 86_400_000L
             ranked.add((if (urgent) 0 else 60) to DayMove(item.title, "ASSIGNMENT", item.id.toString(), firstStep = item.description,
@@ -94,10 +96,10 @@ object DayGuide {
         input.attempts.filter { it.retryAt in 1L..input.now }.sortedBy { it.retryAt }.forEach {
             ranked.add(35 to DayMove(it.problem, "PRACTICE", it.id, it.link, it.notes, "A retry you scheduled is due"))
         }
-        input.attempts.filter { it.retryAt == 0L && it.outcome != "Solved" }.forEach {
+        input.attempts.filter { it.retryAt == 0L && it.outcome != "Solved" && !it.id.startsWith("aisat26:") }.forEach {
             ranked.add(50 to DayMove(it.problem, "PRACTICE", it.id, it.link, it.notes, "An open coding problem"))
         }
-        input.topics.filter { it.revisionAt == 0L }.forEach {
+        input.topics.filter { it.revisionAt == 0L && !it.id.startsWith("aisat26:") }.forEach {
             ranked.add(65 to DayMove(listOf(it.course, it.title).filter(String::isNotBlank).joinToString(" · "), "TOPIC", it.id, it.material, reason = "From your study topics"))
         }
         input.projects.filter { !it.archived && it.blocker.isBlank() }.forEach { project ->

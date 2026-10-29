@@ -1,5 +1,26 @@
 # V2 implementation stages
 
+## Academic integration, 2026-10-30
+
+Baseline `1f486e1`; saved plan/provenance and completed work in ACADEMIC_IMPORT.md.
+New AcademicPlan/SyllabusPlanner models, AcademicStore and two IGNORE DAO inserts add a
+deduplicated 6-course/140-group source catalog without schema changes or overwriting edits.
+Seven original PDFs plus source/page/hash metadata are offline assets; no external viewer
+dependency or permissions. AcademicSourceViewer renders bounded original pages on IO.
+AcademicPlanningUi adds the editable map, source library, coverage/confidence/revision, budget/
+module selection, date-only targets/completion/undo/overdue recovery and S1/S2 calendar.
+DayGuide/dayInputs and Today/College/Plan/Exam Prep connect due targets to existing source IDs,
+exact-minute placement, collisions, focus/capsule and history. At most two broad suggestions;
+urgent saved work, chosen priorities and explicit revision/retries keep precedence. Calendar
+dates are reference data, not actual paper assignments or fixed personal time. Auto-import is
+one-time, non-overwriting and wipe-aware; explicit catalog choice restores only its item.
+Initial 50 min/day and theory-first rotation are editable suggestions; current portions and
+coverage remain unreported. S2 syllabus, attendance screenshot and exact timetable are missing.
+68 Kotlin source files parse; catalog/hash/source checks pass. Eleven cloud tests added,
+unrun. No local compilation/Android execution; native/cloud validation remains outstanding.
+
+## Original stages (historical baseline)
+
 2026-10-27. Source baseline: `1d14d90`; clean `main`, refreshed against origin/main.
 
 ## Code-grounded approach

@@ -54,6 +54,19 @@ composer/time surface, visible numeric input/slider/one-minute controls and 1–
 boundary. Raw input persists and is validated at the write, including after restoring/changing
 sources. Preserve the real-work/preview contract. Cloud/device visual acceptance is pending.
 
+### Supplied academic documents, 2026-10-30
+
+The user supplied all seven listed S1 syllabus PDFs and an S1/S2 academic calendar and
+explicitly asked for planning/app integration. ACADEMIC_IMPORT.md records provenance and
+implementation. Electrical/Electronics are identical copies of one course, so this is six
+distinct courses. Preserve the source's assessment/scope distinctions and unchanged PDF bytes.
+Exam Prep now has the actual catalog/calendar and an editable date-only preparation roadmap;
+Today consumes concrete due targets through the existing study/session flow. The initial
+50-min/day budget and course rotation are assistant choices, not confirmed availability or
+teacher portions. No existing records, attendance aliases or manual exam targets are replaced.
+Teacher-set portions, individual exam dates/times, coverage/lab/activity completion and S2
+syllabus remain missing; the calendar supplies college dates only. No attendance inference.
+
 ## Routine and human constraints
 
 The full approximate weekday is in REVAMP_DIRECTION.md. Important anchors: college around 8:00 AM-1:30 PM; home around 2:30-2:50 PM; gym around 8:00-9:00 PM; family prayer around 9:30-10:30 PM; call with girlfriend around 10:30-11:45 PM. Exact boundaries remain uncertain.
@@ -73,6 +86,7 @@ For attendance, the user chose a screenshot as the faster way to establish accur
 | Know now / next / recovery | Explicit desired payoff |
 | Notifications, alarms, useful follow-through | Opt-in inexact local implementation; delivery remains unverified |
 | Attendance baseline from portal screenshot | Desired; screenshot not supplied |
+| S1 syllabus and academic calendar planning | Supplied; offline source catalog and editable roadmap implemented; source-only verification |
 | More quality features without filler | Explicit requirement; candidate modules need a recurring purpose |
 | More tabs/spaces and greater feature density | Explicit V2 requirement after device testing |
 | Unified cross-space behavior, rich motion, and liquid glass | Explicit V2 requirement; extends beyond the current visual consistency |

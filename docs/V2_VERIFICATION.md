@@ -1,8 +1,30 @@
 # V2 verification and cloud/device handoff
 
-2026-10-28. No local Android compilation, Gradle, emulator or Android test execution.
+2026-10-30. No local Android compilation, Gradle, emulator or Android test execution.
 
 ## First path to try after the external build
+
+Latest academic path: **Exam Prep → Syllabus & sources → course → original page**. Check
+the six actual courses and scoped topic/lab/activity information, both S1/S2 calendar pages,
+and no duplicate Electrical/Electronics course or merged attendance aliases. Roadmap initially
+suggests 50 min/day; **Adjust → 37 min/day + selected modules → refresh from today** must
+preserve existing blocks/history/completed targets. Mark/undo coverage and one dated target,
+restart and verify persistence. Missed targets must remain visible or be replaced deliberately
+by refreshing. Target → study window → exact custom minutes → focus/capsule → source PDF →
+resume note → Review must retain actual source identity. Time never implies mastery/submission.
+Check original PDF paging/zoom, memory, rotation, narrow/200% fonts, keyboard/TalkBack, all
+appearances/Reduce motion and active-session/preview protection. Test wipe/reimport only in
+an isolated profile. Full path and uncertainty matrix: ACADEMIC_IMPORT.md.
+
+Academic source evidence: `python scripts/check_academic_pack.py` passes IDs/source-page bounds,
+hashes for all seven original PDFs (3,121,843 bytes), six course codes, twenty-module coverage,
+assessment exclusions and 26 milestones including explicit S1/S2 examination date lists.
+`python scripts/check_sources.py` parses **68 Kotlin files**, retains all 13 routes/legacy
+action names and validates UTF-8/manifest/additive SQL preservation. `git diff --check` passes.
+Eleven new methods in SyllabusPlannerTest/AcademicImportTest are supplied for the external
+runner, **not executed**. These add to earlier tests; no cloud test/build/device pass is claimed.
+No local dependency/build/signing changes, schema reset or data overwrite. Teacher portions,
+individual papers/times, completed coverage and S2 syllabus remain unknown.
 
 Latest composer path: **Today → next move → type exact minutes** in the large time control.
 Try 17, 37 and 90, ±1 and slider, then inspect the exact start/end receipt. Choose/change saved

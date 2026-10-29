@@ -69,7 +69,8 @@ import kotlin.math.floor
 fun AcademicsScreen(
     viewModel: LifeOsViewModel,
     modifier: Modifier = Modifier,
-    onStartWork: ((AssignmentItem) -> Unit)? = null
+    onStartWork: ((AssignmentItem) -> Unit)? = null,
+    academicContent: (@Composable () -> Unit)? = null
 ) {
     val lifeColors = LocalLifeOsColors.current
     val context = LocalContext.current
@@ -106,6 +107,7 @@ fun AcademicsScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)
     ) {
+        if (academicContent != null) item { academicContent() }
         // 1. Academic Target & First Exam Banner (Redesigned per Req 3)
         item {
             AcademicTargetBanner(

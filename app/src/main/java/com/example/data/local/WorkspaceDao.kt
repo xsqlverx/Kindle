@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WorkspaceDao {
+    @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertAcademicTopic(topic: ExamTopic)
+    @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertAcademicAttempt(attempt: CodingAttempt)
     @Query("SELECT * FROM day_blocks ORDER BY startMillis") suspend fun blocksSnapshot(): List<DayBlock>
     @Query("SELECT * FROM work_projects") suspend fun projectsSnapshot(): List<WorkProject>
     @Query("SELECT * FROM project_steps") suspend fun stepsSnapshot(): List<ProjectStep>

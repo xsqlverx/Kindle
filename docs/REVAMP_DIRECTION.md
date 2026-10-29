@@ -2,6 +2,14 @@
 
 Status: the first Today prototype was accepted for V1 only. V2 implementation now includes the connected shell, live day/session foundation and working new modules; see STATUS.md, V2_IMPLEMENTATION.md and V2_VERIFICATION.md. Cloud compilation/device verification remain unobserved. Naming and logo work come last.
 
+2026-10-30: supplied syllabus/calendar now ground actual study planning. ACADEMIC_IMPORT.md
+records the original-page catalog, scope distinctions, editable date-only roadmap, capacity
+before exam windows and connection to the existing next-move/session history. Show the next
+useful target before library detail. Default 50 min/day is a suggestion; do not turn college
+exam windows into guessed subject times, or timer activity into coverage/mastery/submission.
+The PDFs arrived; teacher portions, actual completed coverage and individual timetable remain
+unknown. Preserve attendance/timetable aliases and existing user edits during one-time import.
+
 Latest correction: the user could not immediately see an average day or what to test. The
 research-driven pass now centers one next action, a shared short entry flow, a clear agenda,
 connected focus/capsule motion and confirmed progress feedback. An optional labelled 60-second
@@ -80,7 +88,7 @@ Interpretation: compact controls can reveal additional capability through connec
 ## Proposed depth: practical additions to evaluate
 
 1. **Arrival and recovery flow.** A quick home check-in, space for food or a bounded rest, one manageable study action, and a revised plan after a missed start. Suggested blocks stay distinct from confirmed commitments.
-2. **Study execution.** Connect courses and deadlines to an actual session: chosen topic or task, relevant material, first step, a timer when useful, and a record of where to resume. The app needs user-supplied study content before it can offer subject-specific instructions.
+2. **Study execution.** Connect courses and deadlines to an actual session: chosen topic or task, relevant material, first step, a timer when useful, and a record of where to resume. The supplied S1 syllabi now ground actual topic suggestions and original-page access; personal notes, prior coverage, teacher portions and solutions are still unknown.
 3. **Attendance reliability.** Reconcile a dated baseline from the user's screenshot; then support present, absent, cancelled, and unmarked classes, corrections, and protection against duplicate marking. Calculations must reflect the known class counts and configured target. The attendance screenshot has not yet been supplied.
 4. **Workout continuity.** Make today's routine actionable, surface previous set data and the next exercise, and preserve workout, rest, hydration, weight, and meal capabilities. Routine changes require the user's actual program.
 5. **Planning and follow-through.** Give reminders useful actions such as start, delay, or revise the plan. Respect protected commitments and avoid repeatedly interrupting an active session. Keep all work, including coding and records, visible when allocating time.

@@ -1,8 +1,37 @@
 # Implementation status
 
-Last updated: 2026-10-28, Asia/Calcutta.
+Last updated: 2026-10-30, Asia/Calcutta.
 
-## Current delivery: next-move composer and exact minutes
+## Current delivery: supplied syllabus and academic planning
+
+Baseline `1f486e1`, clean main, fetched and equal to origin/main. The user supplied seven
+syllabus files and a two-page academic calendar and asked the app to plan from them.
+ACADEMIC_IMPORT.md records the saved implementation plan, provenance, decisions and tests.
+
+- Electrical/Electronics PDFs are byte-identical: six distinct courses, imported once. Seven
+  original PDFs are bundled offline with hashes/pages. Catalog: 66 theory groups, 18 Python
+  lab exercises, 15 Chemistry lab options and scoped foundations/internal/optional/activity
+  work, 140 groups total; 26 relevant S1/S2 calendar milestones. Teacher portions, paper
+  assignments/times and actual progress remain unknown. S2 syllabus has not been supplied.
+- Exam Prep now has course/source browsing, source-page viewer, explicit coverage/confidence/
+  revision, actual coding outcome access, an editable date-only roadmap, budget/module scope,
+  completion/undo and overdue recovery. The 50-min/day initial budget is an assistant suggestion.
+  Rotating theory/recall and a weekly portfolio audit lead to Dec 6, before the first final.
+  Capacity before the next window stays visible; no guaranteed mastery/full internal coverage.
+- Today/Plan/College expose calendar access; due targets enter the same source-linked next move,
+  exact-minute placement, focus/resume and Review loop. Urgent saved work and explicit revision/
+  retries retain precedence. Imported items do not swamp automatic recommendations.
+- One-time stable-ID INSERT IGNORE preserves edits/progress, attendance, timetable aliases,
+  manual exam target and all existing data/features. Room stays v4. Wipe prevents automatic
+  reimport; explicit catalog choice restores only that item. No builder/signing/dependency change.
+- Source/data checks pass: 68 Kotlin files parse, all thirteen routes, UTF-8/manifest/legacy
+  actions/additive SQL preservation, catalog IDs/pages/scopes/calendar dates and PDF hashes.
+  `git diff --check` passes. Eleven cloud regression methods added, **not executed**.
+- No local Gradle/build/emulator/Android tests. Cloud compilation/tests, native PDF rendering,
+  modal transitions, touch/keyboard, large fonts/TalkBack, memory/frame pacing and user acceptance
+  remain unverified. Attendance screenshot and exact timetable/workout inputs remain pending.
+
+## Previous delivery: next-move composer and exact minutes
 
 Baseline `19f8915`, clean main, fetched and equal to origin/main. The user says “Give it a
 little room” looks like an HTML form and wants their own minutes instead of four presets.

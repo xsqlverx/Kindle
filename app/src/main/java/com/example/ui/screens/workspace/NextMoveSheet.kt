@@ -42,8 +42,11 @@ fun dayInputs(life: LifeOsViewModel, model: WorkspaceViewModel, focus: TodayProt
     val session by focus.session.collectAsStateWithLifecycle()
     val home by model.homeAt.collectAsStateWithLifecycle()
     val resets by life.allDailyResets.collectAsStateWithLifecycle()
+    val academicPack by model.academicPack.collectAsStateWithLifecycle()
+    val academicRoadmap by model.academicRoadmap.collectAsStateWithLifecycle()
     val date = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date(now))
-    return DayInputs(now, home, session, blocks, timetable, tasks, assignments, topics, attempts, projects, steps, history, resets.any { it.dateString == date })
+    val academicMoves = academicPack?.let { SyllabusPlanner.next(it, academicRoadmap, now, topics, attempts) }.orEmpty()
+    return DayInputs(now, home, session, blocks, timetable, tasks, assignments, topics, attempts, projects, steps, history, resets.any { it.dateString == date }, academicMoves)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

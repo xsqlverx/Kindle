@@ -1,5 +1,13 @@
 # V2: a connected daily experience
 
+2026-10-30 implementation: the user supplied the S1 syllabus PDFs and S1/S2 academic calendar
+and asked for planning inside the app. Continue from ACADEMIC_IMPORT.md: six deduplicated
+courses, actual scope/assessment distinctions, offline originals, editable date-only targets,
+budget/module scope, explicit progress and concrete Today-to-session continuity. The default
+budget/order is an assistant suggestion. Missing teacher portions, paper timetable, completed
+coverage and S2 syllabus must stay visible. Keep the calendar reference apart from real fixed
+commitments and delivered reminders. Cloud/native results remain unobserved.
+
 Recorded 2026-10-27, Asia/Calcutta.
 
 Status: the V2 goals and five-position navigation contract below are explicit requirements. A first implementation of the inventory, centre expansion and connected flows is now in source. V2_IMPLEMENTATION.md records implementation choices; STATUS.md and V2_VERIFICATION.md distinguish source checks from unobserved cloud/device behavior. These choices are not final user design approval.

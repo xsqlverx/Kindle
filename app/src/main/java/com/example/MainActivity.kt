@@ -203,7 +203,7 @@ class MainActivity : ComponentActivity() {
                                                     Destination.PLAN -> PlanScreen(life, model, focus, now)
                                                     Destination.COLLEGE -> AcademicsScreen(life, onStartWork = { assignment ->
                                                         model.offerMove(DayMove(assignment.title, "ASSIGNMENT", assignment.id.toString(), firstStep = assignment.description, reason = "From your College deadline"))
-                                                    })
+                                                    }, academicContent = { AcademicCalendarBrief(model, now) })
                                                     Destination.STUDY -> StudyScreen(life, model, focus)
                                                     Destination.FITNESS -> GymScreen(life, onLogTraining = { trainingSplit = it })
                                                     Destination.TASKS -> TasksMatrixScreen(life, onStartFocus = { task -> model.offerMove(DayMove(task.title, "TASK", task.id.toString(), reason = "From your saved task")) })

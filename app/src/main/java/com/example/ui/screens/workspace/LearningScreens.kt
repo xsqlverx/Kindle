@@ -107,15 +107,18 @@ fun CaptureScreen(model: WorkspaceViewModel) {
 @Composable
 fun ExamPrepScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: TodayPrototypeViewModel, now: Long) {
     val topics by model.topics.collectAsStateWithLifecycle()
+    val ownTopics = topics.filterNot { it.id.startsWith("aisat26:") }
     val target by life.targetExam.collectAsStateWithLifecycle()
     var add by rememberSaveable { mutableStateOf(false) }
     var editId by rememberSaveable { mutableStateOf<String?>(null) }
     val colors = LocalLifeOsColors.current
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
-        item { SpaceHeading("Exam preparation", "Know what needs another pass.", if (target.dateMillis > 0) "${target.title} · ${target.getFormattedDate()}" else "Set an exam date in College or Settings. Add your own topics here; no syllabus or mastery is assumed.") }
+        item { SpaceHeading("Exam preparation", "Your syllabus, in motion.", if (target.dateMillis > 0) "Your manual target · ${target.title} · ${target.getFormattedDate()}" else "Your supplied syllabus and college calendar, connected to the next useful session.") }
+        item { AcademicHub(model, now) }
+        item { Text("Your additional revision topics", color = colors.textPrimary, fontSize = 21.sp) }
         item { WorkspaceButton(onClick = { add = true }) { Text("Add a topic") } }
-        if (topics.isEmpty()) item { WorkCard("Build your revision queue", "Add a course and topic from your actual syllabus. Self-rate confidence after practice and set the next revision date.") }
-        topics.groupBy { it.course }.forEach { (course, group) ->
+        if (ownTopics.isEmpty()) item { WorkCard("Keep extra work here", "Your provided syllabus is in the study map above. Add teacher extras, custom topics or personal references here.") }
+        ownTopics.groupBy { it.course }.forEach { (course, group) ->
             item(key = "course_$course") { Text(course.ifBlank { "Unsorted" }, color = colors.primaryAccent, fontSize = 21.sp, fontWeight = FontWeight.Medium) }
             items(group.sortedBy { it.revisionAt }, key = { it.id }) { topic ->
                 WorkCard(topic.title, when {
@@ -145,7 +148,7 @@ fun ExamPrepScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: Toda
 }
 
 @Composable
-private fun RevisionActions(at: Long, onChange: (Long) -> Unit) {
+internal fun RevisionActions(at: Long, onChange: (Long) -> Unit) {
     Text("Schedule next review", fontSize = 12.sp)
     Row {
         listOf(1, 3, 7).forEach { days -> WorkspaceTextButton(onClick = {
@@ -170,10 +173,13 @@ fun PracticeScreen(model: WorkspaceViewModel, focus: TodayPrototypeViewModel, no
         val visible = attempts.filter { !dueOnly || it.retryAt in 1L..now }
         if (visible.isEmpty()) item { WorkCard(if (dueOnly) "No retries due" else "Start with a real problem", "Add a DSA exercise, debugging question or contest problem. Unattempted stays unattempted until you report the result.") }
         items(visible, key = { it.id }) { attempt ->
-            WorkCard(attempt.problem, "${attempt.difficulty} · ${attempt.outcome}" + if (attempt.retryAt > 0) "\nRetry · ${dated(attempt.retryAt)}" else "") {
+            WorkCard(attempt.problem, "${attempt.difficulty} · ${if (attempt.id.startsWith("aisat26:") && attempt.outcome == "Unattempted") "No app outcome recorded" else attempt.outcome}" + if (attempt.retryAt > 0) "\nRetry · ${dated(attempt.retryAt)}" else "") {
                 if (attempt.link.isNotBlank()) MaterialReference(attempt.link)
                 if (attempt.notes.isNotBlank()) Text("Lesson · ${attempt.notes}", fontSize = 14.sp)
-                WorkspaceButton(onClick = { model.offerMove(DayMove(attempt.problem, "PRACTICE", attempt.id, attempt.link, attempt.notes, "From your coding practice")) }) { Text("Work on this problem") }
+                WorkspaceButton(onClick = {
+                    if (attempt.id.startsWith("aisat26:")) model.offerAcademic(attempt.id)
+                    else model.offerMove(DayMove(attempt.problem, "PRACTICE", attempt.id, attempt.link, attempt.notes, "From your coding practice"))
+                }) { Text("Work on this problem") }
                 Column {
                     listOf("Unattempted", "Stuck", "With help", "Solved").chunked(2).forEach { pair ->
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { pair.forEach { outcome ->
