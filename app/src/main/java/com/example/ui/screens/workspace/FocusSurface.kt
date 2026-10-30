@@ -68,6 +68,8 @@ fun FocusSurface(expanded: Boolean, origin: Rect?, focus: TodayPrototypeViewMode
             .statusBarsPadding().navigationBarsPadding().imePadding().verticalScroll(rememberScrollState()).padding(horizontal = 26.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                ContinuityOrb(Modifier.size(38.dp), compact = true)
+                Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(if (preview) "PREVIEW · YOUR DAY STAYS AS IT IS" else if (session.kind == FocusKind.REST) "BREATHING ROOM" else "ONE THING AT A TIME", color = colors.primaryAccent, fontSize = 10.sp, letterSpacing = 1.5.sp)
                     Text(when (session.phase) { FocusPhase.FINISHED -> "Keep the thread"; FocusPhase.PAUSED -> "Your place is held"; else -> "You're here. That's enough." }, color = colors.textSecondary, fontSize = 12.sp)

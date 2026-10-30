@@ -6,6 +6,11 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WorkspaceDao {
+    @Query("SELECT * FROM entry_receipts WHERE id = :id") suspend fun entryReceipt(id: String): EntryReceipt?
+    @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun saveEntryReceipt(receipt: EntryReceipt)
+    @Query("DELETE FROM entry_receipts") suspend fun clearEntryReceipts()
+    @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertSuggestedProject(project: WorkProject)
+    @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertSuggestedStep(step: ProjectStep)
     @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertAcademicTopic(topic: ExamTopic)
     @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertAcademicAttempt(attempt: CodingAttempt)
     @Query("SELECT * FROM day_blocks ORDER BY startMillis") suspend fun blocksSnapshot(): List<DayBlock>
@@ -67,6 +72,6 @@ interface WorkspaceDao {
     @Query("DELETE FROM exam_topics") suspend fun clearTopics()
     @Query("DELETE FROM coding_attempts") suspend fun clearAttempts()
     @Transaction suspend fun clearWorkspace() {
-        clearBlocks(); clearSessions(); clearSteps(); clearProjects(); clearCaptures(); clearTopics(); clearAttempts()
+        clearBlocks(); clearSessions(); clearSteps(); clearProjects(); clearCaptures(); clearTopics(); clearAttempts(); clearEntryReceipts()
     }
 }

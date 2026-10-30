@@ -52,6 +52,10 @@ import com.example.ui.components.LectureDetailSheet
 import com.example.ui.components.LiquidGlassCard
 import com.example.ui.components.CourseAttendanceControl
 import com.example.ui.components.AttendanceHistory
+import com.example.ui.components.LocalEntryLauncher
+import com.example.ui.components.LocalEntryPrefill
+import com.example.ui.components.WorkspaceActionRow
+import com.example.data.model.EntryKind
 import com.example.ui.components.playAppleHaptic
 import com.example.ui.theme.LocalLifeOsColors
 import com.example.ui.theme.RingGymRose
@@ -74,6 +78,8 @@ fun AcademicsScreen(
 ) {
     val lifeColors = LocalLifeOsColors.current
     val context = LocalContext.current
+    val entry = LocalEntryLauncher.current
+    val prefill = LocalEntryPrefill.current
 
     val selectedDay by viewModel.selectedDay.collectAsStateWithLifecycle()
     val timetable by viewModel.dayTimetable.collectAsStateWithLifecycle()
@@ -159,7 +165,7 @@ fun AcademicsScreen(
                 }
 
                 WorkspaceTonalButton(
-                    onClick = { showAddClassDialog = true },
+                    onClick = { if (entry != null) { entry(EntryKind.CLASS); prefill?.invoke("day", selectedDay.toString()) } else showAddClassDialog = true },
                     modifier = Modifier.testTag("add_class_button"),
                     shape = RoundedCornerShape(12.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
@@ -336,7 +342,7 @@ fun AcademicsScreen(
                 }
 
                 WorkspaceTonalButton(
-                    onClick = { showAddAssignmentDialog = true },
+                    onClick = { if (entry != null) entry(EntryKind.DEADLINE) else showAddAssignmentDialog = true },
                     modifier = Modifier.testTag("add_deadline_button"),
                     shape = RoundedCornerShape(12.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
@@ -378,7 +384,7 @@ fun AcademicsScreen(
                                 color = lifeColors.textSecondary
                             )
                             WorkspaceButton(
-                                onClick = { showAddAssignmentDialog = true },
+                                onClick = { if (entry != null) entry(EntryKind.DEADLINE) else showAddAssignmentDialog = true },
                                 modifier = Modifier.padding(top = 4.dp),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
@@ -505,8 +511,7 @@ fun AcademicsScreen(
         DeadlineEditorDialog(
             initialAssignment = null,
             onDismiss = { showAddAssignmentDialog = false },
-            onSave = { code, title, desc, cat, daysAhead, weight ->
-                val dueMillis = System.currentTimeMillis() + (daysAhead * 24L * 3600L * 1000L)
+            onSave = { code, title, desc, cat, dueMillis, weight ->
                 viewModel.addAssignment(
                     courseCode = code,
                     title = title,
@@ -525,15 +530,14 @@ fun AcademicsScreen(
         DeadlineEditorDialog(
             initialAssignment = itemToEdit,
             onDismiss = { assignmentToEdit = null },
-            onSave = { code, title, desc, cat, daysAhead, weight ->
-                val newDueMillis = System.currentTimeMillis() + (daysAhead * 24L * 3600L * 1000L)
+            onSave = { code, title, desc, cat, dueMillis, weight ->
                 viewModel.updateAssignment(
                     itemToEdit.copy(
                         courseCode = code,
                         title = title,
                         description = desc,
                         category = cat,
-                        dueDateMillis = newDueMillis,
+                        dueDateMillis = dueMillis,
                         weightPercentage = weight
                     )
                 )
@@ -976,24 +980,22 @@ private fun AssignmentGlassCard(assignment: AssignmentItem, onToggle: () -> Unit
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DeadlineEditorDialog(
     initialAssignment: AssignmentItem?,
     onDismiss: () -> Unit,
-    onSave: (code: String, title: String, desc: String, category: String, daysAhead: Int, weight: Int) -> Unit
+    onSave: (code: String, title: String, desc: String, category: String, dueMillis: Long, weight: Int) -> Unit
 ) {
     val lifeColors = LocalLifeOsColors.current
-    var code by remember { mutableStateOf(initialAssignment?.courseCode ?: "CSE S1") }
-    var title by remember { mutableStateOf(initialAssignment?.title ?: "") }
-    var desc by remember { mutableStateOf(initialAssignment?.description ?: "") }
-    var category by remember { mutableStateOf(initialAssignment?.category ?: "Project") }
-    var daysAhead by remember {
-        val days = initialAssignment?.let {
-            ((it.dueDateMillis - System.currentTimeMillis()) / (24 * 3600 * 1000L)).toInt().coerceAtLeast(1)
-        } ?: 7
-        mutableStateOf(days.toString())
-    }
-    var weight by remember { mutableStateOf((initialAssignment?.weightPercentage ?: 15).toString()) }
+    val context = LocalContext.current
+    var code by rememberSaveable(initialAssignment?.id) { mutableStateOf(initialAssignment?.courseCode.orEmpty()) }
+    var title by rememberSaveable(initialAssignment?.id) { mutableStateOf(initialAssignment?.title.orEmpty()) }
+    var desc by rememberSaveable(initialAssignment?.id) { mutableStateOf(initialAssignment?.description.orEmpty()) }
+    var category by rememberSaveable(initialAssignment?.id) { mutableStateOf(initialAssignment?.category ?: "Assignment") }
+    var dueMillis by rememberSaveable(initialAssignment?.id) { mutableStateOf(initialAssignment?.dueDateMillis) }
+    var weight by rememberSaveable(initialAssignment?.id) { mutableStateOf(initialAssignment?.weightPercentage?.takeIf { it > 0 }?.toString().orEmpty()) }
+    val validWeight = weight.isBlank() || weight.toIntOrNull()?.let { it in 0..100 } == true
 
     val categories = listOf("Project", "Assignment", "Exam", "Lab")
 
@@ -1007,10 +1009,10 @@ private fun DeadlineEditorDialog(
             )
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 // Category Pills
                 Text("Category", fontSize = 12.sp, color = lifeColors.textSecondary)
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     categories.forEach { cat ->
                         val isSel = cat.equals(category, ignoreCase = true)
                         Box(
@@ -1050,18 +1052,21 @@ private fun DeadlineEditorDialog(
                         value = weight,
                         onValueChange = { weight = it },
                         label = { Text("Weight %") },
+                        isError = !validWeight,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        supportingText = { Text("0–100 or blank") },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp)
                     )
                 }
 
-                OutlinedTextField(
-                    value = daysAhead,
-                    onValueChange = { daysAhead = it },
-                    label = { Text("Due (days from now)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                )
+                WorkspaceActionRow("Due date", dueMillis?.let { SimpleDateFormat("EEE, d MMM yyyy", Locale.getDefault()).format(Date(it)) } ?: "Choose the actual date",
+                    Icons.Outlined.Event) {
+                    val calendar = Calendar.getInstance().apply { dueMillis?.let { timeInMillis = it } }
+                    android.app.DatePickerDialog(context, { _, year, month, day ->
+                        dueMillis = Calendar.getInstance().apply { set(year, month, day, 0, 0, 0); set(Calendar.MILLISECOND, 0) }.timeInMillis
+                    }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+                }
 
                 OutlinedTextField(
                     value = desc,
@@ -1074,15 +1079,16 @@ private fun DeadlineEditorDialog(
         },
         confirmButton = {
             WorkspaceButton(
+                enabled = title.isNotBlank() && dueMillis != null && validWeight,
                 onClick = {
-                    if (title.isNotBlank()) {
+                    if (title.isNotBlank() && dueMillis != null && validWeight) {
                         onSave(
                             code.trim().uppercase(),
                             title.trim(),
                             desc.trim(),
                             category,
-                            daysAhead.toIntOrNull() ?: 5,
-                            weight.toIntOrNull() ?: 15
+                            requireNotNull(dueMillis),
+                            weight.toIntOrNull() ?: 0
                         )
                     }
                 }

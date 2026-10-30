@@ -25,10 +25,16 @@ val ATTENDANCE_MIGRATION_3_4 = object : Migration(3, 4) {
     }
 }
 
+val ENTRY_MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS entry_receipts (id TEXT NOT NULL PRIMARY KEY, kind TEXT NOT NULL, recordId TEXT NOT NULL)")
+    }
+}
+
 object DatabaseProvider {
     @Volatile private var instance: LifeOsDatabase? = null
     fun get(context: Context): LifeOsDatabase = instance ?: synchronized(this) {
         instance ?: Room.databaseBuilder(context.applicationContext, LifeOsDatabase::class.java, "life_os_database_v6")
-            .addMigrations(WORKSPACE_MIGRATION_2_3, ATTENDANCE_MIGRATION_3_4).build().also { instance = it }
+            .addMigrations(WORKSPACE_MIGRATION_2_3, ATTENDANCE_MIGRATION_3_4, ENTRY_MIGRATION_4_5).build().also { instance = it }
     }
 }

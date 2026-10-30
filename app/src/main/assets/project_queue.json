@@ -1,0 +1,61 @@
+{
+  "version": "github-2026-10-30-v1",
+  "projects": [
+    {
+      "id": "github:xsqlverx:Emerald-math",
+      "name": "Emerald Math · truthful enquiry flow",
+      "repo": "xsqlverx/Emerald-math",
+      "revision": "7fdc05cddf3e21115a69ea1dac04daca499d38ae",
+      "why": "The current intake marks submission successful in finally, including failure paths. A real visitor can see success without a successful request.",
+      "goal": "Only show success after an accepted enquiry. Keep typed input and offer a clear retry on failure.",
+      "steps": [
+        "Write mocked cases for accepted, rejected and offline enquiry responses",
+        "Separate successful submission from cleanup; preserve input on failure",
+        "Verify retry and duplicate-submit behavior, then record the observed outcome"
+      ],
+      "evidence": "https://github.com/xsqlverx/Emerald-math/blob/7fdc05cddf3e21115a69ea1dac04daca499d38ae/src/components/IntakeForm.tsx#L95-L135"
+    },
+    {
+      "id": "github:xsqlverx:AURA-V2",
+      "name": "AURA · dependable common commands",
+      "repo": "xsqlverx/AURA-V2",
+      "revision": "811a5acd7b6b2f7b0d7bbb0b3fef61119a7356d0",
+      "why": "The current fast path checks whether mute is inside the request, so unmute is treated as mute. Create-file requests also route to create_folder.",
+      "goal": "Selected everyday commands reach the intended tool with exact arguments and honest results.",
+      "steps": [
+        "Add intent cases for mute, unmute, create file and create folder",
+        "Fix exact mute polarity and separate file creation from folder creation",
+        "Check malformed requests cause no action and record real outcomes separately from parser checks"
+      ],
+      "evidence": "https://github.com/xsqlverx/AURA-V2/blob/811a5acd7b6b2f7b0d7bbb0b3fef61119a7356d0/core/fastpath.py#L158-L197"
+    },
+    {
+      "id": "github:xsqlverx:KronosV1",
+      "name": "Kronos · close the setup evidence gap",
+      "repo": "xsqlverx/KronosV1",
+      "revision": "f926a85321553070ab89ab6e2cad7970a604eb3e",
+      "why": "The repository handoff distinguishes Windows evidence from missing real Mac Keychain/setup checks. A repeatable small verification pass would make the build easier to trust.",
+      "goal": "A reproducible setup checklist and observed outcomes on the intended machine, without claiming mocked tests prove desktop behavior.",
+      "steps": [
+        "Make a short fresh-install and credential-save checklist from HANDOFF.md",
+        "When the intended Mac is available, check Keychain save/read-back and launch manually",
+        "Check disposable-file operations and failure messages; record device and remaining gaps"
+      ],
+      "evidence": "https://github.com/xsqlverx/KronosV1/blob/f926a85321553070ab89ab6e2cad7970a604eb3e/HANDOFF.md"
+    },
+    {
+      "id": "github:xsqlverx:Kindle",
+      "name": "Kindle · prove the daily loop",
+      "repo": "xsqlverx/Kindle",
+      "revision": "83197439dc2db4c97697abf43ecd75d102bac484",
+      "why": "The source handoff still lacks observed cloud/device results, and filling data feels harder than deciding what to enter.",
+      "goal": "One usable afternoon on the phone with easy entry, source-linked work and a resume point that survives reopening.",
+      "steps": [
+        "After the external build, add a task and personal project without instructions",
+        "Complete one real source-to-focus-to-resume-note journey and inspect Review",
+        "Check orb continuity, Reduce motion, large fonts and restart; note exact friction before changing more screens"
+      ],
+      "evidence": "https://github.com/xsqlverx/Kindle/blob/83197439dc2db4c97697abf43ecd75d102bac484/docs/V2_VERIFICATION.md"
+    }
+  ]
+}

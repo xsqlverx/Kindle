@@ -3,6 +3,7 @@ package com.example.ui.screens.workspace
 import com.example.ui.components.WorkspaceButton
 import com.example.ui.components.WorkspaceOutlinedButton
 import com.example.ui.components.WorkspaceTextButton
+import com.example.ui.components.WorkspaceDisclosure
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.spring
@@ -54,12 +55,12 @@ fun dated(at: Long): String = SimpleDateFormat("EEE, d MMM · h:mm a", Locale.ge
 fun uid(): String = UUID.randomUUID().toString()
 
 @Composable
-fun MaterialReference(text: String) {
+fun MaterialReference(text: String, label: String? = null) {
     if (text.startsWith("syllabus://")) { AcademicReference(text); return }
     val handler = LocalUriHandler.current
     var failed by remember { mutableStateOf(false) }
     if (text.startsWith("https://") || text.startsWith("http://")) {
-        WorkspaceTextButton(onClick = { try { handler.openUri(text) } catch (_: Exception) { failed = true } }) { Text(text) }
+        WorkspaceTextButton(onClick = { try { handler.openUri(text) } catch (_: Exception) { failed = true } }) { Text(label ?: text) }
         if (failed) Text("No app could open this link. You can edit or copy the reference.", fontSize = 12.sp)
     } else androidx.compose.foundation.text.selection.SelectionContainer { Text(text, fontSize = 13.sp) }
 }
@@ -91,14 +92,17 @@ fun WorkCard(title: String, detail: String, modifier: Modifier = Modifier, conte
 fun RecordDialog(title: String, labels: List<String>, initial: List<String> = labels.map { "" },
                  onDismiss: () -> Unit, onSave: (List<String>) -> Unit) {
     var values by rememberSaveable { mutableStateOf(ArrayList(initial)) }
+    var details by rememberSaveable { mutableStateOf(initial.drop(1).any { it.isNotBlank() }) }
     AlertDialog(onDismissRequest = onDismiss, title = { Text(title) }, text = {
         Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             labels.forEachIndexed { index, label ->
-                OutlinedTextField(values[index], { next -> values = ArrayList(values.toMutableList().apply { set(index, next) }) },
-                    label = { Text(label) }, modifier = Modifier.fillMaxWidth(), minLines = if (index == labels.lastIndex && labels.size > 1) 2 else 1)
+                if (index == 1) WorkspaceDisclosure("Extra details · optional", details, { details = !details })
+                if (index == 0 || details) OutlinedTextField(values[index], { next -> values = ArrayList(values.toMutableList().apply { set(index, next) }) },
+                    label = { Text(label) }, modifier = Modifier.fillMaxWidth(), minLines = if (index == labels.lastIndex && labels.size > 1) 2 else 1,
+                    supportingText = { if (index == 0) Text("Start with the part you know. You can edit it later.") })
             }
         }
-    }, confirmButton = { WorkspaceButton(enabled = values.firstOrNull()?.isNotBlank() == true, onClick = { onSave(values.map { it.trim() }); onDismiss() }) { Text("Save") } },
+    }, confirmButton = { WorkspaceButton(enabled = values.firstOrNull()?.isNotBlank() == true, onClick = { onSave(values.map { it.trim() }); onDismiss() }) { Text(if (title.startsWith("Edit") || title.startsWith("Your")) "Save changes" else "Add") } },
         dismissButton = { WorkspaceTextButton(onClick = onDismiss) { Text("Cancel") } })
 }
 

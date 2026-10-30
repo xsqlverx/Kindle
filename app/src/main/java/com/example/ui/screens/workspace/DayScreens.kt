@@ -200,13 +200,19 @@ private fun PlanDialog(choices: List<WorkChoice>, onDismiss: () -> Unit,
     var type by rememberSaveable { mutableStateOf("CUSTOM") }
     var id by rememberSaveable { mutableStateOf("") }
     var picker by remember { mutableStateOf(false) }
+    var query by rememberSaveable { mutableStateOf("") }
+    var details by rememberSaveable { mutableStateOf(false) }
     AlertDialog(onDismissRequest = onDismiss, title = { Text("Reserve a window") }, text = {
         Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             WorkspaceTextButton(onClick = { picker = !picker }) { Text("Link saved work") }
             if (picker) Column(Modifier.heightIn(max = 180.dp).verticalScroll(rememberScrollState())) {
-                choices.forEach { choice -> WorkspaceTextButton(onClick = { title = choice.title; type = choice.type; id = choice.id; material = choice.material; step = choice.step; picker = false }) { Text(choice.title) } }
+                OutlinedTextField(query, { query = it }, label = { Text("Find a task, topic or project") }, singleLine = true)
+                val matches = choices.filter { it.title.contains(query, ignoreCase = true) }
+                matches.take(25).forEach { choice -> WorkspaceTextButton(onClick = { title = choice.title; type = choice.type; id = choice.id; material = choice.material; step = choice.step; details = material.isNotBlank() || step.isNotBlank(); picker = false }) { Text(choice.title) } }
+                if (matches.size > 25) Text("Keep typing to narrow ${matches.size} choices.", fontSize = 12.sp)
+                if (matches.isEmpty()) Text("No saved work matches that search.", fontSize = 12.sp)
             }
-            OutlinedTextField(title, { title = it }, label = { Text("Action / commitment") })
+            OutlinedTextField(title, { title = it }, label = { Text("What needs room?") }, placeholder = { Text("Revise derivatives, or gym") }, modifier = Modifier.fillMaxWidth())
             if (id.isNotBlank()) WorkspaceTextButton(onClick = { type = "CUSTOM"; id = "" }) { Text("Linked ${type.lowercase()} · unlink") }
             Row(verticalAlignment = Alignment.CenterVertically) { Checkbox(fixed, { fixed = it }); Text("Fixed commitment") }
             Text(if (fixed) "Only save a time you confirm." else "Find the first free window at or after this time.", fontSize = 12.sp)
@@ -220,10 +226,15 @@ private fun PlanDialog(choices: List<WorkChoice>, onDismiss: () -> Unit,
                 val cal = Calendar.getInstance().apply { timeInMillis = start }
                 TimePickerDialog(context, { _, h, m -> start = (cal.clone() as Calendar).apply { set(Calendar.HOUR_OF_DAY, h); set(Calendar.MINUTE, m); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }.timeInMillis }, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), false).show()
             }) { Text("Change start time") }
-            OutlinedTextField(minutes, { minutes = it.filter(Char::isDigit).take(3) }, label = { Text("Duration · 5–180 minutes") })
+            OutlinedTextField(minutes, { minutes = it }, label = { Text("Duration · 5–180 minutes") },
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                isError = minutes.toIntOrNull()?.let { it in 5..180 } != true)
             if (!fixed) {
-                OutlinedTextField(material, { material = it }, label = { Text("Material / page / link") })
-                OutlinedTextField(step, { step = it }, label = { Text("First concrete step") })
+                WorkspaceDisclosure("Material & first step · optional", details, { details = !details })
+                if (details) {
+                    OutlinedTextField(material, { material = it }, label = { Text("Material / page / link") }, placeholder = { Text("Notes p12 or a link") })
+                    OutlinedTextField(step, { step = it }, label = { Text("First concrete step") }, placeholder = { Text("Start at example 3") })
+                }
             }
         }
     }, confirmButton = { WorkspaceButton(enabled = title.isNotBlank() && (minutes.toIntOrNull() ?: 0) in 5..180, onClick = {

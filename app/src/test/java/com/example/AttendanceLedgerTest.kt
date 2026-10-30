@@ -167,7 +167,7 @@ class AttendanceLedgerTest {
                 }).build())
         v3.writableDatabase
         v3.close()
-        val db = Room.databaseBuilder(context, LifeOsDatabase::class.java, name).addMigrations(ATTENDANCE_MIGRATION_3_4).build()
+        val db = Room.databaseBuilder(context, LifeOsDatabase::class.java, name).addMigrations(ATTENDANCE_MIGRATION_3_4, ENTRY_MIGRATION_4_5).build()
         try {
             assertEquals(17, db.academicDao().attendanceByCourse("CS")!!.attendedClasses)
             assertEquals(85, db.academicDao().attendanceByCourse("CS")!!.targetPercentage)

@@ -2,7 +2,43 @@
 
 Last updated: 2026-10-30, Asia/Calcutta.
 
-## Current delivery: supplied syllabus and academic planning
+## Current delivery: easier entry, shared orb and GitHub-informed projects
+
+Baseline `8319743`, clean main, fetched equal to origin/main. The user wants a queue grounded
+in their GitHub profile, effortless personal project entry, a prominent connected animation,
+and far less friction understanding how to enter their own data. The concise plan, public
+source evidence, implementation and acceptance checks are in ENTRY_ORB_PROJECTS.md.
+
+- Four editable suggested projects with concrete next actions: AURA command correctness,
+  Emerald Math enquiry results, Kronos verification and Kindle's actual daily loop. Current
+  public sources were checked at pinned commits. Suggestions are not completed-work claims;
+  the original repo links/evidence are visible; links open a browser when tapped, with no
+  authenticated account access or background GitHub synchronization.
+- An Add/log sheet in Today and all headers handles 12 useful kinds. One main input, examples,
+  optional detail, course picker, date/time pickers, explicit saves and a destination receipt.
+  Project name/URL plus optional newline actions saves together. Drafts survive close and kind
+  switches; validation rejects bad numbers/dates. The live create buttons in Tasks, College,
+  Fitness and workspace screens lead to the sheet; detailed exercise/weight tools remain.
+  Deadline editing no longer moves its date accidentally. Meal input no longer prepopulates
+  guessed nutrition numbers. Four values are still required by the existing aggregate model.
+- A native dimensional glass orb uses one foreground/visibility-aware phase for a large Today
+  presence and small non-Today header. It responds to real session phase and confirmed saves,
+  reduces to stillness for Reduce motion or system animator scale zero, and keeps a labelled,
+  focusable Add/log action. No AI-listening or fabricated productivity score.
+- Version 5 adds one receipt table via a non-destructive 4→5 migration. A UUID and Room
+  transaction prevent duplicate retries; success waits for the transaction/draft transition.
+  The GitHub queue uses non-overwriting inserts and respects a user wipe. Other data, attendance
+  ledger, all destinations, original PDF source pack and existing session/preview safeguards stay.
+- Source-only evidence: **75 Kotlin files** parse, the original 13 routes/actions and 2→5 SQL
+  preservation checks pass, academic and project-pack checks pass, pinned Compose API source
+  signatures were inspected. Fifteen cloud test methods added, not executed. `git diff --check`
+  passes. No local Gradle, compilation, emulator or Android tests.
+- Remaining: external cloud build/test results and real-device animation, GPU/battery, screen
+  reader, keyboard/IME, font scaling, rotation and journey usability/visual acceptance. No
+  synchronous/live GitHub refresh or private repo access. Attendance screenshot, teacher portions,
+  exact timetable and S2 syllabus remain missing. V2 is not declared complete.
+
+## Previous delivery: supplied syllabus and academic planning
 
 Baseline `1f486e1`, clean main, fetched and equal to origin/main. The user supplied seven
 syllabus files and a two-page academic calendar and asked the app to plan from them.

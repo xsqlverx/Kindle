@@ -7,6 +7,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -17,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +33,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.model.BodyWeightLog
 import com.example.data.model.ExerciseSetLog
+import com.example.data.model.EntryKind
+import com.example.data.model.EntryRules
 import com.example.ui.components.*
 import com.example.ui.theme.*
 import com.example.viewmodel.LifeOsViewModel
@@ -44,6 +49,8 @@ fun GymScreen(
 ) {
     val lifeColors = LocalLifeOsColors.current
     val context = LocalContext.current
+    val entry = LocalEntryLauncher.current
+    val prefill = LocalEntryPrefill.current
 
     val selectedSplit by viewModel.selectedSplit.collectAsStateWithLifecycle()
     val sets by viewModel.currentSplitSets.collectAsStateWithLifecycle()
@@ -122,13 +129,15 @@ fun GymScreen(
                     fontWeight = FontWeight.Bold,
                     color = lifeColors.textPrimary
                 )
-                WorkspaceTextButton(onClick = { showAddSetDialog = true }) {
+                WorkspaceTextButton(onClick = { if (entry != null) { entry(EntryKind.SET); prefill?.invoke("split", selectedSplit) } else showAddSetDialog = true }) {
                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Add Set", fontWeight = FontWeight.Bold)
                 }
             }
         }
+
+        if (entry != null) item { WorkspaceTextButton(onClick = { showAddSetDialog = true }) { Text("Browse exercise suggestions") } }
 
         item {
             LazyRow(
@@ -490,7 +499,8 @@ fun GymScreen(
                         String.format(Locale.getDefault(), "%+.1f kg since your first saved weigh-in", weightDelta),
                         color = lifeColors.textSecondary, fontSize = 12.sp)
                     Spacer(Modifier.height(8.dp))
-                    WorkspaceTextButton(onClick = { showWeightDialog = true }) { Text("Log weigh-in / edit target", fontSize = 12.sp) }
+                    WorkspaceTextButton(onClick = { if (entry != null) entry(EntryKind.WEIGHT) else showWeightDialog = true }) { Text("Log a weigh-in", fontSize = 12.sp) }
+                    WorkspaceTextButton(onClick = { showWeightDialog = true }) { Text("Edit target or use detailed log", fontSize = 12.sp) }
                 }
             }
         }
@@ -655,58 +665,42 @@ fun GymScreen(
 
     // Modal: Quick Meal Logger
     if (showMealDialog) {
-        var calInput by remember { mutableStateOf("550") }
-        var proteinInput by remember { mutableStateOf("40") }
-        var carbsInput by remember { mutableStateOf("65") }
-        var fatsInput by remember { mutableStateOf("15") }
+        var mealValues by rememberSaveable { mutableStateOf(arrayListOf("", "", "", "")) }
+        var mealSaving by remember { mutableStateOf(false) }
+        val parsed = mealValues.map { it.toIntOrNull() }
+        val current = listOf(macros.currentCalories, macros.currentProteinGrams, macros.currentCarbsGrams, macros.currentFatsGrams)
+        val accepted = EntryRules.meal(mealValues, current)
+        val valid = accepted != null
 
         AlertDialog(
             onDismissRequest = { showMealDialog = false },
-            title = { Text("Quick Meal Macros", fontWeight = FontWeight.Bold) },
+            title = { Text("Add a meal", fontWeight = FontWeight.Bold) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedTextField(
-                        value = calInput,
-                        onValueChange = { calInput = it },
-                        label = { Text("Calories (kcal)") },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp)
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(
-                            value = proteinInput,
-                            onValueChange = { proteinInput = it },
-                            label = { Text("Protein (g)") },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(14.dp)
-                        )
-                        OutlinedTextField(
-                            value = carbsInput,
-                            onValueChange = { carbsInput = it },
-                            label = { Text("Carbs (g)") },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(14.dp)
-                        )
-                        OutlinedTextField(
-                            value = fatsInput,
-                            onValueChange = { fatsInput = it },
-                            label = { Text("Fats (g)") },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(14.dp)
-                        )
+                Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Use the values you know for this meal. Enter 0 only when that value is actually zero.", fontSize = 12.sp, lineHeight = 18.sp)
+                    listOf("Calories · kcal", "Protein · grams", "Carbs · grams", "Fat · grams").forEachIndexed { index, label ->
+                        OutlinedTextField(mealValues[index], { text -> mealValues = ArrayList(mealValues.toMutableList().apply { set(index, text) }) },
+                            label = { Text(label) }, placeholder = { Text("Whole number from your meal") },
+                            isError = mealValues[index].isNotBlank() && parsed[index]?.let { it in 0..100000 } != true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true,
+                            modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp))
                     }
+                    if (!valid) Text("Enter all four whole numbers to save this meal.", color = lifeColors.textSecondary, fontSize = 12.sp)
                 }
             },
             confirmButton = {
                 WorkspaceButton(
+                    enabled = valid && !mealSaving,
                     onClick = {
-                        viewModel.logQuickMeal(
-                            calories = calInput.toIntOrNull() ?: 0,
-                            protein = proteinInput.toIntOrNull() ?: 0,
-                            carbs = carbsInput.toIntOrNull() ?: 0,
-                            fats = fatsInput.toIntOrNull() ?: 0
-                        )
-                        showMealDialog = false
+                        if (!mealSaving) {
+                            val latest = viewModel.macros.value
+                            val totals = listOf(latest.currentCalories, latest.currentProteinGrams, latest.currentCarbsGrams, latest.currentFatsGrams)
+                            EntryRules.meal(mealValues, totals)?.let { amounts ->
+                                mealSaving = true
+                                viewModel.logQuickMeal(calories = amounts[0], protein = amounts[1], carbs = amounts[2], fats = amounts[3])
+                                showMealDialog = false
+                            }
+                        }
                     }
                 ) {
                     Text("Save Meal")

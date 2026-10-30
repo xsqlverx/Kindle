@@ -1,5 +1,12 @@
 # V2: a connected daily experience
 
+Latest 2026-10-30 correction: the user struggles with how to fill the app, wants projects
+drawn from their GitHub plus simple custom project entry, and wants a prominent Today visual
+that connects the rest of the app. ENTRY_ORB_PROJECTS.md records the 12-kind guided entry,
+transactional receipt, native shared orb and four source-grounded editable suggestions.
+Keep the content useful and progress honest; do not assume the implementation has reduced
+cognitive load or achieved visual quality without the user's device feedback.
+
 2026-10-30 implementation: the user supplied the S1 syllabus PDFs and S1/S2 academic calendar
 and asked for planning inside the app. Continue from ACADEMIC_IMPORT.md: six deduplicated
 courses, actual scope/assessment distinctions, offline originals, editable date-only targets,

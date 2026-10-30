@@ -55,7 +55,8 @@ continue to constrain actual placement. New dates must never be fabricated as as
 - `AcademicStore` installs 122 ExamTopic records (confidence 0, revision unreported) and
   18 Python CodingAttempt records (no app outcome/lesson, createdAt 0) using stable `aisat26:` IDs
   and Room INSERT IGNORE inside a transaction. Retry/forced import preserves edits, notes,
-  outcomes, revision dates and IDs. No schema change (Room remains v4), destructive migration,
+  outcomes, revision dates and IDs. No schema change in this stage (Room was v4; the later
+  entry stage added a v5 receipt table), destructive migration,
   attendance/timetable alias merge, default exam overwrite or mock seeding.
 - Separate committed preferences persist the suggested roadmap, daily budget, selected
   modules, explicit coverage and target completion. Fresh installs initially suggest 50

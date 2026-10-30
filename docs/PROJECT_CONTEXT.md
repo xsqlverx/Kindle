@@ -54,6 +54,18 @@ composer/time surface, visible numeric input/slider/one-minute controls and 1–
 boundary. Raw input persists and is validated at the write, including after restoring/changing
 sources. Preserve the real-work/preview contract. Cloud/device visual acceptance is pending.
 
+### Entry, orb and project feedback, 2026-10-30
+
+The user asks for current GitHub-informed projects to work on, an easier way to add their own,
+a shared animation prominent on Today and quieter elsewhere, and much simpler data entry across
+the app. ENTRY_ORB_PROJECTS.md records the source-grounded selection and implementation. Twelve
+entry types now share a guided sheet with drafts/validation/confirmed receipts. The project queue
+contains four labelled suggestions grounded in public GitHub source, with editable actions and
+links. An original native orb shares real session state across destinations. This is source-only:
+cloud/device results, visual acceptance and actual reduction in cognitive load remain unverified.
+No private account access, invented progress or new branding. Existing data remains protected
+by an additive Room 4→5 receipt migration and non-overwriting, wipe-aware queue installation.
+
 ### Supplied academic documents, 2026-10-30
 
 The user supplied all seven listed S1 syllabus PDFs and an S1/S2 academic calendar and
@@ -87,6 +99,8 @@ For attendance, the user chose a screenshot as the faster way to establish accur
 | Notifications, alarms, useful follow-through | Opt-in inexact local implementation; delivery remains unverified |
 | Attendance baseline from portal screenshot | Desired; screenshot not supplied |
 | S1 syllabus and academic calendar planning | Supplied; offline source catalog and editable roadmap implemented; source-only verification |
+| Easier app data entry and personal projects | Explicit latest request; guided entry, editable projects and source-only verification |
+| Prominent Today animation, quieter cross-app continuity | Explicit latest request; state-aware native orb in source; device visual/performance acceptance pending |
 | More quality features without filler | Explicit requirement; candidate modules need a recurring purpose |
 | More tabs/spaces and greater feature density | Explicit V2 requirement after device testing |
 | Unified cross-space behavior, rich motion, and liquid glass | Explicit V2 requirement; extends beyond the current visual consistency |

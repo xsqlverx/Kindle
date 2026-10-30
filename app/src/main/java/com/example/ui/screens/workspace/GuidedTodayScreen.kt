@@ -59,12 +59,27 @@ fun GuidedTodayScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: T
                     Text(SimpleDateFormat("EEEE, d MMM", Locale.getDefault()).format(Date(now)), color = colors.textSecondary, fontSize = 12.sp)
                     Text("Today", color = colors.textPrimary, fontSize = 27.sp, fontWeight = FontWeight.Medium)
                 }
-                WorkspaceIconButton(onClick = { model.offerMove() }) { Icon(Icons.Outlined.Add, "Add a next move", tint = colors.primaryAccent) }
+                WorkspaceIconButton(onClick = { model.openEntry() }) { Icon(Icons.Outlined.Add, "Add or log something", tint = colors.primaryAccent) }
                 Spacer(Modifier.width(8.dp))
                 WorkspaceIconButton(onClick = onSettings) { Icon(Icons.Outlined.Tune, "Settings", tint = colors.textSecondary) }
             }
         }
-        item { WeekTrace(input) }
+        item {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                ContinuityOrb(Modifier.size(150.dp), onClick = { model.openEntry() })
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(when (input.session.phase) {
+                        FocusPhase.RUNNING -> if (input.session.sourceType == "PREVIEW") "Preview in motion" else "Your focus, carried with you."
+                        FocusPhase.PAUSED -> "Your place is held."
+                        FocusPhase.FINISHED -> "Ready to keep the thread."
+                        else -> "A place for the small things."
+                    }, color = colors.textPrimary, fontSize = 19.sp, lineHeight = 25.sp)
+                    Text(if (input.session.phase == FocusPhase.IDLE) "A task, a project, a note or a quick log. Start with what you know." else input.session.title,
+                        color = colors.textSecondary, fontSize = 12.sp, lineHeight = 19.sp)
+                    WorkspaceTextButton(onClick = { model.openEntry() }) { Text("Add or log", color = colors.primaryAccent) }
+                }
+            }
+        }
         item {
             AnimatedContent(Triple(saved, cue, trial), transitionSpec = {
                 (fadeIn(tween(if (reduced) 0 else 220)) + slideInVertically(tween(if (reduced) 0 else 340)) { it / 12 }) togetherWith
@@ -76,6 +91,7 @@ fun GuidedTodayScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: T
                 else NextMoveHero(target.second, input, model, focus)
             }
         }
+        item { WeekTrace(input) }
         item { AcademicCalendarBrief(model, now) }
         if (input.session.phase == FocusPhase.IDLE && firstLap) item {
             Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(colors.primaryAccent.copy(alpha = 0.06f))

@@ -14,6 +14,18 @@ Inspect Git status and the actual source. Preserve existing local changes. V1 in
 
 WHAT I WANT
 
+Latest request, 2026-10-30 after `8319743`: entering personal data feels difficult; the user
+wants easy entry, easier personal projects, GitHub-informed projects and a large Today visual
+that connects the app while staying subtle elsewhere. Read ENTRY_ORB_PROJECTS.md. The current
+source has a 12-kind Add/log sheet, per-kind persistent drafts, native date/time/course selection,
+transactional UUID receipts and a 4→5 Room migration; deadline edits retain their exact date.
+Four public-source suggestions are editable, non-overwriting and wipe-aware. One native orb
+shares real session state and an animation phase across Today/other headers, with lifecycle,
+Reduce motion/system-scale handling. Preserve existing capabilities/data and the prior academic,
+attendance and preview contracts. Source checks parse 75 Kotlin files; fifteen new cloud tests
+are supplied, not executed. No cloud compilation, device visuals/performance or usability pass
+has been observed. Do not present dated public GitHub suggestions as live account sync.
+
 Latest request, 2026-10-30 after `1f486e1`: the user supplied seven syllabus PDFs and a two-page
 S1/S2 academic calendar and asked the app to plan from them. Read ACADEMIC_IMPORT.md in full.
 The current source bundles seven unchanged PDF assets (Electrical/Electronics are identical),

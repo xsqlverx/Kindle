@@ -30,7 +30,7 @@ class WorkspaceDatabaseTest {
             old.execSQL("INSERT INTO body_weight_logs VALUES (3, 61.2, 'User supplied', 123)")
             old.version = 2
         }
-        val db = Room.databaseBuilder(context, LifeOsDatabase::class.java, name).addMigrations(WORKSPACE_MIGRATION_2_3, ATTENDANCE_MIGRATION_3_4).build()
+        val db = Room.databaseBuilder(context, LifeOsDatabase::class.java, name).addMigrations(WORKSPACE_MIGRATION_2_3, ATTENDANCE_MIGRATION_3_4, ENTRY_MIGRATION_4_5).build()
         try {
             assertEquals("User task", db.taskDao().getAllTasks().first().single().title)
             assertEquals(17, db.academicDao().getAllAttendance().first().single().attendedClasses)

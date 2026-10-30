@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.model.Quadrant
 import com.example.data.model.TaskItem
 import com.example.data.model.TaskStatus
+import com.example.data.model.EntryKind
 import com.example.ui.components.*
 import com.example.ui.screens.today.TaskGlassRow
 import com.example.ui.theme.*
@@ -55,6 +56,7 @@ fun TasksMatrixScreen(
 ) {
     val lifeColors = LocalLifeOsColors.current
     val context = LocalContext.current
+    val entry = LocalEntryLauncher.current
 
     val allTasks by viewModel.allTasks.collectAsStateWithLifecycle()
     var selectedFilter by rememberSaveable { mutableStateOf(TaskFilterOption.ALL) }
@@ -108,7 +110,7 @@ fun TasksMatrixScreen(
                         Text("${pendingTasks.size}", fontSize = 42.sp, fontWeight = FontWeight.Light, color = lifeColors.textPrimary)
                         Text("open · ${completedTasks.size} completed", fontSize = 12.sp, color = lifeColors.textSecondary)
                     }
-                    WorkspaceTonalButton(onClick = { showAddTaskDialog = true }, shape = RoundedCornerShape(14.dp),
+                    WorkspaceTonalButton(onClick = { if (entry != null) entry(EntryKind.TASK) else showAddTaskDialog = true }, shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.heightIn(min = 48.dp).testTag("new_task_modal_button")) {
                         Icon(Icons.Default.Add, null, modifier = Modifier.size(17.dp))
                         Spacer(Modifier.width(7.dp))

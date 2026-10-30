@@ -2,6 +2,15 @@
 
 Status: the first Today prototype was accepted for V1 only. V2 implementation now includes the connected shell, live day/session foundation and working new modules; see STATUS.md, V2_IMPLEMENTATION.md and V2_VERIFICATION.md. Cloud compilation/device verification remain unobserved. Naming and logo work come last.
 
+Latest 2026-10-30: entering data feels much harder than deciding what to enter. Make one
+obvious Add/log action available across the app, explain the first input with a concrete
+example, make other detail optional where safe, and confirm where each saved item went.
+Preserve raw drafts, explicit data, advanced capability and no-guesses behavior. The user
+also requested a distinctive shared animation, large on Today and quiet elsewhere: the source
+now has an original state-aware native orb, not a branded character or inferred score.
+Public-source project suggestions and an easy custom-project path are implemented. See
+ENTRY_ORB_PROJECTS.md for provenance, actual scope and unverified phone behavior.
+
 2026-10-30: supplied syllabus/calendar now ground actual study planning. ACADEMIC_IMPORT.md
 records the original-page catalog, scope distinctions, editable date-only roadmap, capacity
 before exam windows and connection to the existing next-move/session history. Show the next

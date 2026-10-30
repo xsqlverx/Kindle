@@ -116,12 +116,14 @@ fun MoveDurationControl(text: String, enabled: Boolean, onChange: (String) -> Un
 /** Inset native editor with a quiet label, rather than a stack of outlined form boxes. */
 @Composable
 fun MoveField(value: String, onChange: (String) -> Unit, label: String, placeholder: String,
-    enabled: Boolean, modifier: Modifier = Modifier, prominent: Boolean = false, maxLines: Int = 4) {
+    enabled: Boolean, modifier: Modifier = Modifier, prominent: Boolean = false, maxLines: Int = 4,
+    minLines: Int = 1, singleLine: Boolean = false, keyboardOptions: KeyboardOptions = KeyboardOptions.Default) {
     val colors = LocalLifeOsColors.current
     val source = remember { MutableInteractionSource() }
     val focused by source.collectIsFocusedAsState()
     val shape = RoundedCornerShape(23.dp)
-    BasicTextField(value, onChange, enabled = enabled, interactionSource = source, maxLines = maxLines,
+    BasicTextField(value, onChange, enabled = enabled, interactionSource = source, maxLines = maxLines, minLines = minLines,
+        singleLine = singleLine, keyboardOptions = keyboardOptions,
         modifier = modifier.fillMaxWidth().clip(shape).background(colors.surfaceGlass)
             .border(1.dp, if (focused) colors.primaryAccent.copy(alpha = 0.65f) else colors.borderGlass, shape)
             .semantics { contentDescription = label },

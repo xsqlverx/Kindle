@@ -1,5 +1,21 @@
 # V2 implementation stages
 
+## Easier entry, orb and project queue, 2026-10-30
+
+Baseline `8319743`; see ENTRY_ORB_PROJECTS.md. QuickEntryStore/QuickEntrySheet implement
+12 entry kinds with editable kind-specific drafts, validation, native date/time/course pickers,
+one atomic Room receipt per draft and explicit saved destinations. Project creation supports
+an optional repository and one next action per line; steps remain editable and actionable.
+Public source informed four editable, one-time, non-overwriting, wipe-aware suggestions.
+`ENTRY_MIGRATION_4_5` adds the receipt table; original 2→3→4 migrations stay chained and no
+destructive fallback is introduced. Deadline edits preserve their actual timestamp, Plan's
+picker is searchable, and meal values are explicitly entered rather than guessed.
+ContinuityOrb is a native Canvas glass/orbit scene with one lifecycle/visibility-aware phase,
+real session state, confirmed-save bloom, haptic/keyboard focus and stillness for reduced
+motion/system scale zero. Today is large; other headers have a compact Add/log orb.
+Source parsing/data checks and exact pinned Compose API inspection pass; fifteen external
+tests are supplied but unrun. Cloud/device performance and visual/usability acceptance remain.
+
 ## Academic integration, 2026-10-30
 
 Baseline `1f486e1`; saved plan/provenance and completed work in ACADEMIC_IMPORT.md.

@@ -104,7 +104,8 @@ object DayGuide {
         }
         input.projects.filter { !it.archived && it.blocker.isBlank() }.forEach { project ->
             input.steps.filter { it.projectId == project.id && !it.done }.minByOrNull { it.position }?.let {
-                ranked.add(40 to DayMove(it.title, "PROJECT_STEP", it.id, firstStep = project.blocker, reason = "Next milestone · ${project.title}"))
+                ranked.add(40 to DayMove(it.title, "PROJECT_STEP", it.id, material = project.goal.lines().firstOrNull { line -> line.startsWith("https://") || line.startsWith("http://") }.orEmpty(), firstStep = project.blocker,
+                    reason = "${if (project.id.startsWith("github:xsqlverx:")) "Suggested project" else "Next milestone"} · ${project.title}"))
             }
         }
         return ranked.sortedBy { it.first }.map { withResume(input, it.second) }.distinctBy { it.key }
@@ -123,7 +124,8 @@ object DayGuide {
             input.topics.map { DayMove(listOf(it.course, it.title).filter(String::isNotBlank).joinToString(" · "), "TOPIC", it.id, it.material, reason = "From your study topics") } +
             input.attempts.map { DayMove(it.problem, "PRACTICE", it.id, it.link, it.notes, "From your coding practice") } +
             input.steps.filter { !it.done && input.projects.any { project -> project.id == it.projectId && !project.archived } }.map {
-                DayMove(it.title, "PROJECT_STEP", it.id, reason = "From your project milestones")
+                val project = input.projects.first { project -> project.id == it.projectId }
+                DayMove(it.title, "PROJECT_STEP", it.id, material = project.goal.lines().firstOrNull { line -> line.startsWith("https://") || line.startsWith("http://") }.orEmpty(), reason = "From your project milestones")
             }
         return (choices(input) + all.map { withResume(input, it) }).distinctBy { it.key }
     }

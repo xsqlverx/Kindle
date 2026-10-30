@@ -92,6 +92,8 @@ class MainActivity : ComponentActivity() {
             val canUndo by model.canUndo.collectAsStateWithLifecycle()
             val lastSaved by focus.lastSaved.collectAsStateWithLifecycle()
             val lastTrial by focus.lastTrial.collectAsStateWithLifecycle()
+            val entryOpen by model.entryOpen.collectAsStateWithLifecycle()
+            val entryResult by model.entryResult.collectAsStateWithLifecycle()
             val snackbar = remember { SnackbarHostState() }
             var focusOrigin by remember { mutableStateOf<Rect?>(null) }
             var capsuleBounds by remember { mutableStateOf<Rect?>(null) }
@@ -133,10 +135,10 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(lastSaved?.id, lastTrial?.id) {
                 if (lastSaved != null || lastTrial != null) { panel = false; preview = false; tools = false; launcher = false; model.clearMessage(); model.navigate(Destination.TODAY) }
             }
-            LaunchedEffect(message, panel, moveDraft != null) {
+            LaunchedEffect(message, panel, moveDraft != null, entryOpen) {
                 val text = message ?: return@LaunchedEffect
                 now = System.currentTimeMillis()
-                if (panel || moveDraft != null) return@LaunchedEffect
+                if (panel || moveDraft != null || entryOpen) return@LaunchedEffect
                 val undo = canUndo && text.startsWith("Moved ")
                 val result = snackbar.showSnackbar(text, actionLabel = if (undo) "Undo" else null,
                     withDismissAction = true, duration = if (text.length > 100) SnackbarDuration.Long else SnackbarDuration.Short)
@@ -163,6 +165,8 @@ class MainActivity : ComponentActivity() {
                     if (reduced) snap() else spring(1f, 100f), label = "workspace_light")
                 val contentLayer = rememberGraphicsLayer()
                 val backdropLayer = rememberGraphicsLayer()
+                val orb = rememberOrbScene(session, now, (lastSaved?.id.orEmpty() + entryResult?.receipt?.id.orEmpty()), reduced,
+                    !launcher && !tools && !preview && !entryOpen)
                 SideEffect {
                     backdropLayer.renderEffect = if (android.os.Build.VERSION.SDK_INT >= 31) BlurEffect(20f, 20f, TileMode.Clamp) else null
                     val controller = WindowCompat.getInsetsController(window, window.decorView)
@@ -170,10 +174,11 @@ class MainActivity : ComponentActivity() {
                     controller.isAppearanceLightNavigationBars = !colors.isDark
                 }
                 CompositionLocalProvider(LocalReducedMotion provides reduced, LocalWorkspaceBackdrop provides backdropLayer,
+                    LocalOrbScene provides orb, LocalEntryLauncher provides { kind -> model.openEntry(kind) }, LocalEntryPrefill provides model::prefillEntry,
                     LocalFocusOrigin provides { focusOrigin = it }) {
                     Box(Modifier.fillMaxSize().background(colors.background)) {
                         // Capture only the page scene. Glass overlays cannot capture themselves.
-                        CompositionLocalProvider(LocalWorkspaceBackdrop provides null) {
+                        CompositionLocalProvider(LocalWorkspaceBackdrop provides null, LocalOrbActivity provides !panel) {
                             Box(Modifier.fillMaxSize().then(if (launcher) Modifier.clearAndSetSemantics {} else Modifier)
                                 .drawWithContent {
                                     contentLayer.record { this@drawWithContent.drawContent() }
@@ -247,9 +252,10 @@ class MainActivity : ComponentActivity() {
                         LaunchedEffect(lecture?.id) { if (lecture != null) { tools = false; preview = false } }
                         if (lecture != null) LectureDetailSheet(lecture, attendanceRecords = attendance, onDismiss = life::closeLectureDetail,
                             attendanceControl = { AttendanceClassControl(it, life) })
-                        if (moveDraft != null && !panel) NextMoveSheet(life, model, focus, now)
+                        if (moveDraft != null && !panel && !entryOpen) NextMoveSheet(life, model, focus, now)
                         FocusSurface(panel, focusOrigin ?: capsuleBounds, focus, now, { model.resumeSession(focus) },
                             { focusOrigin = capsuleBounds; panel = false }, message)
+                        if (entryOpen) QuickEntrySheet(model)
                         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
                             .padding(start = 16.dp, end = 16.dp, bottom = dockReserve + sessionInset + 8.dp))
                         trainingSplit?.let { split ->

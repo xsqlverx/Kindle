@@ -44,10 +44,10 @@ with sqlite3.connect(':memory:') as connection:
     declarations = re.findall(r'db\.execSQL\("((?:CREATE TABLE|ALTER TABLE)[^"\n]+)"\)', migration)
     for statement in declarations:
         connection.execute(statement)
-    assert len(declarations) == 9  # seven V3 tables, one additive V4 column and one ledger
+    assert len(declarations) == 10  # V3 tables, additive V4 column/ledger, V5 entry receipts
     assert connection.execute('SELECT title FROM tasks WHERE id=42').fetchone() == ('Preserve this',)
     assert connection.execute('SELECT attendedClasses, totalClasses, baselineAt FROM attendance_records WHERE id=7').fetchone() == (17, 20, 0)
-    assert connection.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").fetchone()[0] == 18
+    assert connection.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").fetchone()[0] == 19
 
 registry = (ROOT / 'app/src/main/java/com/example/data/model/Workspace.kt').read_text(encoding='utf-8')
 destinations = re.findall(r'^    ([A-Z_]+)\("[a-z]+",', registry, flags=re.M)

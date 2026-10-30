@@ -9,6 +9,8 @@ import com.example.data.local.DatabaseProvider
 import com.example.data.model.*
 import com.example.data.reminders.PlanReminders
 import com.example.data.repository.AcademicStore
+import com.example.data.repository.QuickEntryStore
+import com.example.data.repository.ProjectQueueStore
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +27,20 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
     private val dao = db.workspaceDao()
     private val prefs = application.getSharedPreferences("workspace_v2", Context.MODE_PRIVATE)
     private val academicStore = AcademicStore(application, db)
+    private val entryStore = QuickEntryStore(application, db)
+    private val projectQueueStore = ProjectQueueStore(application, db)
+    private val _projectSuggestions = MutableStateFlow<List<ProjectSuggestion>>(emptyList())
+    val projectSuggestions = _projectSuggestions.asStateFlow()
+    private val _entryDraft = MutableStateFlow(entryStore.readDraft())
+    val entryDraft = _entryDraft.asStateFlow()
+    private val _entryOpen = MutableStateFlow(false)
+    val entryOpen = _entryOpen.asStateFlow()
+    private val _entrySaving = MutableStateFlow(false)
+    val entrySaving = _entrySaving.asStateFlow()
+    private val _entryResult = MutableStateFlow<EntryResult?>(null)
+    val entryResult = _entryResult.asStateFlow()
+    private val _entryError = MutableStateFlow<String?>(null)
+    val entryError = _entryError.asStateFlow()
     private val _academicPack = MutableStateFlow<AcademicPack?>(null)
     val academicPack = _academicPack.asStateFlow()
     private val _academicError = MutableStateFlow<String?>(null)
@@ -69,6 +85,14 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
+            try { academicInitialization.withLock {
+                val suggestions = projectQueueStore.load()
+                projectQueueStore.install(suggestions)
+                _projectSuggestions.value = suggestions
+            } } catch (cancelled: CancellationException) { throw cancelled
+            } catch (_: Exception) { _message.value = "Could not open the suggested GitHub queue. You can still add your own projects." }
+        }
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 academicInitialization.withLock {
                     val pack = academicStore.load()
@@ -89,6 +113,44 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
             }
         }
     }
+    fun openEntry(kind: EntryKind? = null) {
+        if (_entrySaving.value) return
+        _entryResult.value = null; _entryError.value = null
+        if (kind != null) { _entryDraft.value = _entryDraft.value.copy(kind = kind); entryStore.draft(_entryDraft.value) }
+        _entryOpen.value = true
+    }
+    fun editEntry(key: String, text: String) {
+        if (_entrySaving.value || _entryResult.value != null) return
+        _entryDraft.value = _entryDraft.value.edit(key, text)
+        entryStore.draft(_entryDraft.value); _entryError.value = null
+    }
+    fun prefillEntry(key: String, text: String) { if (_entryDraft.value.get(key).isBlank()) editEntry(key, text) }
+    fun discardEntryKind() {
+        if (_entrySaving.value || _entryResult.value != null) return
+        val old = _entryDraft.value
+        _entryDraft.value = EntryDraft(kind = old.kind, values = old.values.filterKeys { !it.startsWith("${old.kind.name}.") })
+        entryStore.draft(_entryDraft.value); _entryError.value = null
+    }
+    fun closeEntry() { if (!_entrySaving.value) _entryOpen.value = false }
+    fun saveEntry() {
+        if (_entrySaving.value || _entryResult.value != null) return
+        val draft = _entryDraft.value
+        EntryRules.error(draft)?.let { _entryError.value = it; return }
+        _entrySaving.value = true
+        viewModelScope.launch {
+            try { writes.withLock {
+                if (_entryDraft.value.id != draft.id) return@withLock
+                val result = entryStore.save(draft, System.currentTimeMillis())
+                _entryDraft.value = withContext(Dispatchers.IO) { entryStore.afterSave(draft) }
+                _entryResult.value = result; _entryError.value = null
+            } } catch (cancelled: CancellationException) { throw cancelled
+            } catch (_: Exception) { _entryError.value = "Could not finish saving. Your draft is kept; retry here to avoid adding it twice."
+            } finally { _entrySaving.value = false }
+        }
+    }
+    fun openEntryResult() { _entryResult.value?.let { navigate(it.destination); _entryOpen.value = false } }
+    fun addEntryAgain() { _entryResult.value = null; _entryError.value = null }
+
     private suspend fun saveAcademic(value: AcademicRoadmap) {
         withContext(Dispatchers.IO) { academicStore.saveRoadmap(value) }
         _academicRoadmap.value = value
@@ -366,7 +428,9 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
         if (focus.saving.value) { _message.value = "Wait for the current session save to finish before clearing records."; return@write }
         academicInitialization.withLock {
             withContext(Dispatchers.IO) { academicStore.clearRoadmap() }
+            withContext(Dispatchers.IO) { projectQueueStore.retainWipeIntent(); entryStore.clearDraft() }
             _academicRoadmap.value = AcademicRoadmap()
+            _entryDraft.value = EntryDraft(); _entryResult.value = null; _entryOpen.value = false
         }
         focus.clearForUserWipe()
         dao.clearWorkspace()

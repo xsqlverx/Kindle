@@ -55,11 +55,19 @@ fun WorkspaceTopBar(
 ) {
     val colors = LocalLifeOsColors.current
     var showAppearance by remember { mutableStateOf(false) }
+    val entry = LocalEntryLauncher.current
     Row(
         modifier.fillMaxWidth().background(colors.background).statusBarsPadding()
             .heightIn(min = 76.dp).padding(start = 24.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        if (LocalOrbScene.current != null) {
+            Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+                ContinuityOrb(Modifier.fillMaxSize(), compact = true, onClick = entry?.let { { it(null) } })
+                if (entry != null) Icon(Icons.Outlined.Add, null, Modifier.align(Alignment.BottomEnd).size(14.dp), tint = colors.primaryAccent)
+            }
+            Spacer(Modifier.width(8.dp))
+        }
         Column(Modifier.weight(1f).graphicsLayer { alpha = (1f - settingsProgress * 2f).coerceIn(0f, 1f) }) {
             WorkspaceLabel(subtitle ?: "YOUR WORKSPACE")
             Spacer(Modifier.height(4.dp))

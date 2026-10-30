@@ -23,6 +23,13 @@ The user authorized pushing this ongoing revamp to `origin/main`. Verify the che
 
 ## Continuity
 
+Latest entry/motion/projects request (2026-10-30): read docs/ENTRY_ORB_PROJECTS.md. The user
+struggles with how to fill the app, wants easy custom projects, GitHub-informed project work,
+and a prominent Today animation shared subtly elsewhere. Preserve the 12-kind guided Add/log
+flow, per-kind drafts, transaction-confirmed receipts, 4→5 additive migration, editable/wipe-aware
+GitHub suggestions and real-session orb. Do not infer progress or private repository access.
+No local Android build/tests; source parsing is not cloud/device/visual/usability verification.
+
 Academic input (2026-10-30): all seven listed S1 syllabus PDFs and the S1/S2 calendar have
 now been supplied. Read docs/ACADEMIC_IMPORT.md. Preserve the deduplicated original assets,
 source/page/hash metadata, stable IDs and non-overwriting import. The editable roadmap's

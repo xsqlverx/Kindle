@@ -4,6 +4,31 @@
 
 ## First path to try after the external build
 
+Latest entry/motion path: on **Today → Add or log** enter a task title only, save and use the
+receipt to open Tasks. Add a project by pasting a GitHub URL and typing two actions on separate
+lines; open Projects, edit/check an action and start it through the existing focus/resume flow.
+Try the four source-linked suggestions and archive/restore one. Go to College → Add class:
+pick a supplied course, weekday and real start/end; add a deadline with an actual date, edit
+only its description and confirm the original date remains unchanged. Fitness → Add set:
+choose actual reps/kg and split; it remains planned until explicitly marked. Log water/weight
+and a self-reported training session; check the named destination and no duplicate on rapid
+save/retry. Meal values start blank and invalid/missing fields cannot silently become zero.
+
+Switch entry types mid-draft, close/reopen, rotate and restart; unfinished other-kind input
+must survive a different kind's successful save. Test a failed save/retry and v4→v5 upgrade
+with existing attendance, tasks, projects/sessions. Only in an isolated profile, wipe before
+and after initial queue install; suggestions and drafts must not silently reappear. Check that
+the Today orb and quiet header orbit share motion, real running/paused/finished progress and
+confirmed-save feedback; preview is labelled. Repeat background/foreground, moving between
+destinations, reduced motion and system scale zero, keyboard focus/TalkBack, narrow/landscape,
+200% fonts and all palettes. Measure frame pacing and battery rather than assuming quality.
+
+Source evidence: `check_sources.py` parses **75 Kotlin files** and validates routes, legacy
+actions, UTF-8/manifest and additive 2→5 SQL sentinels. Academic and project catalog checkers
+pass. Fifteen new cloud methods cover validation, idempotent concurrent entry, data and draft
+retention, wipe, project installation and 4→5 migration, **not executed**. Pinned Compose
+API signatures were inspected. No local Android compile/test, cloud result or device pass.
+
 Latest academic path: **Exam Prep → Syllabus & sources → course → original page**. Check
 the six actual courses and scoped topic/lab/activity information, both S1/S2 calendar pages,
 and no duplicate Electrical/Electronics course or merged attendance aliases. Roadmap initially

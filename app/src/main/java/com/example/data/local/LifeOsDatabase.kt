@@ -130,6 +130,8 @@ interface AcademicDao {
 
 @Dao
 interface FitnessDao {
+    @Query("SELECT MAX(setNumber) FROM exercise_sets WHERE splitCategory = :split AND exerciseName = :exercise")
+    suspend fun latestSetNumber(split: String, exercise: String): Int?
     @Query("SELECT * FROM fitness_logs ORDER BY dateMillis DESC")
     fun getWorkoutSessions(): Flow<List<WorkoutSession>>
 
@@ -198,9 +200,9 @@ interface DailyResetDao {
         WaterLog::class,
         DailyResetRecord::class,
         DayBlock::class, WorkSessionRecord::class, WorkProject::class, ProjectStep::class,
-        CaptureNote::class, ExamTopic::class, CodingAttempt::class
+        CaptureNote::class, ExamTopic::class, CodingAttempt::class, EntryReceipt::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class LifeOsDatabase : RoomDatabase() {
