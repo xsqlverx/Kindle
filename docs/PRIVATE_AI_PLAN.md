@@ -54,3 +54,7 @@ GitHub Actions adds only a separate `assistantPreview` build type and generates 
 debug keystore; the external builder's existing debug/release configuration is unchanged.
 No AI keys, chat, personal app records, keystores or generated artifacts are committed.
 AssistantRoutingTest supplies three cloud unit tests; none has run locally.
+
+First Actions run `42092469356` failed before compilation: setup-android v3 requested the
+obsolete SDK package `tools`. Workflow now requests `platform-tools` explicitly; a new cloud
+run is needed. This is not an Android source/build pass.
