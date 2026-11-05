@@ -1,5 +1,8 @@
 # V2: a connected daily experience
 
+2026-11-06: Assistant day questions now use actual local commitments and source-linked actions;
+provider answers use animated, expandable blocks. Check keyboard and device behavior before acceptance.
+
 2026-11-06: Assistant uses actual app context and can hand suggestions to the existing editable
 next-move flow; provider calls and all four new pathways need cloud/device validation.
 

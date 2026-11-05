@@ -26,4 +26,11 @@ class AssistantRoutingTest {
         assertEquals("openrouter/free", AssistantProvider.OPENROUTER.model)
         assertTrue(AssistantProvider.entries.all { it.endpoint.startsWith("https://") })
     }
+
+    @Test fun localDaySnapshotsAreNotIncludedInLaterCloudHistory() {
+        val messages = listOf(AssistantMessage("user", "what next"), AssistantMessage("assistant", "private local schedule", "On device"),
+            AssistantMessage("user", "explain loops"))
+        assertTrue(AssistantRouting.cloudTurns(messages).none { it.text.contains("private local schedule") })
+        assertTrue(AssistantRouting.cloudTurns(messages).last().text.contains("explain loops"))
+    }
 }

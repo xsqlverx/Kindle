@@ -1,6 +1,7 @@
 package com.example.ui.screens.workspace
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,6 +9,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -15,12 +20,20 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.data.assistant.AssistantDay
 import com.example.data.assistant.AssistantProvider
 import com.example.data.model.*
 import com.example.ui.components.*
@@ -82,7 +95,9 @@ fun AssistantScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: Tod
             if (last >= 0) listState.animateScrollToItem(last)
         }
     }
-    fun ask(question: String) = assistant.send(question, assistantContext(input, habits, attendance, water,
+    fun ask(question: String, dayBrief: Boolean = false): Boolean = if (dayBrief || AssistantDay.isNextQuestion(question))
+        assistant.replyFromSavedDay(question, AssistantDay.snapshot(input))
+    else assistant.send(question, assistantContext(input, habits, attendance, water,
         waterLogs.any { it.timestamp in DayGuide.startOfDay(now) until DayGuide.endOfDay(now) }, weights, pack, question))
     Column(Modifier.fillMaxSize().imePadding()) {
         LazyColumn(Modifier.weight(1f).fillMaxWidth(), state = listState, contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -103,7 +118,7 @@ fun AssistantScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: Tod
                 Text("A LITTLE MORE POWER", color = colors.textTertiary, fontSize = 10.sp, letterSpacing = 1.2.sp)
                 Spacer(Modifier.height(8.dp))
                 WorkspaceActionRow("The briefing", "A useful read on your real day", Icons.Outlined.WbSunny) {
-                    if (!busy) ask("Give me a concise briefing for my day using my actual records: what matters now, the next concrete step, and one thing to watch. Say when information is missing.")
+                    if (!busy) ask("What's next in my day?", dayBrief = true)
                 }
                 Spacer(Modifier.height(8.dp))
                 WorkspaceActionRow("Exam rehearsal", "Turn your syllabus into a practice session", Icons.Outlined.School) { rehearsal = true }
@@ -115,21 +130,21 @@ fun AssistantScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: Tod
             if (data.messages.isNotEmpty()) item { Text("CONVERSATION", color = colors.textTertiary, fontSize = 10.sp, letterSpacing = 1.2.sp) }
             items(data.messages.size) { index ->
                 val message = data.messages[index]
-                Column(Modifier.fillMaxWidth().background(if (message.role == "user") colors.primaryAccent.copy(alpha = 0.12f) else colors.surfaceGlass, RoundedCornerShape(22.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(if (message.role == "user") "YOU" else "ASSISTANT · ${message.provider}", color = colors.primaryAccent, fontSize = 10.sp, letterSpacing = 1.sp)
+                if (message.role == "user") Column(Modifier.fillMaxWidth().background(colors.primaryAccent.copy(alpha = 0.11f), RoundedCornerShape(22.dp)).padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("YOU", color = colors.primaryAccent, fontSize = 10.sp, letterSpacing = 1.sp)
                     Text(message.text, color = colors.textPrimary, fontSize = 14.sp, lineHeight = 21.sp)
-                    if (message.role == "assistant") WorkspaceTextButton(onClick = {
-                        model.offerMove(DayMove("Follow up from Assistant", firstStep = message.text.take(1500), reason = "A suggestion you can edit before saving"))
-                    }) { Text("Turn this into a next move") }
+                } else if (message.provider == "On device" && index == data.messages.lastIndex) {
+                    SavedDayResponse(input, model, focus)
+                } else AssistantResponse(message) { title, detail ->
+                    model.offerMove(DayMove(title.take(300), firstStep = detail.take(1500), reason = "AI suggestion · review and edit before saving"))
                 }
             }
-            if (busy) item { Text("Thinking with ${using ?: "your AI"}…", color = colors.primaryAccent, fontSize = 13.sp) }
+            if (busy) item { AssistantThinking(using ?: "your AI") }
             if (error != null) item { Text(error.orEmpty(), color = MaterialTheme.colorScheme.error, fontSize = 13.sp) }
         }
-        Column(Modifier.fillMaxWidth().background(colors.background).padding(horizontal = 16.dp, vertical = 10.dp)) {
-            OutlinedTextField(text, { text = it.take(4000) }, modifier = Modifier.fillMaxWidth(), placeholder = { Text("Ask about your day, study or code…") },
-                enabled = !busy, maxLines = 4, trailingIcon = { IconButton(enabled = !busy && text.isNotBlank(), onClick = { if (ask(text)) text = "" }) { Icon(Icons.Outlined.Send, "Send message") } })
-            Text("Sending shares your message and selected context with your configured provider${if (data.fallback) "s if fallback is needed" else ""}.", color = colors.textTertiary, fontSize = 10.sp, lineHeight = 14.sp)
+        AssistantComposer(text, { text = it.take(4000) }, busy, data.shareContext, data.fallback, data.selected.label) {
+            if (ask(text)) { text = ""; true } else false
         }
     }
     if (settings) AssistantSettings(data, busy, assistant) { settings = false }
@@ -173,6 +188,42 @@ fun AssistantScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: Tod
             }
         }
     }, confirmButton = { WorkspaceTextButton(onClick = { rescue = false }) { Text("Close") } })
+}
+
+@Composable
+private fun AssistantComposer(value: String, onChange: (String) -> Unit, busy: Boolean, shareContext: Boolean,
+    fallback: Boolean, provider: String, onSend: () -> Boolean) {
+    val colors = LocalLifeOsColors.current
+    val focus = LocalFocusManager.current
+    var focused by remember { mutableStateOf(false) }
+    val canSend = !busy && value.isNotBlank()
+    fun send() { if (canSend && onSend()) focus.clearFocus() }
+    Column(Modifier.fillMaxWidth().background(colors.background).padding(horizontal = 16.dp, vertical = 9.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        val shape = RoundedCornerShape(25.dp)
+        Row(Modifier.fillMaxWidth().clip(shape).background(colors.surfaceGlass)
+            .border(1.dp, if (focused) colors.primaryAccent.copy(alpha = 0.65f) else colors.borderGlass, shape)
+            .padding(start = 15.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Icon(Icons.Outlined.AutoAwesome, null, Modifier.size(18.dp), tint = colors.primaryAccent)
+            BasicTextField(value, onChange, Modifier.weight(1f).heightIn(min = 42.dp).onFocusChanged { focused = it.isFocused }.semantics { contentDescription = "Ask Assistant" },
+                enabled = !busy, maxLines = 4, textStyle = androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(color = colors.textPrimary, lineHeight = 20.sp),
+                cursorBrush = SolidColor(colors.primaryAccent), keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                keyboardActions = KeyboardActions(onSend = { send() }), decorationBox = { inner ->
+                    Box(Modifier.fillMaxWidth().heightIn(min = 42.dp), contentAlignment = Alignment.CenterStart) {
+                        if (value.isEmpty()) Text("Ask about your day, study or code", color = colors.textTertiary, fontSize = 13.sp)
+                        inner()
+                    }
+                })
+            IconButton(onClick = { send() }, enabled = canSend,
+                modifier = Modifier.size(44.dp).background(if (canSend) colors.primaryAccent else colors.primaryAccent.copy(alpha = 0.10f), CircleShape)) {
+                Icon(Icons.Outlined.ArrowUpward, "Send message", Modifier.size(20.dp), tint = if (canSend) colors.background else colors.textTertiary)
+            }
+        }
+        Text(if (shareContext) "Next-step answers stay local · AI shares context with $provider${if (fallback) " / fallback" else ""}."
+            else "Next-step answers stay local · AI uses $provider${if (fallback) " / fallback" else ""}; context is off.",
+            color = colors.textTertiary, fontSize = 10.sp, lineHeight = 14.sp, maxLines = 2)
+    }
 }
 
 @Composable

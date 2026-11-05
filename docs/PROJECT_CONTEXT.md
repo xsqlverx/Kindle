@@ -1,5 +1,9 @@
 # Project context and requirement record
 
+2026-11-06: assistant device feedback requests animated, tappable answers instead of a raw
+Markdown wall and reports a broken keyboard/composer layout. The screenshot also shows an
+invented timetable. See ASSISTANT_INTERACTION_REFINEMENT.md; ground day answers in real records.
+
 2026-11-06: user explicitly chose AI source on public main after initially requesting privacy.
 Assistant plus four connected capabilities are recorded in PRIVATE_AI_PLAN.md; real provider
 keys, cloud compilation, data transfer and physical-device behavior remain unverified.

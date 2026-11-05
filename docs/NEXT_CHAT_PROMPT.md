@@ -1,5 +1,12 @@
 Continue implementing Kindle V2 in C:\Kindle (https://github.com/xsqlverx/Kindle). This is an implementation request: inspect the existing app, make the work concrete, and build it rather than returning another generic brainstorm.
 
+Latest device feedback: user wants animated, tappable Assistant answers, not raw Markdown or
+invented routines; keyboard screenshot shows composer/dock displacement. Read
+ASSISTANT_INTERACTION_REFINEMENT.md. Source now routes explicit current-day/next-step questions locally,
+renders provider answers as expandable cards and repairs Assistant IME layout. Check current
+cloud/device verification before assuming success. Existing preview signing key is ephemeral;
+never uninstall or erase it to install a new build.
+
 Latest 2026-11-06: user chose public main for the AI version after initially asking for privacy.
 Read PRIVATE_AI_PLAN.md. Assistant supports Groq, Cerebras, OpenRouter free router and NVIDIA,
 encrypted user-entered keys, bounded actual context, personal memory, chat and four new flows.

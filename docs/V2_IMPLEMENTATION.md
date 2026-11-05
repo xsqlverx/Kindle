@@ -1,5 +1,8 @@
 # V2 implementation stages
 
+2026-11-06: assistant response/IME follow-up is implemented in source, with deterministic
+saved-day routing and tappable visual answers; see ASSISTANT_INTERACTION_REFINEMENT.md.
+
 2026-11-06: Assistant, provider routing and four new experiences implemented in source. See
 PRIVATE_AI_PLAN.md for user-authorized public-main decision, signing and verification limits.
 

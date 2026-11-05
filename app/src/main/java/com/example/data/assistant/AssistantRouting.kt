@@ -16,4 +16,6 @@ object AssistantRouting {
         }
         return result
     }
+
+    fun cloudTurns(messages: List<AssistantMessage>): List<AssistantMessage> = turns(messages.filterNot { it.provider == "On device" })
 }

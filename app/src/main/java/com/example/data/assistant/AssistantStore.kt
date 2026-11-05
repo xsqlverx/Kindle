@@ -19,7 +19,7 @@ enum class AssistantProvider(val label: String, val endpoint: String, val model:
     NVIDIA("NVIDIA", "https://integrate.api.nvidia.com/v1/chat/completions", "meta/llama-3.3-70b-instruct", "https://build.nvidia.com/")
 }
 
-data class AssistantMessage(val role: String, val text: String, val provider: String = "")
+data class AssistantMessage(val role: String, val text: String, val provider: String = "", val truncated: Boolean = false)
 data class AssistantData(
     val keys: Map<AssistantProvider, String> = emptyMap(),
     val selected: AssistantProvider = AssistantProvider.GROQ,
@@ -57,14 +57,14 @@ class AssistantStore(context: Context) {
             selected = AssistantProvider.entries.firstOrNull { it.name == json.optString("selected") } ?: AssistantProvider.GROQ,
             fallback = json.optBoolean("fallback", true), shareContext = json.optBoolean("shareContext", true),
             memory = json.optString("memory"), messages = (0 until messages.length()).mapNotNull { i ->
-                messages.optJSONObject(i)?.let { AssistantMessage(it.optString("role"), it.optString("text"), it.optString("provider")) }
+                messages.optJSONObject(i)?.let { AssistantMessage(it.optString("role"), it.optString("text"), it.optString("provider"), it.optBoolean("truncated", false)) }
             }.filter { it.role in listOf("user", "assistant") }.takeLast(30)
         )
     }
 
     fun write(data: AssistantData) {
         val keys = JSONObject().apply { data.keys.forEach { (provider, value) -> put(provider.name, value) } }
-        val messages = JSONArray().apply { data.messages.takeLast(30).forEach { put(JSONObject().put("role", it.role).put("text", it.text).put("provider", it.provider)) } }
+        val messages = JSONArray().apply { data.messages.takeLast(30).forEach { put(JSONObject().put("role", it.role).put("text", it.text).put("provider", it.provider).put("truncated", it.truncated)) } }
         val plain = JSONObject().put("keys", keys).put("selected", data.selected.name).put("fallback", data.fallback)
             .put("shareContext", data.shareContext).put("memory", data.memory).put("messages", messages).toString()
         val cipher = Cipher.getInstance("AES/GCM/NoPadding").apply { init(Cipher.ENCRYPT_MODE, key()) }

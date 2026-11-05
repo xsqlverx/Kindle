@@ -1,5 +1,20 @@
 # V2 verification and cloud/device handoff
 
+## Assistant cards and keyboard feedback
+
+Ask “what's next in my day” with saved classes, an active session, empty data, a missed block
+and a saved task; verify only actual current/next commitments appear, suggestions are labelled,
+and a tap reaches the original work or editable collision-checked composer. Ask with no provider
+key and with context sharing off; this explicit next-step query must stay local. Reopen historical
+provider responses including the user's reported Markdown table, bullets, long paragraphs and
+code: no accidental deletion, fabricated schedule or raw table dump; expand and inspect the
+original, tap a suggestion and verify no write until confirmation. Check cut-off indicator on
+new truncated responses and excluded local summaries in cloud history. Exercise the four other
+assistant pathways and provider fallback. Open the keyboard in Assistant, type, send, dismiss,
+rotate, use system Back and launcher search; no giant spacer, hidden composer, overlapping dock
+or lost draft. Repeat active focus, reduced motion/system scale zero, 200% fonts, TalkBack,
+small screens and themes. Static checks and cloud tests do not establish native visual quality.
+
 ## Assistant acceptance after cloud build
 
 Open Assistant from Today or launcher. Enter a provider key on-device, check encrypted save,

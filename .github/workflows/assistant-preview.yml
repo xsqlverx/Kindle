@@ -43,7 +43,7 @@ jobs:
         run: |
           gradle --no-daemon -q :app:tasks --all > /tmp/kindle-tasks.txt
           if grep -q '^testDebugUnitTest ' /tmp/kindle-tasks.txt; then
-            gradle --no-daemon :app:testDebugUnitTest --tests 'com.example.AssistantRoutingTest'
+            gradle --no-daemon :app:testDebugUnitTest --tests 'com.example.AssistantRoutingTest' --tests 'com.example.AssistantPresentationTest'
           else
             echo 'No debug unit-test task available; routing tests were not run.'
           fi

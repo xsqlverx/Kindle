@@ -1,5 +1,14 @@
 # Implementation status
 
+## 2026-11-06 assistant response and keyboard feedback
+
+User screenshots show raw Markdown tables, an invented daily routine and a badly displaced
+keyboard/composer/dock. The source now has a locally grounded saved-day response, animated
+expandable/tappable AI answer blocks, a compact composer and IME-aware dock handling. The
+source plan, old-chat preservation and outstanding verification are in
+ASSISTANT_INTERACTION_REFINEMENT.md. Device rendering, provider behavior and the latest cloud
+build must be observed before claiming success; no existing data or signing keys were changed.
+
 ## 2026-11-06 assistant and four capabilities
 
 User superseded their initial privacy request and explicitly requested pushing AI work to

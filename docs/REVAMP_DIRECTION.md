@@ -1,5 +1,8 @@
 # App revamp: working direction
 
+2026-11-06: Assistant replies should become useful, tactile visual surfaces, with one clear
+next action and no invented daily schedule; the keyboard must not displace the composer/dock.
+
 2026-11-06: add a context-aware assistant and four connected capabilities; keep user-controlled
 records and honest network/provider behavior. Source and testing status: PRIVATE_AI_PLAN.md.
 

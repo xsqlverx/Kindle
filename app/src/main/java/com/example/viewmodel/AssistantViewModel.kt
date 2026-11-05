@@ -44,6 +44,14 @@ class AssistantViewModel(application: Application) : AndroidViewModel(applicatio
     fun setMemory(value: String) { if (!_busy.value) save(_data.value.copy(memory = value.take(4000))) }
     fun clearChat() { if (!_busy.value) save(_data.value.copy(messages = emptyList())) }
 
+    /** Local answers are saved alongside chat without contacting any configured provider. */
+    fun replyFromSavedDay(question: String, snapshot: AssistantDaySnapshot): Boolean {
+        if (_busy.value || question.isBlank()) return false
+        val messages = (_data.value.messages + AssistantMessage("user", question.trim().take(4000)) +
+            AssistantMessage("assistant", AssistantDay.summary(snapshot), "On device")).takeLast(30)
+        return save(_data.value.copy(messages = messages))
+    }
+
     fun send(question: String, context: String): Boolean {
         val text = question.trim().take(4000)
         if (text.isEmpty() || _busy.value) return false
@@ -55,7 +63,7 @@ class AssistantViewModel(application: Application) : AndroidViewModel(applicatio
         _busy.value = true
         viewModelScope.launch {
             var lastError = "No provider returned a response."
-            var answer: String? = null
+            var answer: AssistantReply? = null
             var answeredBy: AssistantProvider? = null
             for (provider in ordered) {
                 _using.value = provider.label
@@ -69,7 +77,7 @@ class AssistantViewModel(application: Application) : AndroidViewModel(applicatio
                     else "${provider.label} could not be reached or returned an unreadable response."
             }
             if (answer != null && answeredBy != null) {
-                save(_data.value.copy(messages = (conversation + AssistantMessage("assistant", answer, answeredBy.label)).takeLast(30)))
+                save(_data.value.copy(messages = (conversation + AssistantMessage("assistant", answer.text, answeredBy.label, answer.truncated)).takeLast(30)))
             } else _error.value = "$lastError Your message is kept; you can retry."
             _using.value = null
             _busy.value = false

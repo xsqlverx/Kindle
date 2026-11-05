@@ -159,6 +159,7 @@ class MainActivity : ComponentActivity() {
                 val colors = LocalLifeOsColors.current
                 val density = LocalDensity.current
                 val dockReserve = workspaceDockHeight() + 20.dp
+                val assistantTyping = destination == Destination.ASSISTANT && !launcher && WindowInsets.ime.getBottom(density) > 0
                 var capsuleHeight by remember { mutableStateOf(74.dp) }
                 val sessionInset by animateDpAsState(if (session.phase != FocusPhase.IDLE) capsuleHeight + 12.dp else 0.dp,
                     if (reduced) snap() else spring(1f, 420f), label = "capsule_space")
@@ -198,7 +199,7 @@ class MainActivity : ComponentActivity() {
                                 Column(Modifier.fillMaxSize()) {
                                     if (destination != Destination.TODAY) WorkspaceTopBar(destination.title, destination.purpose, theme, life::setThemeMode,
                                         { navigate(Destination.SETTINGS) }, false, 0f)
-                                    Box(Modifier.weight(1f).padding(bottom = dockReserve + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + sessionInset).clipToBounds()) {
+                                    Box(Modifier.weight(1f).padding(bottom = if (assistantTyping) 0.dp else dockReserve + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + sessionInset).clipToBounds()) {
                                         AnimatedContent(destination, transitionSpec = {
                                             val from = slots.indexOf(initialState)
                                             val to = slots.indexOf(targetState)
@@ -233,7 +234,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         }
-                        AnimatedVisibility(session.phase != FocusPhase.IDLE && !launcher, modifier = Modifier.align(Alignment.BottomCenter),
+                        AnimatedVisibility(session.phase != FocusPhase.IDLE && !launcher && !assistantTyping, modifier = Modifier.align(Alignment.BottomCenter),
                             enter = fadeIn(tween(if (reduced) 0 else 220)) + expandVertically(tween(if (reduced) 0 else 300)),
                             exit = fadeOut(tween(if (reduced) 0 else 140))) {
                             BackdropGlass(Modifier.navigationBarsPadding().padding(start = 22.dp, end = 22.dp, bottom = dockReserve)
@@ -252,7 +253,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         }
-                        WorkspaceDock(slots, destination, launcher, { launcher = it }, navigate, onQuickMove = { model.offerMove() })
+                        if (!assistantTyping) WorkspaceDock(slots, destination, launcher, { launcher = it }, navigate, onQuickMove = { model.offerMove() })
                         val lecture by life.selectedLectureForDetail.collectAsStateWithLifecycle()
                         val attendance by life.attendanceRecords.collectAsStateWithLifecycle()
                         LaunchedEffect(lecture?.id) { if (lecture != null) { tools = false; preview = false } }
