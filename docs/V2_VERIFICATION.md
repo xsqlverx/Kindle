@@ -9,14 +9,17 @@ message, recent chat and enabled context; OpenRouter may route to a third party.
 check free limits and paid billing. Exercise briefing, syllabus rehearsal, coding clinic and
 rescue window, then turn a response into an editable next move. Confirm actual source IDs,
 custom minutes, collision protection and unchanged explicit progress. Actions run `42093811467`
-compiled the preview and passed the three routing unit tests; provider and phone behavior are
-unverified until observed. The later distinct-label change needs its own cloud build.
+compiled the preview and passed the three routing unit tests; labeled run `42094542167` also
+built successfully with its test task FROM-CACHE. The labeled app is installed separately;
+provider calls and phone usability are unverified until observed.
 
 The independently signed `.assistant` GitHub preview is side-by-side and its signer changes
-each Actions run. Existing original app must never be uninstalled to install it. If using
-`run-as` to copy user data, force-stop both apps, snapshot and verify the original database and
-preference files, restore only into the fresh preview package, and report it is a one-time
-copy rather than live synchronization. Preserve original package/data and existing signing.
+each Actions run. Existing original app must never be uninstalled to install it. An initial
+copy attempt failed; the preview has since started and the user confirmed entering data.
+Both version-5 databases passed SQLite quick_check, but the original records are not in the
+preview. Preserve the preview's encrypted assistant settings and any other newly entered data;
+do not replace its database or preferences without identifying what needs merging. A copy
+would be a one-time snapshot rather than synchronization. See PRIVATE_AI_PLAN.md.
 
 ## 2026-11-06 device-feedback path
 

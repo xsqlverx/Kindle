@@ -63,6 +63,16 @@ Actions run `42092689409` successfully compiled `assembleAssistantPreview`, then
 the specified preview unit-test task did not exist; artifact upload was skipped. The workflow
 now uploads the compiled APK first and attempts the debug unit test only if that task exists.
 Actions run `42093811467` compiled the preview, uploaded the APK and executed the three
-`AssistantRoutingTest` unit tests successfully. This verifies cloud compilation and those
-routing tests only, not real provider calls, data transfer, phone visuals or usability. The
-preview build now has a distinct launcher label; a later build must verify that variant change.
+`AssistantRoutingTest` unit tests successfully. The labeled variant was built and its APK
+uploaded successfully in run `42094542167`; its debug routing test task was FROM-CACHE.
+The verified APK package `com.aistudio.lifeos.vkmqzt.assistant` is installed separately on
+SM-E156B as `Assistant Preview`. No local Gradle or Android tests were run.
+
+The original version-5 database was snapshotted without stopping the original app, passed
+SQLite quick_check and had stable file hashes. An attempt to transfer the snapshot into the
+fresh preview failed partway; the original app was never modified. The preview subsequently
+started and the user confirmed entering something there. Both databases now pass SQLite
+quick_check and are separate; the original records have NOT been copied into the preview.
+The preview contains encrypted assistant preferences, which must not be overwritten. Do not
+replace or merge preview data until the user clarifies what was entered and a non-lossy path
+is confirmed. Neither successful compilation nor installation establishes live API behavior.

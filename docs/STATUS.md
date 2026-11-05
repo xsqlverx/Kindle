@@ -8,9 +8,11 @@ chat and editable memory; live bounded context includes actual day, academics, t
 projects and selected health records. Four working source flows and limitations are in
 PRIVATE_AI_PLAN.md. Provider calls require the user's keys and have not been exercised.
 Phone original signer is unknown; side-by-side preview uses an ephemeral Actions key. Actions
-run `42093811467` built the APK and ran the three assistant routing unit tests successfully.
-Copy-based data migration, provider calls and device behavior remain unverified. Never uninstall
-or reset the old app. See PRIVATE_AI_PLAN.md for exact evidence and the subsequent label change.
+run `42093811467` built the APK and ran the three assistant routing unit tests successfully;
+`42094542167` built the labeled variant and passed the cached test task. `Assistant Preview`
+is installed separately. Original records have NOT been copied: the user has entered something
+in the preview, so preserve both datasets while determining a safe merge. Provider calls and
+usability remain unverified. Never uninstall or reset the old app. See PRIVATE_AI_PLAN.md.
 
 ## 2026-11-06 native feel and performance follow-up
 
