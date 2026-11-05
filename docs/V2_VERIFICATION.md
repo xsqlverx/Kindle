@@ -8,8 +8,9 @@ quota cases, no silent mutations and clear chat/memory. The configured provider 
 message, recent chat and enabled context; OpenRouter may route to a third party. User must
 check free limits and paid billing. Exercise briefing, syllabus rehearsal, coding clinic and
 rescue window, then turn a response into an editable next move. Confirm actual source IDs,
-custom minutes, collision protection and unchanged explicit progress. Three routing tests are
-supplied for cloud execution; provider and Android behavior are unverified until observed.
+custom minutes, collision protection and unchanged explicit progress. Actions run `42093811467`
+compiled the preview and passed the three routing unit tests; provider and phone behavior are
+unverified until observed. The later distinct-label change needs its own cloud build.
 
 The independently signed `.assistant` GitHub preview is side-by-side and its signer changes
 each Actions run. Existing original app must never be uninstalled to install it. If using

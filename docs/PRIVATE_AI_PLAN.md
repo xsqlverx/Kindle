@@ -62,4 +62,7 @@ run is needed. This is not an Android source/build pass.
 Actions run `42092689409` successfully compiled `assembleAssistantPreview`, then failed because
 the specified preview unit-test task did not exist; artifact upload was skipped. The workflow
 now uploads the compiled APK first and attempts the debug unit test only if that task exists.
-The unit tests remain unverified until the subsequent run reports their actual execution.
+Actions run `42093811467` compiled the preview, uploaded the APK and executed the three
+`AssistantRoutingTest` unit tests successfully. This verifies cloud compilation and those
+routing tests only, not real provider calls, data transfer, phone visuals or usability. The
+preview build now has a distinct launcher label; a later build must verify that variant change.

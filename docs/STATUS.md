@@ -7,8 +7,10 @@ public main. Assistant adds Groq/Cerebras/OpenRouter free router/NVIDIA, encrypt
 chat and editable memory; live bounded context includes actual day, academics, tasks, coding,
 projects and selected health records. Four working source flows and limitations are in
 PRIVATE_AI_PLAN.md. Provider calls require the user's keys and have not been exercised.
-Phone original signer is unknown; side-by-side preview uses an ephemeral Actions key. Copy-based
-data migration and device behavior remain unverified. Never uninstall or reset the old app.
+Phone original signer is unknown; side-by-side preview uses an ephemeral Actions key. Actions
+run `42093811467` built the APK and ran the three assistant routing unit tests successfully.
+Copy-based data migration, provider calls and device behavior remain unverified. Never uninstall
+or reset the old app. See PRIVATE_AI_PLAN.md for exact evidence and the subsequent label change.
 
 ## 2026-11-06 native feel and performance follow-up
 

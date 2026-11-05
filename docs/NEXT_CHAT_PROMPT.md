@@ -3,7 +3,8 @@ Continue implementing Kindle V2 in C:\Kindle (https://github.com/xsqlverx/Kindle
 Latest 2026-11-06: user chose public main for the AI version after initially asking for privacy.
 Read PRIVATE_AI_PLAN.md. Assistant supports Groq, Cerebras, OpenRouter free router and NVIDIA,
 encrypted user-entered keys, bounded actual context, personal memory, chat and four new flows.
-No cloud/provider/device pass is assumed. Existing phone APK has a different signing key;
+Actions run `42093811467` built the preview and passed three routing tests; provider and device
+behavior is not verified. Existing phone APK has a different signing key;
 never uninstall or overwrite user data. A separate Actions preview may allow one-time data copy.
 
 Latest 2026-11-06: the user reports app-wide lag and a web-like feel, with centre-launcher
