@@ -1,5 +1,8 @@
 # V2: a connected daily experience
 
+2026-11-06: Assistant uses actual app context and can hand suggestions to the existing editable
+next-move flow; provider calls and all four new pathways need cloud/device validation.
+
 2026-11-06: prioritize a responsive, tactile native experience throughout this journey, not
 only the centre launcher. See NATIVE_FEEL_PLAN.md for the present source pass and remaining QA.
 

@@ -1,5 +1,8 @@
 # App revamp: working direction
 
+2026-11-06: add a context-aware assistant and four connected capabilities; keep user-controlled
+records and honest network/provider behavior. Source and testing status: PRIVATE_AI_PLAN.md.
+
 2026-11-06: responsiveness and native interaction across the whole app are now explicit
 priorities. The first source pass and still-unverified device results are in NATIVE_FEEL_PLAN.md.
 

@@ -47,6 +47,12 @@ android {
       signingConfig = signingConfigs.getByName("release")
     }
     debug { signingConfig = signingConfigs.getByName("debugConfig") }
+    // Side-by-side device preview: does not replace the installed app or change its signing.
+    create("assistantPreview") {
+      initWith(getByName("debug"))
+      applicationIdSuffix = ".assistant"
+      matchingFallbacks += listOf("debug")
+    }
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_11

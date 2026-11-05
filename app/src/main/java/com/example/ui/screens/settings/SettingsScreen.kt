@@ -284,7 +284,7 @@ fun SettingsScreen(
             },
             text = {
                 Text(
-                    text = "This permanently clears tasks, habits, assignments, exercise sets, weight, water and calorie logs, plan blocks, sessions, projects, captures, exam topics, coding attempts, study-roadmap progress and unfinished add/log drafts. Attendance returns to 0/0. The timetable, targets, Daily Reset records, appearance and navigation settings remain. Suggested projects will not be added again automatically.",
+                    text = "This permanently clears tasks, habits, assignments, exercise sets, weight, water and calorie logs, plan blocks, sessions, projects, captures, exam topics, coding attempts, study-roadmap progress and unfinished add/log drafts. Attendance returns to 0/0. The timetable, targets, Daily Reset records, appearance and navigation settings remain. Assistant conversation, personal memory and keys remain; manage them separately in Assistant settings. Suggested projects will not be added again automatically.",
                     fontSize = 13.sp,
                     color = lifeColors.textSecondary
                 )

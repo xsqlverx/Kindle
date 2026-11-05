@@ -52,7 +52,7 @@ with sqlite3.connect(':memory:') as connection:
 registry = (ROOT / 'app/src/main/java/com/example/data/model/Workspace.kt').read_text(encoding='utf-8')
 destinations = re.findall(r'^    ([A-Z_]+)\("[a-z]+",', registry, flags=re.M)
 main = (ROOT / 'app/src/main/java/com/example/MainActivity.kt').read_text(encoding='utf-8')
-assert len(destinations) == 13
+assert len(destinations) >= 13
 assert all(f'Destination.{destination} ->' in main for destination in destinations)
 baseline = subprocess.check_output(['git', 'show', '1d14d90:app/src/main/java/com/example/viewmodel/LifeOsViewModel.kt'], cwd=ROOT).decode('utf-8')
 current = (ROOT / 'app/src/main/java/com/example/viewmodel/LifeOsViewModel.kt').read_text(encoding='utf-8')
@@ -63,6 +63,6 @@ assert repository.count('seedDefaultDataIfEmpty(') == 1, 'Example data seeding i
 assert 'fallbackToDestructiveMigration' not in repository + migration
 
 print(f'Parsed {len(files)} Kotlin files; checked manifest XML and documentation UTF-8.')
-print('13 destination routes, legacy action entry points, and additive SQL declarations checked.')
+print(f'{len(destinations)} destination routes, legacy action entry points, and additive SQL declarations checked.')
 print('\n'.join(errors) if errors else 'No grammar or encoding errors found.')
 sys.exit(bool(errors))

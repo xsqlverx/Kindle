@@ -51,6 +51,7 @@ fun Destination.icon(): ImageVector = when (this) {
     Destination.EXAMS -> Icons.Outlined.AutoStories
     Destination.PRACTICE -> Icons.Outlined.Code
     Destination.REVIEW -> Icons.Outlined.History
+    Destination.ASSISTANT -> Icons.Outlined.AutoAwesome
     Destination.RESET -> Icons.Outlined.Bedtime
     Destination.SETTINGS -> Icons.Outlined.Tune
 }
@@ -205,7 +206,7 @@ fun WorkspaceDock(slots: List<Destination>, active: Destination, expanded: Boole
                                 }
                             }
                         }
-                        if (groups.isEmpty()) item { Text("No matching space. All 13 are here when you clear the search.", color = colors.textSecondary, fontSize = 13.sp) }
+                        if (groups.isEmpty()) item { Text("No matching space. Clear the search to see everything.", color = colors.textSecondary, fontSize = 13.sp) }
                     }
                 }
             }

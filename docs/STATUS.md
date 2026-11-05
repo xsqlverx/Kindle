@@ -1,5 +1,15 @@
 # Implementation status
 
+## 2026-11-06 assistant and four capabilities
+
+User superseded their initial privacy request and explicitly requested pushing AI work to
+public main. Assistant adds Groq/Cerebras/OpenRouter free router/NVIDIA, encrypted local keys,
+chat and editable memory; live bounded context includes actual day, academics, tasks, coding,
+projects and selected health records. Four working source flows and limitations are in
+PRIVATE_AI_PLAN.md. Provider calls require the user's keys and have not been exercised.
+Phone original signer is unknown; side-by-side preview uses an ephemeral Actions key. Copy-based
+data migration and device behavior remain unverified. Never uninstall or reset the old app.
+
 ## 2026-11-06 native feel and performance follow-up
 
 The user reports app-wide web-like feel and lag, especially the centre launcher; the recording

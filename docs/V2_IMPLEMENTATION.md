@@ -1,5 +1,8 @@
 # V2 implementation stages
 
+2026-11-06: Assistant, provider routing and four new experiences implemented in source. See
+PRIVATE_AI_PLAN.md for user-authorized public-main decision, signing and verification limits.
+
 2026-11-06: native-feel/device feedback stage implemented in source; see NATIVE_FEEL_PLAN.md.
 Performance and device acceptance remain open, including all destinations beyond the video.
 

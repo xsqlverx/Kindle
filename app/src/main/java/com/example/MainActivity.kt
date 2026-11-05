@@ -80,6 +80,7 @@ class MainActivity : ComponentActivity() {
             val life: LifeOsViewModel = viewModel()
             val model: WorkspaceViewModel = viewModel()
             val focus: TodayPrototypeViewModel = viewModel()
+            val assistant: AssistantViewModel = viewModel()
             val destination by model.destination.collectAsStateWithLifecycle()
             val slots by model.slots.collectAsStateWithLifecycle()
             val reduced by model.reduceMotion.collectAsStateWithLifecycle()
@@ -221,6 +222,7 @@ class MainActivity : ComponentActivity() {
                                                     Destination.EXAMS -> ExamPrepScreen(life, model, focus, now)
                                                     Destination.PRACTICE -> PracticeScreen(model, focus, now)
                                                     Destination.REVIEW -> ReviewScreen(life, model, focus, now)
+                                                    Destination.ASSISTANT -> AssistantScreen(life, model, focus, assistant, now)
                                                     Destination.RESET -> DailyResetScreen(life, onFinishReset = { navigate(Destination.TODAY) })
                                                     Destination.SETTINGS -> SettingsScreen(life, { navigate(Destination.fromId(previous) ?: Destination.TODAY) }, workspace = model, onPreview = { preview = true },
                                                         onWipeWorkspace = { model.clearForUserWipe(focus) }, canWipeWorkspace = !savingSession)

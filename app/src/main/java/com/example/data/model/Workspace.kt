@@ -16,6 +16,7 @@ enum class Destination(val id: String, val title: String, val purpose: String) {
     EXAMS("exams", "Exam Prep", "Topics & revision queue"),
     PRACTICE("practice", "Coding Practice", "Attempts, lessons & retries"),
     REVIEW("review", "Review", "A trail of actual work"),
+    ASSISTANT("assistant", "Assistant", "Your day, study and ideas"),
     RESET("reset", "Daily Reset", "Close today, prepare tomorrow"),
     SETTINGS("settings", "Settings", "Make this space yours");
 
@@ -25,7 +26,7 @@ enum class Destination(val id: String, val title: String, val purpose: String) {
         val groups = listOf(
             "Move today" to listOf(TODAY, PLAN, STUDY, TASKS, RESET),
             "Build something" to listOf(COLLEGE, PROJECTS, EXAMS, PRACTICE, FITNESS),
-            "Keep the thread" to listOf(CAPTURE, REVIEW, SETTINGS)
+            "Keep the thread" to listOf(CAPTURE, REVIEW, ASSISTANT, SETTINGS)
         )
         fun validateSlots(ids: List<String>): List<Destination> =
             (ids.mapNotNull(::fromId) + defaults + entries).distinct().take(4)
