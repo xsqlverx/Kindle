@@ -45,7 +45,10 @@ fun dayInputs(life: LifeOsViewModel, model: WorkspaceViewModel, focus: TodayProt
     val academicPack by model.academicPack.collectAsStateWithLifecycle()
     val academicRoadmap by model.academicRoadmap.collectAsStateWithLifecycle()
     val date = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date(now))
-    val academicMoves = academicPack?.let { SyllabusPlanner.next(it, academicRoadmap, now, topics, attempts) }.orEmpty()
+    val academicDate = AcademicDates.key(now)
+    val academicMoves = remember(academicPack, academicRoadmap, academicDate, topics, attempts) {
+        academicPack?.let { SyllabusPlanner.next(it, academicRoadmap, now, topics, attempts) }.orEmpty()
+    }
     return DayInputs(now, home, session, blocks, timetable, tasks, assignments, topics, attempts, projects, steps, history, resets.any { it.dateString == date }, academicMoves)
 }
 
@@ -77,7 +80,7 @@ fun NextMoveSheet(life: LifeOsViewModel, model: WorkspaceViewModel, focus: Today
             confirmValueChange = { it != SheetValue.Hidden || allowDismiss }),
         shape = RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp), containerColor = colors.background, tonalElevation = 0.dp) {
         Column(Modifier.fillMaxWidth().fillMaxHeight(0.94f).imePadding()) {
-            Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(start = 22.dp, end = 22.dp, bottom = 20.dp),
+            Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(start = 22.dp, end = 22.dp, bottom = 36.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(9.dp)) {

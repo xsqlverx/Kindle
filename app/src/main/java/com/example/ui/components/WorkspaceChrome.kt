@@ -29,7 +29,7 @@ fun WorkspaceIntro(eyebrow: String, title: String, description: String, modifier
     Column(modifier.fillMaxWidth().padding(top = 8.dp, bottom = 6.dp)) {
         Text(eyebrow, color = colors.primaryAccent, fontSize = 10.sp, letterSpacing = 1.4.sp, fontWeight = FontWeight.Medium)
         Spacer(Modifier.height(12.dp))
-        Text(title, color = colors.textPrimary, fontSize = 31.sp, lineHeight = 37.sp,
+        Text(title, color = colors.textPrimary, fontSize = 26.sp, lineHeight = 33.sp,
             letterSpacing = (-0.8).sp, fontWeight = FontWeight.Medium)
         Spacer(Modifier.height(10.dp))
         Text(description, color = colors.textSecondary, fontSize = 13.sp, lineHeight = 20.sp)

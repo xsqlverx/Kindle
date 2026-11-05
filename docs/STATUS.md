@@ -1,5 +1,19 @@
 # Implementation status
 
+## 2026-11-06 native feel and performance follow-up
+
+The user reports app-wide web-like feel and lag, especially the centre launcher; the recording
+shows repeated launcher openings and several visible layout/readability issues. The source pass
+changes shared rendering, centre motion, lazy launcher content and shared typography, and fixes
+specific timeline, calendar, coding-link and composer details. See NATIVE_FEEL_PLAN.md for
+implementation and evidence. The installed recording build is unknown and may predate `5e229fc`.
+No data/schema reset. Source checks pass; the cloud build, Android test, phone performance and
+visual/usability result remain unobserved. This pass does not claim to fix every screen.
+
+The user also asks about future AI that can use app data and multiple free-tier providers. This
+is a feasibility question, not permission to transmit data, add credentials or enable AI.
+Free quotas and provider data policies differ; routing cannot guarantee unlimited usage.
+
 Last updated: 2026-10-30, Asia/Calcutta.
 
 ## Current delivery: easier entry, shared orb and GitHub-informed projects

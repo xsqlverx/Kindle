@@ -1,5 +1,8 @@
 # V2: a connected daily experience
 
+2026-11-06: prioritize a responsive, tactile native experience throughout this journey, not
+only the centre launcher. See NATIVE_FEEL_PLAN.md for the present source pass and remaining QA.
+
 Latest 2026-10-30 correction: the user struggles with how to fill the app, wants projects
 drawn from their GitHub plus simple custom project entry, and wants a prominent Today visual
 that connects the rest of the app. ENTRY_ORB_PROJECTS.md records the 12-kind guided entry,

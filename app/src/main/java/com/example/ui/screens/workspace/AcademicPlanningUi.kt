@@ -23,13 +23,22 @@ import com.example.ui.components.*
 import com.example.ui.theme.LocalLifeOsColors
 import com.example.viewmodel.WorkspaceViewModel
 
+/** Each listed date stays explicit: gaps are not treated as examination days. */
+private fun displayCalendarDates(dates: List<String>): String {
+    val years = dates.map { it.take(4) }.distinct()
+    val format = java.text.SimpleDateFormat(if (years.size > 1) "d MMM yyyy" else "d MMM", java.util.Locale.getDefault()).apply {
+        timeZone = java.util.TimeZone.getTimeZone("Asia/Kolkata")
+    }
+    return dates.joinToString(" · ") { date -> runCatching { format.format(java.util.Date(AcademicDates.millis(date))) }.getOrDefault(date) }
+}
+
 @Composable
 fun AcademicCalendarBrief(model: WorkspaceViewModel, now: Long) {
     val pack by model.academicPack.collectAsStateWithLifecycle()
     val calendar = pack ?: return
     val today = AcademicDates.key(now)
     val next = calendar.events.firstOrNull { today in it.dates } ?: calendar.nextExam(today)
-    WorkspaceActionRow(next?.title ?: "Your academic calendar", next?.let { "${it.dates.filter { date -> date >= today }.joinToString(" · ")} · college calendar, date only" } ?: "S1 / S2 milestones from your supplied calendar",
+    WorkspaceActionRow(next?.title ?: "Your academic calendar", next?.let { "${displayCalendarDates(it.dates.filter { date -> date >= today })} · college calendar, date only" } ?: "S1 / S2 milestones from your supplied calendar",
         Icons.Outlined.EventNote) { model.navigate(Destination.EXAMS) }
 }
 
@@ -201,7 +210,7 @@ private fun AcademicCalendar(pack: AcademicPack, today: String, onDismiss: () ->
                 if (semester == 2) Text("S2 dates only. S2 syllabus has not been supplied.", color = colors.textSecondary, fontSize = 12.sp)
             }
             items(pack.events.filter { it.semester == semester && (past || it.dates.any { date -> date >= today }) }.sortedBy { it.dates.first() }, key = { it.id }) { event ->
-                WorkCard(event.title, event.dates.joinToString(" · ")) {
+                WorkCard(event.title, displayCalendarDates(event.dates)) {
                     Text("${event.kind.lowercase()} · calendar page ${event.page} · date only", fontSize = 12.sp)
                 }
             }

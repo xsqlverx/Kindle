@@ -1,5 +1,18 @@
 # V2 verification and cloud/device handoff
 
+## 2026-11-06 device-feedback path
+
+Build this revision externally, then compare with the previous installed APK on the same phone:
+open and close the centre launcher at least ten times, reverse mid-motion, search with keyboard
+open, scroll to every unpinned space, navigate, use scrim/Back, and repeat with active focus,
+reduced motion, large fonts and TalkBack. Check the dock and capsule glass in each palette,
+screen rotation and background/reopen. Compare frame timing with a device trace (including
+refresh rate and recording conditions); a screen recording alone is not an FPS benchmark.
+Check Coding's bare and full links, calendar's individual dates, time labels, the exact-minute
+composer and its footer with keyboard and large text. Confirm existing records survive upgrade.
+`WorkspaceDockTest` is supplied for the external Android test runner, not executed locally.
+Source checks and APK push do not establish a build, frame improvement or user acceptance.
+
 2026-10-30. No local Android compilation, Gradle, emulator or Android test execution.
 
 ## First path to try after the external build

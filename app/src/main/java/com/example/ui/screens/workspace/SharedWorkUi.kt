@@ -58,11 +58,18 @@ fun uid(): String = UUID.randomUUID().toString()
 fun MaterialReference(text: String, label: String? = null) {
     if (text.startsWith("syllabus://")) { AcademicReference(text); return }
     val handler = LocalUriHandler.current
+    val colors = LocalLifeOsColors.current
     var failed by remember { mutableStateOf(false) }
-    if (text.startsWith("https://") || text.startsWith("http://")) {
-        WorkspaceTextButton(onClick = { try { handler.openUri(text) } catch (_: Exception) { failed = true } }) { Text(label ?: text) }
-        if (failed) Text("No app could open this link. You can edit or copy the reference.", fontSize = 12.sp)
-    } else androidx.compose.foundation.text.selection.SelectionContainer { Text(text, fontSize = 13.sp) }
+    val trimmed = text.trim()
+    val url = when {
+        trimmed.startsWith("https://", true) || trimmed.startsWith("http://", true) -> trimmed
+        '@' !in trimmed && android.util.Patterns.WEB_URL.matcher(trimmed).matches() -> "https://$trimmed"
+        else -> null
+    }
+    if (url != null) {
+        WorkspaceTextButton(onClick = { try { handler.openUri(url) } catch (_: Exception) { failed = true } }) { Text(label ?: text) }
+        if (failed) Text("No app could open this link. You can edit or copy the reference.", color = colors.textSecondary, fontSize = 12.sp)
+    } else androidx.compose.foundation.text.selection.SelectionContainer { Text(text, color = colors.textSecondary, fontSize = 13.sp) }
 }
 
 @Composable
@@ -70,8 +77,8 @@ fun SpaceHeading(kicker: String, title: String, detail: String) {
     val colors = LocalLifeOsColors.current
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(kicker.uppercase(Locale.getDefault()), color = colors.primaryAccent, fontSize = 11.sp, letterSpacing = 1.8.sp)
-        Text(title, color = colors.textPrimary, fontSize = 32.sp, lineHeight = 37.sp, fontWeight = FontWeight.Medium)
-        Text(detail, color = colors.textSecondary, fontSize = 14.sp, lineHeight = 21.sp)
+        Text(title, color = colors.textPrimary, fontSize = 26.sp, lineHeight = 33.sp, fontWeight = FontWeight.Medium)
+        Text(detail, color = colors.textSecondary, fontSize = 13.sp, lineHeight = 19.sp)
     }
 }
 

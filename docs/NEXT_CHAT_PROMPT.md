@@ -1,5 +1,12 @@
 Continue implementing Kindle V2 in C:\Kindle (https://github.com/xsqlverx/Kindle). This is an implementation request: inspect the existing app, make the work concrete, and build it rather than returning another generic brainstorm.
 
+Latest 2026-11-06: the user reports app-wide lag and a web-like feel, with centre-launcher
+stutter. Read NATIVE_FEEL_PLAN.md and the latest STATUS/V2_VERIFICATION sections. A source
+pass reduces shared backdrop work, transforms a fixed-size launcher and addresses recorded
+readability issues; it needs external cloud build and matched phone/frame/usability testing.
+The recording's installed build is unknown. Future multi-provider AI was discussed only as
+feasibility; do not enable online access, upload personal data or promise unlimited free use.
+
 First read AGENTS.md and these repository documents:
 - docs/PROJECT_CONTEXT.md
 - docs/V2_EXPERIENCE_PLAN.md

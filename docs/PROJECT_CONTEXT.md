@@ -1,5 +1,9 @@
 # Project context and requirement record
 
+2026-11-06: the user describes the app as broadly laggy and web-like, with centre-launcher
+stutter especially visible. Follow NATIVE_FEEL_PLAN.md and the current STATUS; preserve
+data, native motion, unrestricted destinations and the no-local-Android-build boundary.
+
 Last updated: 2026-10-28, Asia/Calcutta.
 
 ## User intent

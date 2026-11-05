@@ -1,5 +1,8 @@
 # V2 implementation stages
 
+2026-11-06: native-feel/device feedback stage implemented in source; see NATIVE_FEEL_PLAN.md.
+Performance and device acceptance remain open, including all destinations beyond the video.
+
 ## Easier entry, orb and project queue, 2026-10-30
 
 Baseline `8319743`; see ENTRY_ORB_PROJECTS.md. QuickEntryStore/QuickEntrySheet implement

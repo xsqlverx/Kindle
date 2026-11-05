@@ -181,9 +181,13 @@ class MainActivity : ComponentActivity() {
                         CompositionLocalProvider(LocalWorkspaceBackdrop provides null, LocalOrbActivity provides !panel) {
                             Box(Modifier.fillMaxSize().then(if (launcher) Modifier.clearAndSetSemantics {} else Modifier)
                                 .drawWithContent {
-                                    contentLayer.record { this@drawWithContent.drawContent() }
-                                    backdropLayer.record { drawLayer(contentLayer) }
-                                    drawLayer(contentLayer)
+                                    if (session.phase != FocusPhase.IDLE && !launcher) {
+                                        contentLayer.record { this@drawWithContent.drawContent() }
+                                        backdropLayer.record { drawLayer(contentLayer) }
+                                        drawLayer(contentLayer)
+                                    } else {
+                                        drawContent()
+                                    }
                                 }.background(colors.background).drawBehind {
                                     val light = Offset(size.width * (0.25f + 0.55f * lightPosition), size.height * (0.17f + 0.16f * (1f - lightPosition)))
                                     drawCircle(Brush.radialGradient(listOf(colors.primaryAccent.copy(alpha = 0.16f), Color.Transparent), light, size.width * 1.1f), size.width * 1.1f, light)

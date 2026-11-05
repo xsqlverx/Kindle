@@ -174,7 +174,7 @@ fun PracticeScreen(model: WorkspaceViewModel, focus: TodayPrototypeViewModel, no
     var editId by rememberSaveable { mutableStateOf<String?>(null) }
     var dueOnly by rememberSaveable { mutableStateOf(false) }
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
-        item { SpaceHeading("Coding practice", "Keep the lesson, not just the count.", "Log a problem and your actual outcome. Save the idea you missed and bring it back into the retry queue.") }
+        item { SpaceHeading("Coding practice", "Your practice", "Keep the problem, outcome and lesson together. Return when a retry is due.") }
         item { Row {
             WorkspaceButton(onClick = { model.openEntry(EntryKind.CODING) }) { Text("Add a problem") }
             WorkspaceTextButton(onClick = { dueOnly = !dueOnly }) { Text(if (dueOnly) "All problems" else "Due retries") }

@@ -1,5 +1,8 @@
 # App revamp: working direction
 
+2026-11-06: responsiveness and native interaction across the whole app are now explicit
+priorities. The first source pass and still-unverified device results are in NATIVE_FEEL_PLAN.md.
+
 Status: the first Today prototype was accepted for V1 only. V2 implementation now includes the connected shell, live day/session foundation and working new modules; see STATUS.md, V2_IMPLEMENTATION.md and V2_VERIFICATION.md. Cloud compilation/device verification remain unobserved. Naming and logo work come last.
 
 Latest 2026-10-30: entering data feels much harder than deciding what to enter. Make one

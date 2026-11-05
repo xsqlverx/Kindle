@@ -369,10 +369,8 @@ fun DayAgenda(input: DayInputs, model: WorkspaceViewModel, wholeDay: Boolean = t
             val saved = row.block?.state == "REVIEWED"
             val highlight by animateFloatAsState(if (current) 1f else 0f, tween(if (reduced) 0 else 380), label = "agenda_now")
             Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).heightIn(min = 85.dp), verticalAlignment = Alignment.Top) {
-                Column(Modifier.width(58.dp).padding(top = 14.dp)) {
-                    Text(SimpleDateFormat("h:mm", Locale.getDefault()).format(Date(row.start)), color = if (current) colors.primaryAccent else colors.textSecondary, fontSize = 12.sp)
-                    Text(SimpleDateFormat("a", Locale.getDefault()).format(Date(row.start)), color = colors.textTertiary, fontSize = 9.sp)
-                }
+                Text(clock(row.start), Modifier.widthIn(min = 78.dp).padding(top = 14.dp),
+                    color = if (current) colors.primaryAccent else colors.textSecondary, fontSize = 11.sp, maxLines = 1, softWrap = false)
                 Canvas(Modifier.width(14.dp).fillMaxHeight()) {
                     drawLine(colors.borderGlass, Offset(center.x, 0f), Offset(center.x, size.height), 1.dp.toPx())
                     drawCircle(if (saved || current) colors.primaryAccent else colors.textTertiary, if (current) 5.dp.toPx() else 3.dp.toPx(), Offset(center.x, 22.dp.toPx()))

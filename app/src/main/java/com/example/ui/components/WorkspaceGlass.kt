@@ -27,17 +27,17 @@ val LocalWorkspaceBackdrop = staticCompositionLocalOf<GraphicsLayer?> { null }
  * Android <31 uses the same backdrop without RenderEffect and a denser readable tint.
  */
 @Composable
-fun BackdropGlass(modifier: Modifier = Modifier, radius: Int = 28, content: @Composable BoxScope.() -> Unit) {
+fun BackdropGlass(modifier: Modifier = Modifier, radius: Int = 28, sampleBackdrop: Boolean = true, content: @Composable BoxScope.() -> Unit) {
     val colors = LocalLifeOsColors.current
-    val backdrop = LocalWorkspaceBackdrop.current
+    val backdrop = LocalWorkspaceBackdrop.current.takeIf { sampleBackdrop }
     var position by remember { mutableStateOf(Offset.Zero) }
     val shape = RoundedCornerShape(radius.dp)
-    Box(modifier.onGloballyPositioned { position = it.positionInRoot() }.clip(shape)
+    Box(modifier.then(if (backdrop != null) Modifier.onGloballyPositioned { position = it.positionInRoot() } else Modifier).clip(shape)
         .drawWithContent {
             if (backdrop != null) translate(-position.x, -position.y) { drawLayer(backdrop) }
             drawContent()
         }
-        .background(colors.surfaceGlass.copy(alpha = if (Build.VERSION.SDK_INT >= 31) 0.80f else 0.96f))
+        .background(colors.surfaceGlass.copy(alpha = if (sampleBackdrop && Build.VERSION.SDK_INT >= 31) 0.80f else 0.96f))
         .background(Brush.linearGradient(listOf(Color.White.copy(alpha = 0.10f), Color.Transparent, colors.primaryAccent.copy(alpha = 0.06f))))
         .border(1.dp, Brush.linearGradient(listOf(Color.White.copy(alpha = 0.34f), colors.borderGlass, colors.primaryAccent.copy(alpha = 0.22f))), shape),
         content = content)
