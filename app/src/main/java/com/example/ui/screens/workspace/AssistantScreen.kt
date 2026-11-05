@@ -136,6 +136,18 @@ fun AssistantScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: Tod
                     Text(message.text, color = colors.textPrimary, fontSize = 14.sp, lineHeight = 21.sp)
                 } else if (message.provider == "On device" && index == data.messages.lastIndex) {
                     SavedDayResponse(input, model, focus)
+                } else if (index == data.messages.lastIndex && data.messages.getOrNull(index - 1)?.let {
+                    it.role == "user" && AssistantDay.isNextQuestion(it.text)
+                } == true) {
+                    var earlier by rememberSaveable(message.text) { mutableStateOf(false) }
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        SavedDayResponse(input, model, focus)
+                        WorkspaceDisclosure(if (earlier) "Hide earlier AI reply" else "See earlier AI reply", earlier,
+                            { earlier = !earlier }, Modifier.fillMaxWidth())
+                        if (earlier) AssistantResponse(message) { title, detail ->
+                            model.offerMove(DayMove(title.take(300), firstStep = detail.take(1500), reason = "AI suggestion · review and edit before saving"))
+                        }
+                    }
                 } else AssistantResponse(message) { title, detail ->
                     model.offerMove(DayMove(title.take(300), firstStep = detail.take(1500), reason = "AI suggestion · review and edit before saving"))
                 }

@@ -27,7 +27,9 @@ and substantially less text overload. Screenshots are device evidence of the cur
   without a key. The snapshot labels actual timetable entries and saved work; suggestions have
   explicit reasons and hand off existing source IDs to the editable next-move composer. A live
   animated orb and progress ring derive from the current saved commitment, not inferred presence.
-  Earlier local snapshots stay in chat; the latest live view updates with the actual day.
+  Earlier local snapshots stay in chat; the latest live view updates with the actual day. The
+  most recent historical AI answer to the same question also opens as a live saved-day view,
+  with the old provider response retained behind an explicit disclosure.
 - `AssistantAnswer` segments provider prose, headings, lists, Markdown tables and fenced code.
   Compose surfaces reveal short previews, expandable/tappable cards, item-level planning and
   a full-original option for expanded responses. AI table times are labelled suggestions, never
@@ -41,3 +43,7 @@ and substantially less text overload. Screenshots are device evidence of the cur
 - `AssistantPresentationTest` covers the reported Markdown table, code and arithmetic text,
   explicit local intent and real-day provenance; routing tests cover excluding local snapshots.
   Static checks and cloud build/test results must be recorded separately from device usability.
+
+Cloud Actions run `42099774239` compiled commit `bdf7444` and successfully ran the routing
+and presentation unit-test task. The later historical-answer disclosure change requires its
+own cloud build. Neither run verifies phone motion, IME geometry or real provider behavior.
