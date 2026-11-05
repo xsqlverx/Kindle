@@ -1,5 +1,14 @@
 Continue implementing Kindle V2 in C:\Kindle (https://github.com/xsqlverx/Kindle). This is an implementation request: inspect the existing app, make the work concrete, and build it rather than returning another generic brainstorm.
 
+## Latest assistant handoff (2026-11-06)
+
+Read `ASSISTANT_INTERACTION_REFINEMENT.md` for the interactive response and keyboard changes.
+Cloud run `42101043548` compiled commit `cc8158d` and passed the focused assistant tests.
+Phone visual/keyboard/provider behavior remains unverified. The existing Assistant Preview
+uses an unavailable ephemeral signing key: never uninstall or clear it to install an update,
+since it contains encrypted provider settings and chat. The older request below contains
+historical decisions; online AI was subsequently explicitly authorized and implemented.
+
 Latest device feedback: user wants animated, tappable Assistant answers, not raw Markdown or
 invented routines; keyboard screenshot shows composer/dock displacement. Read
 ASSISTANT_INTERACTION_REFINEMENT.md. Source now routes explicit current-day/next-step questions locally,

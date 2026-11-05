@@ -1,5 +1,14 @@
 # Implementation status
 
+## Latest assistant interaction update (2026-11-06)
+
+Commit `cc8158d` replaces raw answer dumps with expandable, tappable response cards,
+uses saved-day data for explicit next-in-day questions, and adjusts the composer/dock for
+the keyboard. See `ASSISTANT_INTERACTION_REFINEMENT.md`. Cloud Actions run `42101043548`
+compiled the preview and ran focused assistant unit tests successfully. Device visuals,
+keyboard behavior and live providers remain unverified. The existing preview has a different
+ephemeral signing key; do not uninstall or clear it to install the new build.
+
 ## 2026-11-06 assistant response and keyboard feedback
 
 User screenshots show raw Markdown tables, an invented daily routine and a badly displaced

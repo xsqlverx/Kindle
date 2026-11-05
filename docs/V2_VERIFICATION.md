@@ -1,5 +1,14 @@
 # V2 verification and cloud/device handoff
 
+## Latest assistant evidence (2026-11-06)
+
+Cloud Actions run `42101043548` built source commit `cc8158d`, uploaded the preview APK,
+and executed the focused assistant routing and presentation unit tests successfully. Source
+checks parsed 86 Kotlin files. These results do not verify physical-device layout, motion,
+keyboard behavior, provider responses or usability. The installed preview cannot be updated
+with the new ephemeral signing key; preserve its encrypted data. Historical notes below
+retain their original scope and do not supersede this specific cloud evidence.
+
 ## Assistant cards and keyboard feedback
 
 Ask “what's next in my day” with saved classes, an active session, empty data, a missed block

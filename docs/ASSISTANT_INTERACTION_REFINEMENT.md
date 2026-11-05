@@ -44,6 +44,8 @@ and substantially less text overload. Screenshots are device evidence of the cur
   explicit local intent and real-day provenance; routing tests cover excluding local snapshots.
   Static checks and cloud build/test results must be recorded separately from device usability.
 
-Cloud Actions run `42099774239` compiled commit `bdf7444` and successfully ran the routing
-and presentation unit-test task. The later historical-answer disclosure change requires its
-own cloud build. Neither run verifies phone motion, IME geometry or real provider behavior.
+Cloud Actions run `42101043548` compiled commit `cc8158d`, uploaded the preview APK, and
+successfully executed `:app:testDebugUnitTest` for the assistant routing and presentation
+tests. Source checks parsed 86 Kotlin files. Neither evidence verifies phone motion, IME
+geometry, real provider behavior or usability. The installed preview has an unavailable
+ephemeral signing key, so this new APK cannot update it in place; preserve its key and chat.
