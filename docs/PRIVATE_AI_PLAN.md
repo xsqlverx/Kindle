@@ -31,7 +31,8 @@ possible after force-stopping both packages and validating the snapshot. Copies 
 Automatic approval review rejected uploading a dedicated signing key to the public repository's
 Actions secrets. The workflow generates an ephemeral preview signer instead. Subsequent APKs
 cannot update that preview without another safe migration. No existing builder key changed.
-Cloud build, API keys, provider requests and device behavior remain unverified.
+At that stage the cloud build, API keys, provider requests and device behavior were unverified;
+the later evidence below supersedes that status.
 
 ## Implemented source
 
@@ -69,10 +70,22 @@ The verified APK package `com.aistudio.lifeos.vkmqzt.assistant` is installed sep
 SM-E156B as `Assistant Preview`. No local Gradle or Android tests were run.
 
 The original version-5 database was snapshotted without stopping the original app, passed
-SQLite quick_check and had stable file hashes. An attempt to transfer the snapshot into the
-fresh preview failed partway; the original app was never modified. The preview subsequently
-started and the user confirmed entering something there. Both databases now pass SQLite
-quick_check and are separate; the original records have NOT been copied into the preview.
-The preview contains encrypted assistant preferences, which must not be overwritten. Do not
-replace or merge preview data until the user clarifies what was entered and a non-lossy path
-is confirmed. Neither successful compilation nor installation establishes live API behavior.
+SQLite quick_check and had stable file hashes. An initial transfer into the fresh preview
+failed partway; the original app was never modified. The preview subsequently started and
+the user confirmed entering something there. Both databases passed SQLite quick_check at
+that stage, and the copy was paused pending clarification. The later completed-copy evidence
+below supersedes that paused status. Neither compilation nor installation proves live AI calls.
+
+### One-time data copy completed
+
+The user clarified that they entered only an AI provider key or assistant settings in the
+preview, authorizing a data-preserving transfer. A stable original snapshot was checked with
+SQLite quick_check, version 5, before briefly force-stopping only the preview. Raw binary ADB
+transfer truncated a database file; the original remained untouched and the preview's encrypted
+assistant preferences stayed unchanged. After an all-byte transfer probe, the copy was repaired
+using base64 transport. Eight original database/preference files matched SHA-256 in the preview;
+SQLite quick_check and all database table counts matched the original snapshot. The preview's
+encrypted assistant settings matched their pre-copy hash. Its own reminder preferences were
+retained rather than copied. Both packages remain installed, and this is a one-time snapshot,
+not ongoing synchronization. No API request, Android test or post-copy user-interface result
+has been observed. The ephemeral Actions signer limitation still applies to future APKs.

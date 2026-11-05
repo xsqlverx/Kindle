@@ -14,12 +14,13 @@ built successfully with its test task FROM-CACHE. The labeled app is installed s
 provider calls and phone usability are unverified until observed.
 
 The independently signed `.assistant` GitHub preview is side-by-side and its signer changes
-each Actions run. Existing original app must never be uninstalled to install it. An initial
-copy attempt failed; the preview has since started and the user confirmed entering data.
-Both version-5 databases passed SQLite quick_check, but the original records are not in the
-preview. Preserve the preview's encrypted assistant settings and any other newly entered data;
-do not replace its database or preferences without identifying what needs merging. A copy
-would be a one-time snapshot rather than synchronization. See PRIVATE_AI_PLAN.md.
+each Actions run. Existing original app must never be uninstalled to install it. After the user
+confirmed entering only assistant settings, a one-time snapshot of the original database and
+app preferences was copied locally into the preview. Source/target file hashes, SQLite
+quick_check and table counts matched; encrypted assistant settings retained their exact hash.
+Preview reminder preferences were retained. The two installations do not synchronize, and
+post-copy UI, live-provider behavior and reminder delivery remain unverified. See
+PRIVATE_AI_PLAN.md for the initially truncated transfer and successful binary-safe repair.
 
 ## 2026-11-06 device-feedback path
 

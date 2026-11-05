@@ -4,10 +4,11 @@ Latest 2026-11-06: user chose public main for the AI version after initially ask
 Read PRIVATE_AI_PLAN.md. Assistant supports Groq, Cerebras, OpenRouter free router and NVIDIA,
 encrypted user-entered keys, bounded actual context, personal memory, chat and four new flows.
 Actions runs `42093811467` and `42094542167` built the preview and passed the routing test task.
-The distinct `Assistant Preview` APK is installed on the phone. Copying the original app's data
-failed partway; the user has since entered data in the preview. Both databases pass integrity
-checks and remain separate. Never uninstall or overwrite user data; determine a non-lossy merge
-and preserve preview assistant preferences. Provider calls and usability are not verified.
+The distinct `Assistant Preview` APK is installed on the phone. The user confirmed entering
+only AI settings; the original database and app preferences were copied as a one-time snapshot
+and verified by file hashes, SQLite quick_check and table counts. Preview encrypted assistant
+settings stayed unchanged, and its reminder preferences stayed separate. The original app
+remains installed, the two copies do not sync, and provider calls/usability are not verified.
 
 Latest 2026-11-06: the user reports app-wide lag and a web-like feel, with centre-launcher
 stutter. Read NATIVE_FEEL_PLAN.md and the latest STATUS/V2_VERIFICATION sections. A source
