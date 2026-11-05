@@ -58,3 +58,8 @@ AssistantRoutingTest supplies three cloud unit tests; none has run locally.
 First Actions run `42092469356` failed before compilation: setup-android v3 requested the
 obsolete SDK package `tools`. Workflow now requests `platform-tools` explicitly; a new cloud
 run is needed. This is not an Android source/build pass.
+
+Actions run `42092689409` successfully compiled `assembleAssistantPreview`, then failed because
+the specified preview unit-test task did not exist; artifact upload was skipped. The workflow
+now uploads the compiled APK first and attempts the debug unit test only if that task exists.
+The unit tests remain unverified until the subsequent run reports their actual execution.
