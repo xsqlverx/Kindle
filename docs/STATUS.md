@@ -1,5 +1,11 @@
 # Implementation status
 
+Latest cloud evidence: run `42174843876` built `3bbb11b` and passed focused Assistant and
+next-move unit tests; prompt instrumentation and phone behavior remain unverified. The
+original Life OS package was updated at 11:41 on 2026-11-06 and its installed signing
+certificate matches the original captured APK. New changes still need an original-signed
+AI Studio build; retain the separate preview and its unique encrypted data.
+
 ## Startup and draft prompt update (2026-11-06)
 
 See `STARTUP_PROMPT_REFINEMENT.md` for the video observations and implementation. The first

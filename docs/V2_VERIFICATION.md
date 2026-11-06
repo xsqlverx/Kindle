@@ -1,5 +1,11 @@
 # V2 verification and cloud/device handoff
 
+Latest cloud evidence: run `42174843876` built `3bbb11b` and passed focused Assistant and
+next-move unit tests; prompt instrumentation and phone behavior remain unverified. The
+original Life OS package was updated at 11:41 on 2026-11-06 and its installed signing
+certificate matches the original captured APK. New changes still need an original-signed
+AI Studio build; retain the separate preview and its unique encrypted data.
+
 ## Startup and prompt evidence (2026-11-06)
 
 The user recording shows the restored next-move sheet covering initial content and uneven
