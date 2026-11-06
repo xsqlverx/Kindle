@@ -1,6 +1,13 @@
 package com.example
 
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -41,5 +48,25 @@ class NextMovePromptTest {
         }
         compose.onNodeWithTag("next_move_dismiss").performClick()
         compose.runOnIdle { assertEquals("dismiss", result) }
+    }
+
+    @Test fun bannerDoesNotTimeOutOrBlockTheRestOfTheScreen() {
+        var taps = 0
+        compose.mainClock.autoAdvance = false
+        compose.setContent {
+            LifeOsTheme { CompositionLocalProvider(LocalReducedMotion provides true) {
+                Box(Modifier.fillMaxSize()) {
+                    Button(onClick = { taps++ }, modifier = Modifier.align(Alignment.BottomCenter).testTag("background_action")) { Text("Background") }
+                    NextMovePrompt(DayMove("Read my notes"), {}, {})
+                }
+            } }
+        }
+        compose.waitForIdle()
+        compose.mainClock.advanceTimeBy(12_000)
+        compose.onNodeWithTag("next_move_prompt").assertIsDisplayed()
+        compose.onNodeWithTag("background_action").performClick()
+        compose.runOnIdle { assertEquals(1, taps) }
+        compose.onNodeWithTag("next_move_prompt").assertIsDisplayed()
+        compose.mainClock.autoAdvance = true
     }
 }

@@ -270,7 +270,7 @@ class MainActivity : ComponentActivity() {
                         }
                         if (!assistantTyping) WorkspaceDock(slots, destination, launcher, { launcher = it }, navigate, onQuickMove = { model.offerMove() })
                         if (destination != Destination.ASSISTANT && !launcher && !keyboardVisible && !panel && !entryOpen &&
-                            moveDraft == null && lecture == null && trainingSplit == null && !tools && !preview) {
+                            (moveDraft == null || !moveExpanded) && lecture == null && trainingSplit == null && !tools && !preview) {
                             val safeBottom = with(density) {
                                 (dockReserve + sessionInset + 8.dp).toPx() + WindowInsets.navigationBars.getBottom(density)
                             }

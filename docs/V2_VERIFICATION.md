@@ -1,5 +1,11 @@
 # V2 verification and cloud/device handoff
 
+## Next-move reference correction (2026-11-06)
+
+The user-supplied Flowmind recording informs a top-center non-modal icon-to-banner motion
+with persistent explicit actions. Source and test status are in `STARTUP_PROMPT_REFINEMENT.md`;
+phone rendering, motion, accessibility and behavior remain separate from source/cloud checks.
+
 Orb cloud verification: `42177973358` built `b2cc768`, passed focused unit tests
 (from cache), and compiled Android interaction tests. Run `42177409393` actually executed
 the unit-test task before its old dock-test import failed compilation; that import is fixed.

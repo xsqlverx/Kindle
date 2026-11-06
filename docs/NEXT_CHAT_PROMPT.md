@@ -1,5 +1,12 @@
 Continue implementing Kindle V2 in C:\Kindle (https://github.com/xsqlverx/Kindle). This is an implementation request: inspect the existing app, make the work concrete, and build it rather than returning another generic brainstorm.
 
+## Latest next-move popup correction (2026-11-06)
+
+Read the reference correction in `STARTUP_PROMPT_REFINEMENT.md`. The user rejected the
+centered modal: their recording shows a top-center icon expanding sideways into a slim banner
+without dimming the screen. This app must keep it until Expand or Dismiss and preserve drafts.
+The floating Assistant stays independent. Build evidence is not phone visual verification.
+
 Orb cloud verification: `42177973358` built `b2cc768`, passed focused unit tests
 (from cache), and compiled Android interaction tests. Run `42177409393` actually executed
 the unit-test task before its old dock-test import failed compilation; that import is fixed.

@@ -53,3 +53,28 @@ pause, while other switches appear smooth. No frame timings or specific bottlene
   identity AI Studio APK and matching-signature verification before phone installation.
 - Visual behavior, actual frame times, live provider flow, touch and accessibility are not
   established by compilation or unit tests. Cold versus warm device measurements remain open.
+
+## Reference correction — 2026-11-06
+
+The user's `WhatsApp Video 2026-11-06 at 12.40.35 PM.mp4` shows Flowmind's in-app feedback:
+near the top center, a small round icon appears and grows sideways into a slim, rounded
+horizontal banner over the existing screen; it later contracts back into the icon and exits.
+The underlying screen remains visible and undimmed. The previous centered modal card was a
+misinterpretation. Keep the reference's location, one-surface expansion and reverse motion,
+using this app's own visual language. Unlike the reference, the prompt has explicit Expand
+and Dismiss controls and never times out. Expand opens the existing editor; Dismiss preserves
+the draft. Back, reduced motion, accessible actions, inset/font sizing, other overlays and
+stored source/duration/preview backup remain supported. This is an in-app overlay, not an OS
+notification. Implement and verify in cloud without altering the installed app or data.
+
+### Source pass
+
+`NextMovePrompt` is now a top-center, status-inset-aware, non-modal overlay, rather than a
+Dialog. One rounded surface enters as an icon, expands horizontally into a short action
+banner, and reverses on Expand/Dismiss. It has no expiry timer; underlying screen controls
+remain usable. Dismiss/Back retain the draft and suppress repeated startup interruptions;
+Expand opens the existing composer and retains exact raw duration/source/preview behavior.
+The floating Assistant remains available while the banner is present. An adaptive two-line
+layout supports narrow screens and larger text; motion respects both app and system settings.
+`NextMovePromptTest` adds persistence/non-modal coverage for an external device runner.
+Native placement, readability, accessibility and motion still require phone validation.

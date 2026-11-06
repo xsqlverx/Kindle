@@ -1,5 +1,11 @@
 # Implementation status
 
+## Top banner correction (2026-11-06)
+
+The user provided a Flowmind popup reference and corrected the earlier centered modal.
+`STARTUP_PROMPT_REFINEMENT.md` records the new top-center icon-to-horizontal-banner overlay,
+explicit Expand/Dismiss, no timeout or background dim, draft retention and evidence limits.
+
 Orb cloud verification: `42177973358` built `b2cc768`, passed focused unit tests
 (from cache), and compiled Android interaction tests. Run `42177409393` actually executed
 the unit-test task before its old dock-test import failed compilation; that import is fixed.
