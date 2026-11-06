@@ -1,5 +1,9 @@
 Continue implementing Kindle V2 in C:\Kindle (https://github.com/xsqlverx/Kindle). This is an implementation request: inspect the existing app, make the work concrete, and build it rather than returning another generic brainstorm.
 
+Fresh-launch cloud evidence: run `42181140470` built `aaa8b21`, executed focused unit tests
+and compiled Android test sources. `LaunchPromptTest` and real-phone Recents gestures were
+not executed; device behavior remains unverified.
+
 ## Latest launch-frequency clarification (2026-11-06)
 
 The banner should appear on a fresh launcher entry after clearing Recents, even if the last

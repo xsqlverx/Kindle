@@ -1,5 +1,9 @@
 # V2 verification and cloud/device handoff
 
+Fresh-launch cloud evidence: run `42181140470` built `aaa8b21`, executed focused unit tests
+and compiled Android test sources. `LaunchPromptTest` and real-phone Recents gestures were
+not executed; device behavior remains unverified.
+
 ## Fresh-launch banner requirement (2026-11-06)
 
 The user wants the persistent top banner on fresh launcher entries after clearing Recents.

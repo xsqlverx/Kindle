@@ -112,3 +112,11 @@ dismiss, Activity recreation and a second Activity launch in an isolated test in
 only compilation is configured in cloud. A real device's Recents swipe/launcher behavior and
 all visual/touch behavior remain unverified. This supersedes the previous suppression rule
 for fresh launcher entries; dismissal still stays dismissed on ordinary resume/recreation.
+
+### Cloud evidence for launch-frequency change
+
+GitHub Actions run `42181140470` compiled commit `aaa8b21`, executed the configured debug
+unit-test task, and compiled the Android instrumentation test sources. `LaunchPromptTest`
+was not executed; a launcher/Recents gesture and Activity lifecycle behavior need a real
+phone or separate Android device runner. No local Gradle, Android builds or tests were run.
+The separately signed CI preview cannot update the original installed app.

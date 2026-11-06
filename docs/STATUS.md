@@ -1,5 +1,9 @@
 # Implementation status
 
+Fresh-launch cloud evidence: run `42181140470` built `aaa8b21`, executed focused unit tests
+and compiled Android test sources. `LaunchPromptTest` and real-phone Recents gestures were
+not executed; device behavior remains unverified.
+
 ## Banner launch frequency (2026-11-06)
 
 The user clarified the banner should appear for every fresh app launcher entry after clearing
