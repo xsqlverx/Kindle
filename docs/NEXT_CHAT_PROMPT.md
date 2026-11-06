@@ -1,5 +1,9 @@
 Continue implementing Kindle V2 in C:\Kindle (https://github.com/xsqlverx/Kindle). This is an implementation request: inspect the existing app, make the work concrete, and build it rather than returning another generic brainstorm.
 
+Popup cloud evidence: run `42179836593` built `c2ffe2e`, executed focused unit tests, and
+compiled Android interaction checks. The new non-modal/no-timeout test was not executed;
+the corrected banner has not been visually or interactively verified on the phone.
+
 ## Latest next-move popup correction (2026-11-06)
 
 Read the reference correction in `STARTUP_PROMPT_REFINEMENT.md`. The user rejected the

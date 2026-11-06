@@ -1,5 +1,9 @@
 # Implementation status
 
+Popup cloud evidence: run `42179836593` built `c2ffe2e`, executed focused unit tests, and
+compiled Android interaction checks. The new non-modal/no-timeout test was not executed;
+the corrected banner has not been visually or interactively verified on the phone.
+
 ## Top banner correction (2026-11-06)
 
 The user provided a Flowmind popup reference and corrected the earlier centered modal.

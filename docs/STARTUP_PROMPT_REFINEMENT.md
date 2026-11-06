@@ -78,3 +78,11 @@ The floating Assistant remains available while the banner is present. An adaptiv
 layout supports narrow screens and larger text; motion respects both app and system settings.
 `NextMovePromptTest` adds persistence/non-modal coverage for an external device runner.
 Native placement, readability, accessibility and motion still require phone validation.
+
+### Cloud evidence for reference correction
+
+GitHub Actions run `42179836593` compiled commit `c2ffe2e`, executed the focused debug
+unit-test task, and compiled `compileDebugAndroidTestKotlin`. The new no-timeout/non-modal
+interaction check was compiled, not executed. The screen recording shows the reference app,
+not the result in Kindle. Phone rendering, motion, touch, screen-reader and performance
+acceptance remain open. No local Gradle, Android build, emulator or tests were run.
