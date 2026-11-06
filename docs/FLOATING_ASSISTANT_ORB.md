@@ -33,3 +33,18 @@ not Assistant; preserve Add/log, assistant data, all destinations and the launch
 - `AssistantOrbPositionTest` covers side, clamping, resize and invalid-state arithmetic;
   `FloatingAssistantOrbTest` supplies tap/drag device coverage. UI appearance, touch, screen
   readers, keyboard, rotation and smoothness require actual device checks; no measured speedup.
+
+## Verification
+
+- Static checks parsed 92 Kotlin files and passed academic/project data checks plus
+  `git diff --check`. No local compilation, Gradle, emulator or Android tests were run.
+- GitHub Actions run `42177409393` built source `d5b84bc` and actually ran the focused
+  debug unit-test task, including `AssistantOrbPositionTest`; its Android-test compilation
+  then found an existing unresolved import in `WorkspaceDockTest`. Commit `b2cc768` removes
+  that import. Run `42177973358` built the corrected source, passed the unit-test task from
+  cache, and compiled `compileDebugAndroidTestKotlin` successfully. Compilation of the
+  tap/drag instrumentation is not execution.
+- The cloud artifact uses the separate ephemeral preview identity. Update the original Life
+  OS via its Google AI Studio builder after verifying the signing identity; don't uninstall
+  or clear the original or separate preview. Real phone orb behavior, animation quality,
+  drag hit-testing, accessibility, keyboard, app lifecycle and frame pacing are unverified.

@@ -1,5 +1,10 @@
 # V2 verification and cloud/device handoff
 
+Orb cloud verification: `42177973358` built `b2cc768`, passed focused unit tests
+(from cache), and compiled Android interaction tests. Run `42177409393` actually executed
+the unit-test task before its old dock-test import failed compilation; that import is fixed.
+No Android interaction test was executed and the orb has not been assessed on the phone.
+
 ## Floating Assistant verification (2026-11-06)
 
 The user requested a draggable, edge-snapping animated Assistant orb. Source implementation

@@ -1,5 +1,10 @@
 Continue implementing Kindle V2 in C:\Kindle (https://github.com/xsqlverx/Kindle). This is an implementation request: inspect the existing app, make the work concrete, and build it rather than returning another generic brainstorm.
 
+Orb cloud verification: `42177973358` built `b2cc768`, passed focused unit tests
+(from cache), and compiled Android interaction tests. Run `42177409393` actually executed
+the unit-test task before its old dock-test import failed compilation; that import is fixed.
+No Android interaction test was executed and the orb has not been assessed on the phone.
+
 ## Latest floating Assistant handoff (2026-11-06)
 
 Read `FLOATING_ASSISTANT_ORB.md`. Assistant now opens via an animated draggable edge-snapping
