@@ -13,16 +13,27 @@ import kotlinx.coroutines.flow.asStateFlow
 class AssistantViewModel(application: Application) : AndroidViewModel(application) {
     private val store = AssistantStore(application)
     private val client = AssistantClient()
-    private val loaded = runCatching { store.read() }
-    private val _data = MutableStateFlow(loaded.getOrDefault(AssistantData()))
+    private val _data = MutableStateFlow(AssistantData())
     val data = _data.asStateFlow()
-    private val _error = MutableStateFlow<String?>(if (loaded.isFailure) "Could not unlock assistant storage on this device. Existing data was not overwritten." else null)
+    private val _ready = MutableStateFlow(false)
+    val ready = _ready.asStateFlow()
+    private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
     private val _busy = MutableStateFlow(false)
     val busy = _busy.asStateFlow()
     private val _using = MutableStateFlow<String?>(null)
     val using = _using.asStateFlow()
-    private val available = loaded.isSuccess
+    private var available = false
+
+    init {
+        viewModelScope.launch {
+            val loaded = withContext(Dispatchers.IO) { runCatching { store.read() } }
+            available = loaded.isSuccess
+            _data.value = loaded.getOrDefault(AssistantData())
+            if (!available) _error.value = "Could not unlock assistant storage on this device. Existing data was not overwritten."
+            _ready.value = true
+        }
+    }
 
     private fun save(next: AssistantData): Boolean {
         if (!available) return false

@@ -70,6 +70,17 @@ private fun assistantContext(input: DayInputs, habits: List<HabitItem>, attendan
 
 @Composable
 fun AssistantScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: TodayPrototypeViewModel, assistant: AssistantViewModel, now: Long) {
+    val ready by assistant.ready.collectAsStateWithLifecycle()
+    if (!ready) {
+        val colors = LocalLifeOsColors.current
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                CircularProgressIndicator(Modifier.size(24.dp), color = colors.primaryAccent, strokeWidth = 2.dp)
+                Text("Opening your assistant…", color = colors.textSecondary, fontSize = 12.sp)
+            }
+        }
+        return
+    }
     val data by assistant.data.collectAsStateWithLifecycle()
     val busy by assistant.busy.collectAsStateWithLifecycle()
     val error by assistant.error.collectAsStateWithLifecycle()

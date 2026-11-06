@@ -1,5 +1,13 @@
 # Implementation status
 
+## Startup and draft prompt update (2026-11-06)
+
+See `STARTUP_PROMPT_REFINEMENT.md` for the video observations and implementation. The first
+workspace entrance animates, next-move drafts use a dismissible icon-to-card prompt, and
+Assistant initialization/read is deferred and moved off the main thread. Drafts are not
+discarded by dismissal. Cloud build and phone performance/visual checks must be recorded
+separately; the video does not identify a measured bottleneck.
+
 ## Latest assistant interaction update (2026-11-06)
 
 Commit `cc8158d` replaces raw answer dumps with expandable, tappable response cards,

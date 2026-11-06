@@ -118,4 +118,34 @@ class NextMoveDurationTest {
         model.updateMoveMinutes("1")
         assertEquals(1, model.moveDraft.value!!.minutes)
     }
+
+    @Test fun `dismissed prompt stays quiet on restart and explicit reopen restores the exact draft`() {
+        val model = workspace()
+        model.offerMove(DayMove("Finish the lab", "TASK", "42", material = "Notes page 7"))
+        model.updateMoveMinutes("")
+        model.stashMove()
+
+        val recreated = workspace()
+        assertNull(recreated.moveDraft.value)
+        recreated.offerMove()
+        assertEquals("Finish the lab", recreated.moveDraft.value!!.title)
+        assertEquals("42", recreated.moveDraft.value!!.sourceId)
+        assertEquals("Notes page 7", recreated.moveDraft.value!!.material)
+        assertEquals("", recreated.moveMinutesText.value)
+        assertNull(MoveDuration.parse(recreated.moveMinutesText.value))
+    }
+
+    @Test fun `closing preview leaves the backed up real draft quiet and recoverable`() {
+        val model = workspace()
+        model.offerMove(DayMove("Real work", "TASK", "9"))
+        model.updateMoveMinutes("37")
+        model.offerMove(DayMove("Try it", "PREVIEW", minutes = 1))
+        model.stashMove()
+        val recreated = workspace()
+        assertNull(recreated.moveDraft.value)
+        recreated.offerMove()
+        assertEquals("Real work", recreated.moveDraft.value!!.title)
+        assertEquals("9", recreated.moveDraft.value!!.sourceId)
+        assertEquals("37", recreated.moveMinutesText.value)
+    }
 }

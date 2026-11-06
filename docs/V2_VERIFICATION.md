@@ -1,5 +1,13 @@
 # V2 verification and cloud/device handoff
 
+## Startup and prompt evidence (2026-11-06)
+
+The user recording shows the restored next-move sheet covering initial content and uneven
+first-open behavior, but does not establish a measured cause. A source pass adds first-entry
+motion, a dismissible centered draft prompt, quiet-but-recoverable dismissed drafts and
+deferred Assistant loading. See `STARTUP_PROMPT_REFINEMENT.md`; cloud compilation, full
+interaction, phone visuals, accessibility and frame pacing must be verified independently.
+
 ## Latest assistant evidence (2026-11-06)
 
 Cloud Actions run `42101043548` built source commit `cc8158d`, uploaded the preview APK,

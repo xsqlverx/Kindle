@@ -1,5 +1,14 @@
 Continue implementing Kindle V2 in C:\Kindle (https://github.com/xsqlverx/Kindle). This is an implementation request: inspect the existing app, make the work concrete, and build it rather than returning another generic brainstorm.
 
+## Latest startup and prompt handoff (2026-11-06)
+
+Read `STARTUP_PROMPT_REFINEMENT.md`. The user recorded intermittent first-open lag and
+wants a startup fade/slide plus an in-app centered icon that expands into a persistent
+next-move prompt with Expand and Dismiss. Preserve draft recovery, preview backup, reduced
+motion and the full editor. Source checks and cloud builds do not prove device frame pacing.
+The user downloaded an AI Studio build; its identity/signature and actual installation on
+the phone have not yet been established. Never uninstall either existing app or its data.
+
 ## Latest assistant handoff (2026-11-06)
 
 Read `ASSISTANT_INTERACTION_REFINEMENT.md` for the interactive response and keyboard changes.

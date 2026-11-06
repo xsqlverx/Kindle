@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.animateDpAsState
@@ -80,7 +81,6 @@ class MainActivity : ComponentActivity() {
             val life: LifeOsViewModel = viewModel()
             val model: WorkspaceViewModel = viewModel()
             val focus: TodayPrototypeViewModel = viewModel()
-            val assistant: AssistantViewModel = viewModel()
             val destination by model.destination.collectAsStateWithLifecycle()
             val slots by model.slots.collectAsStateWithLifecycle()
             val reduced by model.reduceMotion.collectAsStateWithLifecycle()
@@ -104,6 +104,7 @@ class MainActivity : ComponentActivity() {
             var preview by rememberSaveable { mutableStateOf(false) }
             var trainingSplit by rememberSaveable { mutableStateOf<String?>(null) }
             var previous by rememberSaveable { mutableStateOf(Destination.TODAY.id) }
+            var moveExpanded by rememberSaveable { mutableStateOf(false) }
             var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
             val lifecycle = LocalLifecycleOwner.current.lifecycle
             val state = rememberSaveableStateHolder()
@@ -133,6 +134,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             LaunchedEffect(openSession) { if (openSession) { panel = true; focus.consumeSessionPanelRequest() } }
+            LaunchedEffect(moveDraft == null) { if (moveDraft == null) moveExpanded = false }
             LaunchedEffect(lastSaved?.id, lastTrial?.id) {
                 if (lastSaved != null || lastTrial != null) { panel = false; preview = false; tools = false; launcher = false; model.clearMessage(); model.navigate(Destination.TODAY) }
             }
@@ -158,6 +160,13 @@ class MainActivity : ComponentActivity() {
             LifeOsTheme(mode = theme) {
                 val colors = LocalLifeOsColors.current
                 val density = LocalDensity.current
+                val entrance = remember { Animatable(if (reduced) 1f else 0f) }
+                LaunchedEffect(Unit) {
+                    if (reduced) entrance.snapTo(1f) else {
+                        withFrameNanos { }
+                        entrance.animateTo(1f, tween(420))
+                    }
+                }
                 val dockReserve = workspaceDockHeight() + 20.dp
                 val assistantTyping = destination == Destination.ASSISTANT && !launcher && WindowInsets.ime.getBottom(density) > 0
                 var capsuleHeight by remember { mutableStateOf(74.dp) }
@@ -178,7 +187,10 @@ class MainActivity : ComponentActivity() {
                 CompositionLocalProvider(LocalReducedMotion provides reduced, LocalWorkspaceBackdrop provides backdropLayer,
                     LocalOrbScene provides orb, LocalEntryLauncher provides { kind -> model.openEntry(kind) }, LocalEntryPrefill provides model::prefillEntry,
                     LocalFocusOrigin provides { focusOrigin = it }) {
-                    Box(Modifier.fillMaxSize().background(colors.background)) {
+                    Box(Modifier.fillMaxSize().background(colors.background).graphicsLayer {
+                        alpha = entrance.value
+                        translationY = (1f - entrance.value) * 12.dp.toPx()
+                    }) {
                         // Capture only the page scene. Glass overlays cannot capture themselves.
                         CompositionLocalProvider(LocalWorkspaceBackdrop provides null, LocalOrbActivity provides !panel) {
                             Box(Modifier.fillMaxSize().then(if (launcher) Modifier.clearAndSetSemantics {} else Modifier)
@@ -223,7 +235,7 @@ class MainActivity : ComponentActivity() {
                                                     Destination.EXAMS -> ExamPrepScreen(life, model, focus, now)
                                                     Destination.PRACTICE -> PracticeScreen(model, focus, now)
                                                     Destination.REVIEW -> ReviewScreen(life, model, focus, now)
-                                                    Destination.ASSISTANT -> AssistantScreen(life, model, focus, assistant, now)
+                                                    Destination.ASSISTANT -> AssistantScreen(life, model, focus, viewModel(), now)
                                                     Destination.RESET -> DailyResetScreen(life, onFinishReset = { navigate(Destination.TODAY) })
                                                     Destination.SETTINGS -> SettingsScreen(life, { navigate(Destination.fromId(previous) ?: Destination.TODAY) }, workspace = model, onPreview = { preview = true },
                                                         onWipeWorkspace = { model.clearForUserWipe(focus) }, canWipeWorkspace = !savingSession)
@@ -259,7 +271,10 @@ class MainActivity : ComponentActivity() {
                         LaunchedEffect(lecture?.id) { if (lecture != null) { tools = false; preview = false } }
                         if (lecture != null) LectureDetailSheet(lecture, attendanceRecords = attendance, onDismiss = life::closeLectureDetail,
                             attendanceControl = { AttendanceClassControl(it, life) })
-                        if (moveDraft != null && !panel && !entryOpen) NextMoveSheet(life, model, focus, now)
+                        if (moveDraft != null && !panel && !entryOpen) {
+                            if (moveExpanded) NextMoveSheet(life, model, focus, now)
+                            else NextMovePrompt(moveDraft!!, onExpand = { moveExpanded = true }, onDismiss = model::stashMove)
+                        }
                         FocusSurface(panel, focusOrigin ?: capsuleBounds, focus, now, { model.resumeSession(focus) },
                             { focusOrigin = capsuleBounds; panel = false }, message)
                         if (entryOpen) QuickEntrySheet(model)

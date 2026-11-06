@@ -60,7 +60,8 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
     val homeAt = _homeAt.asStateFlow()
     private val _message = MutableStateFlow<String?>(null)
     val message = _message.asStateFlow()
-    private val _moveDraft = MutableStateFlow(if (application.getSharedPreferences("today_focus_session", Context.MODE_PRIVATE).getString("phase", "IDLE") == "IDLE") readMoveDraft() else null)
+    private val _moveDraft = MutableStateFlow(if (!prefs.getBoolean("move_prompt_snoozed", false) &&
+        application.getSharedPreferences("today_focus_session", Context.MODE_PRIVATE).getString("phase", "IDLE") == "IDLE") readMoveDraft() else null)
     val moveDraft = _moveDraft.asStateFlow()
     private val _moveMinutesText = MutableStateFlow(readMoveMinutesText(_moveDraft.value))
     val moveMinutesText = _moveMinutesText.asStateFlow()
@@ -265,17 +266,25 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
         }
         val selected = move ?: readMoveDraft() ?: DayMove("")
         _moveMinutesText.value = if (move == null) readMoveMinutesText(selected) else selected.minutes.toString()
+        prefs.edit().remove("move_prompt_snoozed").apply()
         persistMove(selected)
     }
     private fun finishPreviewDraft() {
         val backup = prefs.getString("draft_before_preview", null)
-        prefs.edit().apply { if (backup != null) putString("move_draft", backup) else remove("move_draft"); remove("draft_before_preview") }.apply()
+        prefs.edit().apply {
+            if (backup != null) { putString("move_draft", backup); putBoolean("move_prompt_snoozed", true) }
+            else { remove("move_draft"); remove("move_prompt_snoozed") }
+            remove("draft_before_preview")
+        }.apply()
         _moveDraft.value = null
         _moveMinutesText.value = ""
     }
     fun stashMove() {
         if (_journeyBusy.value) return
-        if (_moveDraft.value?.sourceType == "PREVIEW") finishPreviewDraft() else _moveDraft.value = null
+        if (_moveDraft.value?.sourceType == "PREVIEW") finishPreviewDraft() else {
+            prefs.edit().putBoolean("move_prompt_snoozed", true).apply()
+            _moveDraft.value = null
+        }
     }
     fun updateMove(move: DayMove) {
         if (_journeyBusy.value) return
@@ -303,7 +312,7 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
         if (_journeyBusy.value) return
         _moveDraft.value = null
         _moveMinutesText.value = ""
-        prefs.edit().remove("move_draft").apply()
+        prefs.edit().remove("move_draft").remove("move_prompt_snoozed").apply()
     }
 
     private suspend fun sourceAvailable(move: DayMove): Boolean = when (move.sourceType) {
@@ -437,7 +446,7 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
         _homeAt.value = 0L; _undo.value = emptyList()
         _moveDraft.value = null
         _moveMinutesText.value = ""
-        prefs.edit().remove("home_at").remove("move_draft").remove("draft_before_preview").apply()
+        prefs.edit().remove("home_at").remove("move_draft").remove("draft_before_preview").remove("move_prompt_snoozed").apply()
     }
     fun recordTraining(split: String, minutes: Int, note: String) = write {
         if (minutes !in 1..360) { _message.value = "Enter 1–360 actual training minutes."; return@write }
