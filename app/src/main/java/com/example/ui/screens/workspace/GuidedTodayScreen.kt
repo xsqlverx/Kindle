@@ -61,8 +61,6 @@ fun GuidedTodayScreen(life: LifeOsViewModel, model: WorkspaceViewModel, focus: T
                 }
                 WorkspaceIconButton(onClick = { model.openEntry() }) { Icon(Icons.Outlined.Add, "Add or log something", tint = colors.primaryAccent) }
                 Spacer(Modifier.width(8.dp))
-                WorkspaceIconButton(onClick = { model.navigate(Destination.ASSISTANT) }) { Icon(Icons.Outlined.AutoAwesome, "Open Assistant", tint = colors.primaryAccent) }
-                Spacer(Modifier.width(8.dp))
                 WorkspaceIconButton(onClick = onSettings) { Icon(Icons.Outlined.Tune, "Settings", tint = colors.textSecondary) }
             }
         }

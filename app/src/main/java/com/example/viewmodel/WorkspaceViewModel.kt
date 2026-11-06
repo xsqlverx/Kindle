@@ -56,6 +56,15 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
     val slots = _slots.asStateFlow()
     private val _reduceMotion = MutableStateFlow(prefs.getBoolean("reduce_motion", false))
     val reduceMotion = _reduceMotion.asStateFlow()
+    private val _assistantOrbPosition = MutableStateFlow(AssistantOrbPlacement(
+        prefs.getBoolean("assistant_orb_left", false),
+        prefs.getFloat("assistant_orb_height", 0.58f).let { if (it.isFinite()) it.coerceIn(0f, 1f) else 0.58f }))
+    val assistantOrbPosition = _assistantOrbPosition.asStateFlow()
+    fun moveAssistantOrb(position: AssistantOrbPlacement) {
+        val safe = position.copy(verticalFraction = if (position.verticalFraction.isFinite()) position.verticalFraction.coerceIn(0f, 1f) else 0.58f)
+        _assistantOrbPosition.value = safe
+        prefs.edit().putBoolean("assistant_orb_left", safe.left).putFloat("assistant_orb_height", safe.verticalFraction).apply()
+    }
     private val _homeAt = MutableStateFlow(prefs.getLong("home_at", 0L))
     val homeAt = _homeAt.asStateFlow()
     private val _message = MutableStateFlow<String?>(null)

@@ -1,5 +1,11 @@
 # Implementation status
 
+## Floating Assistant update (2026-11-06)
+
+`FLOATING_ASSISTANT_ORB.md` records the new movable in-app Assistant entry, persistent
+edge/height, accessible alternatives, reduced-motion behavior and cloud/device test boundaries.
+The prior Add/log action, Assistant chat and configurable destination slots remain.
+
 Latest cloud evidence: run `42174843876` built `3bbb11b` and passed focused Assistant and
 next-move unit tests; prompt instrumentation and phone behavior remain unverified. The
 original Life OS package was updated at 11:41 on 2026-11-06 and its installed signing

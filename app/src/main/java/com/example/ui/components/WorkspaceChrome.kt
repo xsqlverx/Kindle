@@ -61,10 +61,9 @@ fun WorkspaceTopBar(
             .heightIn(min = 76.dp).padding(start = 24.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (LocalOrbScene.current != null) {
-            Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
-                ContinuityOrb(Modifier.fillMaxSize(), compact = true, onClick = entry?.let { { it(null) } })
-                if (entry != null) Icon(Icons.Outlined.Add, null, Modifier.align(Alignment.BottomEnd).size(14.dp), tint = colors.primaryAccent)
+        if (entry != null) {
+            WorkspaceIconButton(onClick = { entry(null) }) {
+                Icon(Icons.Outlined.Add, "Add or log something", tint = colors.primaryAccent)
             }
             Spacer(Modifier.width(8.dp))
         }

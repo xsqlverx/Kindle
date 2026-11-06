@@ -95,6 +95,8 @@ class MainActivity : ComponentActivity() {
             val lastTrial by focus.lastTrial.collectAsStateWithLifecycle()
             val entryOpen by model.entryOpen.collectAsStateWithLifecycle()
             val entryResult by model.entryResult.collectAsStateWithLifecycle()
+            val orbPosition by model.assistantOrbPosition.collectAsStateWithLifecycle()
+            val lecture by life.selectedLectureForDetail.collectAsStateWithLifecycle()
             val snackbar = remember { SnackbarHostState() }
             var focusOrigin by remember { mutableStateOf<Rect?>(null) }
             var capsuleBounds by remember { mutableStateOf<Rect?>(null) }
@@ -168,7 +170,8 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 val dockReserve = workspaceDockHeight() + 20.dp
-                val assistantTyping = destination == Destination.ASSISTANT && !launcher && WindowInsets.ime.getBottom(density) > 0
+                val keyboardVisible = WindowInsets.ime.getBottom(density) > 0
+                val assistantTyping = destination == Destination.ASSISTANT && !launcher && keyboardVisible
                 var capsuleHeight by remember { mutableStateOf(74.dp) }
                 val sessionInset by animateDpAsState(if (session.phase != FocusPhase.IDLE) capsuleHeight + 12.dp else 0.dp,
                     if (reduced) snap() else spring(1f, 420f), label = "capsule_space")
@@ -266,7 +269,13 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         if (!assistantTyping) WorkspaceDock(slots, destination, launcher, { launcher = it }, navigate, onQuickMove = { model.offerMove() })
-                        val lecture by life.selectedLectureForDetail.collectAsStateWithLifecycle()
+                        if (destination != Destination.ASSISTANT && !launcher && !keyboardVisible && !panel && !entryOpen &&
+                            moveDraft == null && lecture == null && trainingSplit == null && !tools && !preview) {
+                            val safeBottom = with(density) {
+                                (dockReserve + sessionInset + 8.dp).toPx() + WindowInsets.navigationBars.getBottom(density)
+                            }
+                            FloatingAssistantOrb(orbPosition, safeBottom, model::moveAssistantOrb) { navigate(Destination.ASSISTANT) }
+                        }
                         val attendance by life.attendanceRecords.collectAsStateWithLifecycle()
                         LaunchedEffect(lecture?.id) { if (lecture != null) { tools = false; preview = false } }
                         if (lecture != null) LectureDetailSheet(lecture, attendanceRecords = attendance, onDismiss = life::closeLectureDetail,

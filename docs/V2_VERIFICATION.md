@@ -1,5 +1,11 @@
 # V2 verification and cloud/device handoff
 
+## Floating Assistant verification (2026-11-06)
+
+The user requested a draggable, edge-snapping animated Assistant orb. Source implementation
+and planned tests are in `FLOATING_ASSISTANT_ORB.md`; source checks or a cloud build do not
+prove physical-device interaction, accessibility, rendering or frame pacing.
+
 Latest cloud evidence: run `42174843876` built `3bbb11b` and passed focused Assistant and
 next-move unit tests; prompt instrumentation and phone behavior remain unverified. The
 original Life OS package was updated at 11:41 on 2026-11-06 and its installed signing
