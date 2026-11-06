@@ -1,5 +1,11 @@
 # Implementation status
 
+## Banner launch frequency (2026-11-06)
+
+The user clarified the banner should appear for every fresh app launcher entry after clearing
+Recents, even without a draft. The latest implementation and lifecycle/device limits are in
+`STARTUP_PROMPT_REFINEMENT.md`; this supersedes the earlier per-restart suppression rule.
+
 Popup cloud evidence: run `42179836593` built `c2ffe2e`, executed focused unit tests, and
 compiled Android interaction checks. The new non-modal/no-timeout test was not executed;
 the corrected banner has not been visually or interactively verified on the phone.

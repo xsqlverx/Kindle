@@ -1,5 +1,12 @@
 # V2 verification and cloud/device handoff
 
+## Fresh-launch banner requirement (2026-11-06)
+
+The user wants the persistent top banner on fresh launcher entries after clearing Recents.
+Source distinguishes this from ordinary background/resume and Activity recreation; Recents
+behavior depends on Android lifecycle and remains unverified on the actual phone. See
+`STARTUP_PROMPT_REFINEMENT.md` for implementation and cloud/device test boundaries.
+
 Popup cloud evidence: run `42179836593` built `c2ffe2e`, executed focused unit tests, and
 compiled Android interaction checks. The new non-modal/no-timeout test was not executed;
 the corrected banner has not been visually or interactively verified on the phone.

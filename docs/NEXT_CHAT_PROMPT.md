@@ -1,5 +1,12 @@
 Continue implementing Kindle V2 in C:\Kindle (https://github.com/xsqlverx/Kindle). This is an implementation request: inspect the existing app, make the work concrete, and build it rather than returning another generic brainstorm.
 
+## Latest launch-frequency clarification (2026-11-06)
+
+The banner should appear on a fresh launcher entry after clearing Recents, even if the last
+one was dismissed or no draft exists. Preserve an existing draft; the banner itself creates
+no work. Ordinary resume/Activity recreation should not repeatedly prompt. See the latest
+`STARTUP_PROMPT_REFINEMENT.md` section and verify the actual Recents journey on the phone.
+
 Popup cloud evidence: run `42179836593` built `c2ffe2e`, executed focused unit tests, and
 compiled Android interaction checks. The new non-modal/no-timeout test was not executed;
 the corrected banner has not been visually or interactively verified on the phone.

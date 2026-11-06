@@ -86,3 +86,29 @@ unit-test task, and compiled `compileDebugAndroidTestKotlin`. The new no-timeout
 interaction check was compiled, not executed. The screen recording shows the reference app,
 not the result in Kindle. Phone rendering, motion, touch, screen-reader and performance
 acceptance remain open. No local Gradle, Android build, emulator or tests were run.
+
+## Launch-frequency correction — 2026-11-06
+
+The user clarified that the banner should appear on each fresh launcher opening after the app
+is cleared from Recents, even when there is no saved draft or the previous banner was dismissed.
+Use a fresh launcher Activity/task entry as the signal; ordinary background/resume and Activity
+recreation should not repeatedly show it. Android may perform a warm rather than a cold start
+when an Activity is recreated while its process survives, so do not equate every Recents swipe
+with process death. Presenting the banner must not create a task or overwrite an existing draft;
+Expand recovers the saved draft or starts the existing blank editor, Dismiss just closes the
+banner. Preserve explicit work/reminder/session flows, other manual next-move entry points,
+configuration restoration and the banner's no-timeout behavior. Verify source and cloud checks;
+actual Recents gestures and lifecycle behavior still require physical-phone verification.
+
+### Source implementation
+
+A new launcher Activity with no saved Activity state starts a `rememberSaveable` prompt even
+when no draft exists or a draft was previously dismissed. Background/resume and configuration
+recreation do not create a new launch prompt. A reminder action does not trigger the launcher
+prompt. The banner itself does not write or create work: Dismiss closes it, while Expand uses
+`offerMove()` to recover the existing saved draft or create a blank editor draft. Existing
+active drafts and session guards are preserved. `LaunchPromptTest` exercises fresh launcher,
+dismiss, Activity recreation and a second Activity launch in an isolated test installation;
+only compilation is configured in cloud. A real device's Recents swipe/launcher behavior and
+all visual/touch behavior remain unverified. This supersedes the previous suppression rule
+for fresh launcher entries; dismissal still stays dismissed on ordinary resume/recreation.

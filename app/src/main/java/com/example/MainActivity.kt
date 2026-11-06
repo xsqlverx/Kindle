@@ -77,6 +77,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         if (savedInstanceState == null) readReminder(intent)
+        val freshLauncherEntry = savedInstanceState == null && intent.action == Intent.ACTION_MAIN &&
+            intent.hasCategory(Intent.CATEGORY_LAUNCHER) && reminderRequest == null
         setContent {
             val life: LifeOsViewModel = viewModel()
             val model: WorkspaceViewModel = viewModel()
@@ -107,6 +109,7 @@ class MainActivity : ComponentActivity() {
             var trainingSplit by rememberSaveable { mutableStateOf<String?>(null) }
             var previous by rememberSaveable { mutableStateOf(Destination.TODAY.id) }
             var moveExpanded by rememberSaveable { mutableStateOf(false) }
+            var launchPrompt by rememberSaveable { mutableStateOf(freshLauncherEntry) }
             var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
             val lifecycle = LocalLifecycleOwner.current.lifecycle
             val state = rememberSaveableStateHolder()
@@ -280,9 +283,16 @@ class MainActivity : ComponentActivity() {
                         LaunchedEffect(lecture?.id) { if (lecture != null) { tools = false; preview = false } }
                         if (lecture != null) LectureDetailSheet(lecture, attendanceRecords = attendance, onDismiss = life::closeLectureDetail,
                             attendanceControl = { AttendanceClassControl(it, life) })
-                        if (moveDraft != null && !panel && !entryOpen) {
-                            if (moveExpanded) NextMoveSheet(life, model, focus, now)
-                            else NextMovePrompt(moveDraft!!, onExpand = { moveExpanded = true }, onDismiss = model::stashMove)
+                        if ((launchPrompt || moveDraft != null) && !panel && !entryOpen) {
+                            if (moveExpanded && moveDraft != null) NextMoveSheet(life, model, focus, now)
+                            else NextMovePrompt(moveDraft ?: DayMove(""), onExpand = {
+                                if (model.moveDraft.value == null) model.offerMove()
+                                launchPrompt = false
+                                if (model.moveDraft.value != null) moveExpanded = true
+                            }, onDismiss = {
+                                launchPrompt = false
+                                if (model.moveDraft.value != null) model.stashMove()
+                            })
                         }
                         FocusSurface(panel, focusOrigin ?: capsuleBounds, focus, now, { model.resumeSession(focus) },
                             { focusOrigin = capsuleBounds; panel = false }, message)
