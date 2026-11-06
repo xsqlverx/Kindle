@@ -1,5 +1,22 @@
 # Assistant and personal capabilities
 
+## Google AI Studio debug build report (2026-11-06)
+
+The user supplied a build log in which `:app:kspDebugKotlin` first failed with
+`Unexpected owner function: null`. A subsequent automatic build, after AI Studio reported
+`app/build.gradle.kts` changed, completed `:app:assembleDebug` and reported `BUILD SUCCESSFUL`.
+The exact Studio source revision and the intervening change are not confirmed. The reported
+`AWT-EventQueue-0` exception appeared in both builds; GitHub Actions run `42101043548` also
+showed that exception while its debug KSP/test task succeeded. It matches the non-fatal KSP
+2.3.5 issue https://github.com/google/ksp/issues/2763; it does not explain the separate
+`Unexpected owner function` failure by itself. No root cause for that intermittent failure
+is established. Do not change processors or database code solely from this excerpt.
+
+The subsequent Studio log shows an emulator process, not installation on the user's phone.
+An APK from the successful Studio build is needed to compare its package and certificate to
+the original phone app before a data-preserving update. Keep both existing apps and their
+separate data untouched; a successful build alone does not prove signing compatibility.
+
 2026-11-06. User initially requested a private AI APK, then explicitly changed that decision:
 "just build and push to main" and "fck privacy". Public origin is confirmed public; this
 version and its source go to main by that later instruction. Preserve existing builder and data.
